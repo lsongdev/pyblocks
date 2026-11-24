@@ -4,9 +4,9 @@
 
 ## 首次安装 MicroPython
 
-编辑器的“上传并运行”按钮通过串口把当前代码写成 `main.py`，需要板卡已经运行支持串口 raw REPL 的 MicroPython。首次安装请在主界面右上角选择“设备 → 安装 MicroPython 固件”，连接板卡后在对话框中确认安装。也可以打开独立的 [MicroPython 安装页](https://lsong.org/blockly-demo/firmware.html)。本地开发时可以访问 `/firmware.html`。右上角“设置”可修改语言，选择立即生效并保存在本地。
+编辑器的“上传并运行”按钮通过串口把当前代码写成 `main.py`，需要板卡已经运行支持串口 raw REPL 的 MicroPython。首次安装请在主界面右上角选择“设备 → 安装 MicroPython 固件”，连接板卡后在对话框中确认安装。右上角“设置”可修改语言，选择立即生效并保存在本地。
 
-安装页支持经典 ESP32、8 MB Flash 的 Matrix:bit，以及 BBC Micro:bit V1 / V2。它连接板卡、校验所选固件并在用户确认后刷写。BBC Micro:bit 也可以从安装页下载对应版本的 HEX，拖到 `MICROBIT` 盘。固件来源和许可证见 [固件说明](public/firmware/NOTICE.txt)。
+安装对话框支持经典 ESP32、8 MB Flash 的 Matrix:bit，以及 BBC Micro:bit V1 / V2。它连接板卡、校验所选固件并在用户确认后刷写。固件来源和许可证见 [固件说明](public/firmware/NOTICE.txt)。
 
 下面的外部工具可作为备用。
 
@@ -35,7 +35,7 @@
 
 ## 开发与目录
 
-运行 `npm install`、`npm run dev` 启动开发环境；`npm test` 验证积木和代码生成，`npm run build` 构建编辑器与固件安装页。
+运行 `npm install`、`npm run dev` 启动开发环境；`npm test` 验证积木和代码生成，`npm run build` 构建编辑器。
 
 | 路径 | 职责 |
 | --- | --- |
@@ -44,7 +44,7 @@
 | `src/python/` | Python 命名分配、生成错误和事件回调生成 |
 | `src/editor/` | 编辑器界面、工具箱、库管理与默认示例 |
 | `src/device/` | 串口会话、程序上传和设备文件操作 |
-| `src/firmware/` | 独立固件安装页逻辑 |
+| `src/firmware/` | 固件连接、安装逻辑与下载清单 |
 | `src/project/` | 项目格式、校验与本地保存 |
 | `src/i18n/`、`src/styles/` | 翻译与样式 |
 | `test/`、`examples/` | 自动化验证与可导入的积木示例 |
