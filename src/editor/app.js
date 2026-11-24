@@ -3,6 +3,7 @@ import { pythonGenerator } from 'blockly/python';
 import { createToolbox, EditorToolbox } from './toolbox.js';
 import { applyLanguage, getSavedLanguage, normalizeLanguage, saveLanguage, t } from '../i18n/index.js';
 import { PythonBlockError } from '../python/errors.js';
+import { setupDialogs } from './dialogs.js';
 import { createLibraryPanel } from './libraries.js';
 import { example } from './example.js';
 import { createProject, parseProject, ProjectError, readAutosave, writeAutosave } from '../project/storage.js';
@@ -297,6 +298,7 @@ function renderLanguage() {
   document.querySelectorAll('[data-i18n-title]').forEach(element => {
     element.title = t(element.dataset.i18nTitle);
   });
+  document.querySelector('#firmware-progress').setAttribute('aria-label', t('firmwareProgress'));
   renderStatus(uploadStatus, uploadMessage);
   renderStatus(serialStatus, serialMessage);
   setProjectStatus(projectMessage);
@@ -324,6 +326,7 @@ window.setLanguage = (requested, { persist = true } = {}) => {
 function updateButtons() {
   download.disabled = !code.value.trim();
   upload.disabled = download.disabled || serialBusy || !navigator.serial;
+  document.querySelector('#open-firmware').disabled = serialBusy;
   serialConnect.disabled = serialBusy || !navigator.serial;
   serialConnect.textContent = t(serialSession ? 'serialDisconnect' : 'serialConnect');
   codeSync.hidden = !manuallyEdited;
@@ -462,4 +465,25 @@ upload.addEventListener('click', async () => {
     serialBusy = false;
     updateButtons();
   }
+});
+
+setupDialogs({
+  getLanguage: () => language,
+  setLanguage: value => window.setLanguage(value),
+  async acquireDevice() {
+    if (serialBusy) throw new Error(t('filesBusy'));
+    serialBusy = true;
+    updateButtons();
+    try {
+      await detachSerial();
+      deviceListing = undefined;
+      setSerialStatus('serialDisconnected');
+      updateButtons();
+    } catch (error) {
+      serialBusy = false;
+      updateButtons();
+      throw error;
+    }
+  },
+  releaseDevice() { serialBusy = false; updateButtons(); },
 });

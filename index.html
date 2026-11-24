@@ -6,6 +6,16 @@
     <title data-i18n="title">MicroPython Blocks</title>
   </head>
   <body>
+    <header class="app-toolbar">
+      <strong>MicroPython Blocks</strong>
+
+      <nav class="app-menu" aria-label="Application">
+        <details id="device-menu"><summary data-i18n="deviceMenu">Device</summary>
+          <div class="menu-popup"><button id="open-firmware" type="button" data-i18n="firmwareTitle">Install MicroPython firmware</button></div>
+        </details>
+        <button id="open-settings" type="button" data-i18n="settingsTitle">Settings</button>
+      </nav>
+    </header>
     <main>
       <section class="panel" aria-labelledby="workspace-label">
         <div class="panel-heading">
@@ -14,6 +24,7 @@
             <button id="open-project" type="button" data-i18n="projectOpen">Open Project</button>
             <button id="save-project" type="button" data-i18n="projectSave">Save Project</button>
           </div>
+
         </div>
         <input id="project-file" type="file" accept=".json,application/json" hidden>
         <p id="project-status" role="status"></p>
@@ -70,6 +81,37 @@
         </section>
       </section>
     </main>
+    <dialog id="settings-dialog" aria-labelledby="settings-title">
+      <h2 id="settings-title" data-i18n="settingsTitle">Settings</h2>
+      <label for="setting-language" data-i18n="languageLabel">Language</label>
+      <select id="setting-language"><option value="en">English</option><option value="zh-CN">简体中文</option></select>
+      <form method="dialog" class="dialog-actions"><button data-i18n="doneButton">Done</button></form>
+    </dialog>
+    <dialog id="firmware-dialog" aria-labelledby="firmware-title">
+      <h2 id="firmware-title" data-i18n="firmwareTitle">Install MicroPython firmware</h2>
+      <p data-i18n="firmwareIntro">Choose your board and connect it over USB.</p>
+      <fieldset id="firmware-board" class="board-options">
+        <legend data-i18n="firmwareBoard">Board</legend>
+        <label class="board-card">
+          <input type="radio" name="firmware-board" value="matrixbit" checked>
+          <span><strong>Matrix:bit</strong><small>ESP32 · 8 MB</small></span>
+        </label>
+        <label class="board-card">
+          <input type="radio" name="firmware-board" value="microbit">
+          <span><strong>BBC Micro:bit</strong><small>V1 / V2</small></span>
+        </label>
+      </fieldset>
+      <a class="firmware-more" href="https://micropython.org/download/" target="_blank" rel="noopener noreferrer"><span data-i18n="firmwareMore">No matching firmware? Browse MicroPython downloads</span><span aria-hidden="true">↗</span></a>
+      <p id="firmware-detected"></p>
+      <p id="firmware-warning" class="dialog-warning" data-i18n="firmwareWarning" hidden>Installation replaces the program and files on your board. Back up anything you need before continuing.</p>
+      <p id="firmware-status" role="status" aria-live="polite"></p>
+      <progress id="firmware-progress" max="1" aria-label="Firmware installation progress" hidden></progress>
+      <div class="dialog-actions">
+        <button id="firmware-close" type="button" data-i18n="closeButton">Close</button>
+        <button id="firmware-connect" type="button" data-i18n="firmwareConnect">Connect board</button>
+        <button id="firmware-install" class="primary" type="button" data-i18n="firmwareInstall" hidden>Install firmware</button>
+      </div>
+    </dialog>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
