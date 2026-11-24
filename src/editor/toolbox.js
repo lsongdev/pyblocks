@@ -2,7 +2,7 @@ import { CollapsibleToolboxCategory, registry, Toolbox, ToolboxCategory } from '
 import {
   faCode, faCalculator, faCodeBranch, faCube, faEquals, faFont, faListUl, faMicrochip, faRotateRight, faDisplay, faWifi, faPlug, faHandPointer, faClock, faFolderOpen, faBook, faWaveSquare, faLightbulb, faVolumeHigh, faRightLeft,
 } from '@fortawesome/free-solid-svg-icons';
-import { t } from './i18n.js';
+import { t } from '../i18n/index.js';
 
 function addIcon(icon, definition, colour) {
   const [width, height, , , pathData] = definition.icon;
@@ -107,14 +107,25 @@ export function createToolbox() {
       category(t('gpio'), '#29806c', faPlug, [
         { type: 'gpio_read_digital', inputs: { PIN: numberInput(0) } },
         { type: 'gpio_write_digital', inputs: { PIN: numberInput(0) } },
-        { type: 'gpio_read_adc', inputs: { PIN: numberInput(0) } },
+        { type: 'gpio_set_pull', inputs: { PIN: numberInput(0) } },
         { type: 'gpio_on_edge', inputs: { PIN: numberInput(0) } },
+        { kind: 'label', text: 'ADC' },
+        { type: 'adc_create', inputs: { PIN: numberInput(0) } },
+        'adc_read',
       ]),
       category('PWM', '#29806c', faWaveSquare, [
         { type: 'pwm_create', inputs: { PIN: numberInput(0), FREQ: numberInput(440), DUTY: numberInput(0) } },
         { type: 'pwm_frequency', inputs: { FREQ: numberInput(440) } },
         { type: 'pwm_duty', inputs: { DUTY: numberInput(32768) } },
         'pwm_stop',
+        { kind: 'label', text: t('buzzer') },
+        { type: 'buzzer_tone', inputs: { PIN: numberInput(16), FREQ: numberInput(440), DURATION: numberInput(200) } },
+        { type: 'buzzer_start', inputs: { PIN: numberInput(16), FREQ: numberInput(440) } },
+        { type: 'buzzer_stop', inputs: { PIN: numberInput(16) } },
+        { kind: 'label', text: t('servo') },
+        { type: 'servo_angle', inputs: { PIN: numberInput(18), ANGLE: numberInput(90), MIN: numberInput(1000), MAX: numberInput(2000) } },
+        { type: 'servo_pulse', inputs: { PIN: numberInput(18), PULSE: numberInput(1500) } },
+        { type: 'servo_stop', inputs: { PIN: numberInput(18) } },
       ]),
       category(t('neopixelCategory'), '#864ba0', faLightbulb, [
         { type: 'neopixel_create', inputs: { PIN: numberInput(0), COUNT: numberInput(1) } },
@@ -130,7 +141,7 @@ export function createToolbox() {
         { type: 'i2c_read_register', inputs: { ADDRESS: numberInput(60), REGISTER: numberInput(0), COUNT: numberInput(1) } },
         { type: 'i2c_write_register', inputs: { ADDRESS: numberInput(60), REGISTER: numberInput(0) } },
       ]),
-      category('UART', '#3575a6', faRightLeft, [
+      category(t('uart'), '#3575a6', faRightLeft, [
         { type: 'uart_create', inputs: {
           ID: numberInput(1), TX: numberInput(25), RX: numberInput(26), BAUD: numberInput(9600), TIMEOUT: numberInput(100),
         } },
@@ -142,10 +153,10 @@ export function createToolbox() {
       ]),
       category(t('wifiCategory'), '#357d82', faWifi, [
         {
-          type: 'matrixbit_wifi_connect',
+          type: 'wifi_connect',
           inputs: { SSID: textInput('SSID'), PASSWORD: textInput('') },
         },
-        'matrixbit_wifi_connected', 'matrixbit_wifi_ipv4', 'matrixbit_wifi_disconnect',
+        'wifi_connected', 'wifi_ipv4', 'wifi_disconnect',
       ]),
       {
         kind: 'iconCategory',
@@ -170,6 +181,12 @@ export function createToolbox() {
         colour: '#b05039',
         contents: [
           category(t('display'), '#b05039', faDisplay, [
+            'microbit_image_builtin', 'microbit_image_custom',
+            { type: 'microbit_image_transform', inputs: { IMAGE: { shadow: { type: 'microbit_image_builtin' } } } },
+            { type: 'microbit_image_shift', inputs: { IMAGE: { shadow: { type: 'microbit_image_builtin' } }, AMOUNT: numberInput(1) } },
+            { type: 'microbit_show', inputs: { IMAGE: { shadow: { type: 'microbit_image_builtin' } }, DELAY: numberInput(400) } },
+            { type: 'microbit_scroll', inputs: { TEXT: textInput('Hello!'), DELAY: numberInput(150) } },
+            'microbit_display_power', 'microbit_display_is_on',
             {
               type: 'microbit_set_pixel',
               inputs: { X: numberInput(0), Y: numberInput(0), BRIGHTNESS: numberInput(9) },
@@ -177,11 +194,26 @@ export function createToolbox() {
             { type: 'microbit_get_pixel', inputs: { X: numberInput(0), Y: numberInput(0) } },
             'microbit_clear_display',
           ]),
+          category(t('buzzer'), '#b05039', faVolumeHigh, [
+            { type: 'microbit_music_pitch', inputs: { FREQ: numberInput(440), DURATION: numberInput(200) } },
+            { type: 'microbit_music_play', inputs: { NOTES: { shadow: { type: 'microbit_music_melody' } } } },
+            'microbit_music_melody', 'microbit_music_stop',
+            { type: 'microbit_music_tempo', inputs: { BPM: numberInput(120), TICKS: numberInput(4) } },
+            { type: 'microbit_music_volume', inputs: { VOLUME: numberInput(64) } },
+            'microbit_speaker_power',
+          ]),
+          category(t('sensors'), '#b05039', faMicrochip, [
+            'microbit_light_level', 'microbit_temperature', 'microbit_acceleration', 'microbit_running_time',
+          ]),
           category(t('pins'), '#b05039', faPlug, [
             'microbit_read_digital', 'microbit_write_digital', 'microbit_read_analog',
+            'microbit_set_pull',
+            { type: 'microbit_write_analog', inputs: { DUTY: numberInput(512) } },
+            { type: 'microbit_set_analog_period', inputs: { PERIOD: numberInput(20) } },
           ]),
           category(t('buttons'), '#b05039', faHandPointer, [
             'microbit_on_button_pressed', 'microbit_button_is_pressed', 'microbit_button_was_pressed', 'microbit_button_press_count',
+            'microbit_on_logo_touched', 'microbit_logo_is_touched',
           ]),
         ],
       },
@@ -202,10 +234,13 @@ export function createToolbox() {
           category('RGB', '#864ba0', faLightbulb, [
             { type: 'matrixbit_rgb_set', inputs: { RED: numberInput(32), GREEN: numberInput(0), BLUE: numberInput(0) } },
           ]),
-          category(t('buzzer'), '#745ba5', faVolumeHigh, [
-            { type: 'matrixbit_buzzer_tone', inputs: { FREQ: numberInput(440), DURATION: numberInput(200) } },
+          category(t('pins'), '#745ba5', faPlug, ['matrixbit_pin_number']),
+          category(t('buttons'), '#745ba5', faHandPointer, [
+            'matrixbit_on_button_pressed', 'matrixbit_button_is_pressed',
+            { type: 'matrixbit_on_touch', inputs: { THRESHOLD: numberInput(400) } },
+            { type: 'matrixbit_touch_is_touched', inputs: { THRESHOLD: numberInput(400) } },
+            'matrixbit_touch_read',
           ]),
-          category(t('buttons'), '#745ba5', faHandPointer, ['matrixbit_on_button_pressed', 'matrixbit_button_is_pressed']),
         ],
       },
     ],

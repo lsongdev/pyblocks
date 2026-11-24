@@ -1,0 +1,11 @@
+import 'blockly/blocks';
+import '../python/names.js';
+import './python.js';
+import './boards/matrixbit.js';
+import './hardware/wifi.js';
+import './boards/microbit.js';
+import './hardware/gpio.js';
+import './hardware/adc.js';
+import './hardware/pwm.js';
+import './hardware/buses.js';
+import './hardware/timing.js';

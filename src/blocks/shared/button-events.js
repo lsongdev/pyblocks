@@ -1,6 +1,6 @@
 import { pythonGenerator } from 'blockly/python';
-import { blockMessage } from './i18n.js';
-import { eventHandler } from './event-handler.js';
+import { blockMessage } from '../../i18n/index.js';
+import { eventHandler } from '../../python/events.js';
 
 export function buttonEventBlock(type, colour) {
   return {

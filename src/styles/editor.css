@@ -76,7 +76,7 @@ button:disabled { opacity: .45; cursor: default; }
 }
 
 #workspace .blocklyToolbox {
-  width: clamp(156px, 17vw, 260px);
+  width: 200px;
   padding: 6px 0;
   background: #f7f7fa;
   border-inline-end: 1px solid #dedde7;
@@ -145,7 +145,7 @@ button:disabled { opacity: .45; cursor: default; }
 #workspace .blocklyToolboxCategory:not(.blocklyToolboxSelected):hover { background: #e9e8f0; }
 
 @media (max-width: 760px) {
-  #workspace .blocklyToolbox { width: 142px; }
+  #workspace .blocklyToolbox { width: 140px; }
   #workspace .blocklyTreeRowContentContainer { gap: 7px; padding-inline: 6px; }
 }
 

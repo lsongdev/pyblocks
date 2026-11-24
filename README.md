@@ -21,8 +21,33 @@
 
 ### BBC Micro:bit V1 / V2
 
+安装 MicroPython 后，可以直接在本编辑器点击 `flash`，通过串口写入 `main.py`、重启并查看输出。Micro:bit 的文件系统不支持目录，项目中的 Python 库会与 `main.py` 一起放在根目录。
+
+上传会先暂存完整文件。支持 `os.rename` 的板卡通过重命名替换文件；Micro:bit 则需要复制到目标文件，复制过程中断电可能留下不完整的目标文件，需要重新上传。
+
+以下官方编辑器流程也可以用来安装固件或更新程序：
+
 1. 在积木编辑器里点 `download`，导出 `main.py`。
 2. 打开 [Micro:bit 官方 Python Editor](https://python.microbit.org/)，导入 `main.py`，点击 **Send to micro:bit**。也可以在官方编辑器中保存 `.hex`，再把它拖到 `MICROBIT` 盘。
 3. 官方编辑器会把基金会版 MicroPython 和程序一起写入板卡。后续也可以用同样的步骤更新程序。
 
 参见 [Micro:bit Python Editor 使用指南](https://microbit.org/get-started/user-guide/python-editor/)。
+
+## 开发与目录
+
+运行 `npm install`、`npm run dev` 启动开发环境；`npm test` 验证积木和代码生成，`npm run build` 构建编辑器与固件安装页。
+
+| 路径 | 职责 |
+| --- | --- |
+| `src/main.js` | 编辑器入口，加载积木注册和界面 |
+| `src/blocks/` | 积木定义和对应的 Python 生成器；`hardware/` 为通用能力，`boards/` 为板级 API，`shared/` 为共享定义 |
+| `src/python/` | Python 命名分配、生成错误和事件回调生成 |
+| `src/editor/` | 编辑器界面、工具箱、库管理与默认示例 |
+| `src/device/` | 串口会话、程序上传和设备文件操作 |
+| `src/firmware/` | 独立固件安装页逻辑 |
+| `src/project/` | 项目格式、校验与本地保存 |
+| `src/i18n/`、`src/styles/` | 翻译与样式 |
+| `test/`、`examples/` | 自动化验证与可导入的积木示例 |
+| `public/firmware/` | 固件文件、校验来源和许可证说明 |
+
+生成的 Python 变量名、函数名保留合法的中文、日文、韩文等 Unicode 拼写。数字开头会补上 `var_`，非法字符替换为 `_`；关键字、保留名或冲突名称添加数字后缀。项目保存的原始名称和 ID 不变。

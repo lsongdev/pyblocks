@@ -1,6 +1,6 @@
 import { common } from 'blockly/core';
 import { Order, pythonGenerator } from 'blockly/python';
-import { blockMessage } from './i18n.js';
+import { blockMessage } from '../../i18n/index.js';
 
 const colour = 40;
 const value = name => ({ type: 'input_value', name, check: 'Number' });

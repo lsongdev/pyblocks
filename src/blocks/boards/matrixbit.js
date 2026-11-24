@@ -1,7 +1,7 @@
-import { common } from 'blockly/core';
+import { common, Names } from 'blockly/core';
 import { Order, pythonGenerator } from 'blockly/python';
-import { blockMessage } from './i18n.js';
-import { buttonEventBlock, buttonEventCode } from './button-events.js';
+import { blockMessage } from '../../i18n/index.js';
+import { buttonEventBlock, buttonEventCode } from '../shared/button-events.js';
 
 const frameBufferSetup = `_matrixbit_pixels = bytearray(128 * 64 // 8)
 _matrixbit_screen = _matrixbit_framebuf.FrameBuffer(
@@ -24,14 +24,39 @@ const white = [blockMessage('oledWhite'), '1'];
 const black = [blockMessage('oledBlack'), '0'];
 const colorField = (...options) => ({ type: 'field_dropdown', name: 'COLOR', options });
 
+// Matrix:bit follows the mPython board numbering, not raw ESP32 GPIO numbers.
+// https://github.com/labplus-cn/mpython/blob/master/port/boards/mpython/modules/mpython.py
+const boardPins = {
+  0: 33, 1: 32, 2: 35, 3: 34, 4: 39, 5: 0, 6: 16, 7: 17,
+  8: 26, 9: 25, 10: 36, 11: 2, 13: 18, 14: 19, 15: 21, 16: 5,
+  19: 22, 20: 23, 23: 27, 24: 14, 25: 12, 26: 13, 27: 15, 28: 4,
+};
+
+// PYTHON pad mapping: Matrix:bit / mPython-compatible ESP32 pinout.
+// https://mpython.readthedocs.io/en/v2.2.1/library/micropython/machine/machine.TouchPad.html
+const touchPins = Object.fromEntries([...'PYTHON'].map((key, index) => [key, boardPins[23 + index]]));
+const touchKey = { type: 'field_dropdown', name: 'PAD', options: Object.keys(touchPins).map(key => [key, key]) };
+const thresholdInput = { type: 'input_value', name: 'THRESHOLD', check: 'Number' };
+
 common.defineBlocksWithJsonArray([
   {
-    type: 'matrixbit_buzzer_tone',
-    message0: blockMessage('matrixBuzzerTone'),
-    args0: ['FREQ', 'DURATION'].map(name => ({ ...value(name), check: 'Number' })),
-    tooltip: blockMessage('matrixBuzzerHint'),
-    inputsInline: true,
-    ...statement,
+    type: 'matrixbit_pin_number', message0: blockMessage('matrixPinNumber'),
+    args0: [{ type: 'field_dropdown', name: 'PIN', options: Object.entries(boardPins).map(([pin, gpio]) => [`P${pin} → GPIO${gpio}`, pin]) }],
+    tooltip: blockMessage('matrixPinNumberHint'), output: 'Number', colour: 260,
+  },
+  {
+    type: 'matrixbit_touch_read', message0: blockMessage('matrixTouchRead'),
+    args0: [touchKey], tooltip: blockMessage('matrixTouchHint'), output: 'Number', colour: 260,
+  },
+  {
+    type: 'matrixbit_touch_is_touched', message0: blockMessage('matrixTouchIsTouched'),
+    args0: [touchKey, thresholdInput], tooltip: blockMessage('matrixTouchHint'), output: 'Boolean', colour: 260,
+  },
+  {
+    type: 'matrixbit_on_touch', message0: blockMessage('matrixOnTouch'),
+    args0: [touchKey, thresholdInput],
+    message1: blockMessage('buttonEventBody'), args1: [{ type: 'input_statement', name: 'DO' }],
+    tooltip: blockMessage('matrixTouchEventHint'), hat: 'cap', colour: 260,
   },
   {
     type: 'matrixbit_rgb_set',
@@ -89,7 +114,8 @@ common.defineBlocksWithJsonArray([
 pythonGenerator.addReservedWords(
   '_matrixbit_i2c_type,_matrixbit_pin,_matrixbit_framebuf,_matrixbit_i2c,_matrixbit_pixels,' +
   '_matrixbit_screen,_matrixbit_flush,_matrixbit_button_a,_matrixbit_button_b,_matrixbit_rgb,_matrixbit_neopixel,' +
-  '_matrixbit_pwm,_matrixbit_sleep_ms,_matrixbit_buzzer_tone',
+  '_matrixbit_touchpad,' +
+  Object.keys(touchPins).map(key => `_matrixbit_touch_${key}`).join(','),
 );
 
 const pinImport = 'from machine import Pin as _matrixbit_pin';
@@ -119,22 +145,28 @@ function pressedExpression(block, generator) {
   return `${name}.value() == 0`;
 }
 
+function touchRead(block, generator) {
+  const key = block.getFieldValue('PAD');
+  const name = `_matrixbit_touch_${key}`;
+  generator.definitions_.import_matrixbit_pin = pinImport;
+  generator.definitions_.import_matrixbit_touchpad = 'from machine import TouchPad as _matrixbit_touchpad';
+  generator.definitions_[name] = `${name} = _matrixbit_touchpad(_matrixbit_pin(${touchPins[key]}))`;
+  return `${name}.read()`;
+}
+
+function touchedExpression(block, generator) {
+  const threshold = generator.valueToCode(block, 'THRESHOLD', Order.NONE) || '400';
+  return `${touchRead(block, generator)} < int(${threshold})`;
+}
+
 Object.assign(pythonGenerator.forBlock, {
-  matrixbit_buzzer_tone: (block, generator) => {
-    generator.definitions_.import_matrixbit_pin = pinImport;
-    generator.definitions_.import_matrixbit_pwm = 'from machine import PWM as _matrixbit_pwm';
-    generator.definitions_.import_matrixbit_sleep = 'from time import sleep_ms as _matrixbit_sleep_ms';
-    // Matrix:bit V2.0 pinout reported by TavIR.
-    generator.definitions_.matrixbit_buzzer = `def _matrixbit_buzzer_tone(frequency, duration):
-    buzzer = _matrixbit_pwm(_matrixbit_pin(16), freq=frequency, duty_u16=32768)
-    try:
-        _matrixbit_sleep_ms(duration)
-    finally:
-        buzzer.duty_u16(0)
-        buzzer.deinit()`;
-    const frequency = generator.valueToCode(block, 'FREQ', Order.NONE) || '440';
-    const duration = generator.valueToCode(block, 'DURATION', Order.NONE) || '200';
-    return `_matrixbit_buzzer_tone(${frequency}, ${duration})\n`;
+  matrixbit_pin_number: block => [String(boardPins[block.getFieldValue('PIN')]), Order.ATOMIC],
+  matrixbit_touch_read: (block, generator) => [touchRead(block, generator), Order.FUNCTION_CALL],
+  matrixbit_touch_is_touched: (block, generator) => [touchedExpression(block, generator), Order.RELATIONAL],
+  matrixbit_on_touch: (block, generator) => {
+    // Separate event sources let the same pad have handlers with different thresholds.
+    const source = generator.nameDB_.getDistinctName(`matrixbit_touch_${block.getFieldValue('PAD')}`, Names.NameType.PROCEDURE);
+    return buttonEventCode(block, generator, source, touchedExpression(block, generator), 25);
   },
   matrixbit_rgb_set: (block, generator) => {
     generator.definitions_.import_matrixbit_pin = pinImport;

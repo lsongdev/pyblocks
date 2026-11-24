@@ -1,6 +1,8 @@
 import * as Blockly from 'blockly/core';
 import { Order, pythonGenerator } from 'blockly/python';
-import { blockMessage, t } from './i18n.js';
+import { blockMessage, t } from '../i18n/index.js';
+import { PythonBlockError } from '../python/errors.js';
+import { isPythonIdentifier } from '../python/names.js';
 
 const colour = 210;
 const argument = 'PythonArgument';
@@ -74,14 +76,9 @@ Blockly.common.defineBlocksWithJsonArray([
   },
 ]);
 
-export class PythonBlockError extends Error {}
-
-const keywords = new Set(
-  'False None True and as assert async await break class continue def del elif else except finally for from global if import in is lambda nonlocal not or pass raise return try while with yield'.split(' '),
-);
 
 function identifier(name, label) {
-  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name) || keywords.has(name)) {
+  if (!isPythonIdentifier(name)) {
     throw new PythonBlockError(t('invalidIdentifier', label, name));
   }
   return name;

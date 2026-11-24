@@ -1,0 +1,571 @@
+{
+  "format": "blockly-demo",
+  "version": 1,
+  "workspace": {
+    "variables": [
+      {
+        "name": "按钮GPIO",
+        "id": "debounce-variable-0"
+      },
+      {
+        "name": "消抖毫秒",
+        "id": "debounce-variable-1"
+      },
+      {
+        "name": "最近变化时间",
+        "id": "debounce-variable-2"
+      },
+      {
+        "name": "检查时间",
+        "id": "debounce-variable-3"
+      },
+      {
+        "name": "稳定电平",
+        "id": "debounce-variable-4"
+      },
+      {
+        "name": "当前电平",
+        "id": "debounce-variable-5"
+      },
+      {
+        "name": "按下次数",
+        "id": "debounce-variable-6"
+      }
+    ],
+    "blocks": {
+      "languageVersion": 0,
+      "blocks": [
+        {
+          "type": "variables_set",
+          "fields": {
+            "VAR": {
+              "id": "debounce-variable-0"
+            }
+          },
+          "inputs": {
+            "VALUE": {
+              "block": {
+                "type": "math_number",
+                "fields": {
+                  "NUM": 18
+                },
+                "inputs": {}
+              }
+            }
+          },
+          "next": {
+            "block": {
+              "type": "variables_set",
+              "fields": {
+                "VAR": {
+                  "id": "debounce-variable-1"
+                }
+              },
+              "inputs": {
+                "VALUE": {
+                  "block": {
+                    "type": "math_number",
+                    "fields": {
+                      "NUM": 30
+                    },
+                    "inputs": {}
+                  }
+                }
+              },
+              "next": {
+                "block": {
+                  "type": "gpio_set_pull",
+                  "fields": {
+                    "PULL": "DOWN"
+                  },
+                  "inputs": {
+                    "PIN": {
+                      "block": {
+                        "type": "variables_get",
+                        "fields": {
+                          "VAR": {
+                            "id": "debounce-variable-0"
+                          }
+                        },
+                        "inputs": {}
+                      }
+                    }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "variables_set",
+                      "fields": {
+                        "VAR": {
+                          "id": "debounce-variable-4"
+                        }
+                      },
+                      "inputs": {
+                        "VALUE": {
+                          "block": {
+                            "type": "gpio_read_digital",
+                            "fields": {
+                              "PULL": "KEEP"
+                            },
+                            "inputs": {
+                              "PIN": {
+                                "block": {
+                                  "type": "variables_get",
+                                  "fields": {
+                                    "VAR": {
+                                      "id": "debounce-variable-0"
+                                    }
+                                  },
+                                  "inputs": {}
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "next": {
+                        "block": {
+                          "type": "variables_set",
+                          "fields": {
+                            "VAR": {
+                              "id": "debounce-variable-2"
+                            }
+                          },
+                          "inputs": {
+                            "VALUE": {
+                              "block": {
+                                "type": "timing_ticks_ms",
+                                "fields": {},
+                                "inputs": {}
+                              }
+                            }
+                          },
+                          "next": {
+                            "block": {
+                              "type": "variables_set",
+                              "fields": {
+                                "VAR": {
+                                  "id": "debounce-variable-6"
+                                }
+                              },
+                              "inputs": {
+                                "VALUE": {
+                                  "block": {
+                                    "type": "math_number",
+                                    "fields": {
+                                      "NUM": 0
+                                    },
+                                    "inputs": {}
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "x": 24,
+          "y": 24
+        },
+        {
+          "type": "gpio_on_edge",
+          "fields": {
+            "EDGE": "both",
+            "PULL": "DOWN"
+          },
+          "inputs": {
+            "PIN": {
+              "block": {
+                "type": "variables_get",
+                "fields": {
+                  "VAR": {
+                    "id": "debounce-variable-0"
+                  }
+                },
+                "inputs": {}
+              }
+            },
+            "DO": {
+              "block": {
+                "type": "variables_set",
+                "fields": {
+                  "VAR": {
+                    "id": "debounce-variable-2"
+                  }
+                },
+                "inputs": {
+                  "VALUE": {
+                    "block": {
+                      "type": "timing_ticks_ms",
+                      "fields": {},
+                      "inputs": {}
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "x": 24,
+          "y": 260
+        },
+        {
+          "type": "controls_whileUntil",
+          "fields": {
+            "MODE": "WHILE"
+          },
+          "inputs": {
+            "BOOL": {
+              "block": {
+                "type": "logic_boolean",
+                "fields": {
+                  "BOOL": "TRUE"
+                },
+                "inputs": {}
+              }
+            },
+            "DO": {
+              "block": {
+                "type": "variables_set",
+                "fields": {
+                  "VAR": {
+                    "id": "debounce-variable-3"
+                  }
+                },
+                "inputs": {
+                  "VALUE": {
+                    "block": {
+                      "type": "variables_get",
+                      "fields": {
+                        "VAR": {
+                          "id": "debounce-variable-2"
+                        }
+                      },
+                      "inputs": {}
+                    }
+                  }
+                },
+                "next": {
+                  "block": {
+                    "type": "controls_if",
+                    "fields": {},
+                    "inputs": {
+                      "IF0": {
+                        "block": {
+                          "type": "logic_compare",
+                          "fields": {
+                            "OP": "GTE"
+                          },
+                          "inputs": {
+                            "A": {
+                              "block": {
+                                "type": "timing_elapsed_ms",
+                                "fields": {},
+                                "inputs": {
+                                  "START": {
+                                    "block": {
+                                      "type": "variables_get",
+                                      "fields": {
+                                        "VAR": {
+                                          "id": "debounce-variable-3"
+                                        }
+                                      },
+                                      "inputs": {}
+                                    }
+                                  },
+                                  "END": {
+                                    "block": {
+                                      "type": "timing_ticks_ms",
+                                      "fields": {},
+                                      "inputs": {}
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "B": {
+                              "block": {
+                                "type": "variables_get",
+                                "fields": {
+                                  "VAR": {
+                                    "id": "debounce-variable-1"
+                                  }
+                                },
+                                "inputs": {}
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "DO0": {
+                        "block": {
+                          "type": "variables_set",
+                          "fields": {
+                            "VAR": {
+                              "id": "debounce-variable-5"
+                            }
+                          },
+                          "inputs": {
+                            "VALUE": {
+                              "block": {
+                                "type": "gpio_read_digital",
+                                "fields": {
+                                  "PULL": "KEEP"
+                                },
+                                "inputs": {
+                                  "PIN": {
+                                    "block": {
+                                      "type": "variables_get",
+                                      "fields": {
+                                        "VAR": {
+                                          "id": "debounce-variable-0"
+                                        }
+                                      },
+                                      "inputs": {}
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "next": {
+                            "block": {
+                              "type": "controls_if",
+                              "fields": {},
+                              "inputs": {
+                                "IF0": {
+                                  "block": {
+                                    "type": "logic_operation",
+                                    "fields": {
+                                      "OP": "AND"
+                                    },
+                                    "inputs": {
+                                      "A": {
+                                        "block": {
+                                          "type": "logic_compare",
+                                          "fields": {
+                                            "OP": "EQ"
+                                          },
+                                          "inputs": {
+                                            "A": {
+                                              "block": {
+                                                "type": "variables_get",
+                                                "fields": {
+                                                  "VAR": {
+                                                    "id": "debounce-variable-3"
+                                                  }
+                                                },
+                                                "inputs": {}
+                                              }
+                                            },
+                                            "B": {
+                                              "block": {
+                                                "type": "variables_get",
+                                                "fields": {
+                                                  "VAR": {
+                                                    "id": "debounce-variable-2"
+                                                  }
+                                                },
+                                                "inputs": {}
+                                              }
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "B": {
+                                        "block": {
+                                          "type": "logic_compare",
+                                          "fields": {
+                                            "OP": "NEQ"
+                                          },
+                                          "inputs": {
+                                            "A": {
+                                              "block": {
+                                                "type": "variables_get",
+                                                "fields": {
+                                                  "VAR": {
+                                                    "id": "debounce-variable-5"
+                                                  }
+                                                },
+                                                "inputs": {}
+                                              }
+                                            },
+                                            "B": {
+                                              "block": {
+                                                "type": "variables_get",
+                                                "fields": {
+                                                  "VAR": {
+                                                    "id": "debounce-variable-4"
+                                                  }
+                                                },
+                                                "inputs": {}
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "DO0": {
+                                  "block": {
+                                    "type": "variables_set",
+                                    "fields": {
+                                      "VAR": {
+                                        "id": "debounce-variable-4"
+                                      }
+                                    },
+                                    "inputs": {
+                                      "VALUE": {
+                                        "block": {
+                                          "type": "variables_get",
+                                          "fields": {
+                                            "VAR": {
+                                              "id": "debounce-variable-5"
+                                            }
+                                          },
+                                          "inputs": {}
+                                        }
+                                      }
+                                    },
+                                    "next": {
+                                      "block": {
+                                        "type": "controls_if",
+                                        "fields": {},
+                                        "inputs": {
+                                          "IF0": {
+                                            "block": {
+                                              "type": "logic_compare",
+                                              "fields": {
+                                                "OP": "EQ"
+                                              },
+                                              "inputs": {
+                                                "A": {
+                                                  "block": {
+                                                    "type": "variables_get",
+                                                    "fields": {
+                                                      "VAR": {
+                                                        "id": "debounce-variable-4"
+                                                      }
+                                                    },
+                                                    "inputs": {}
+                                                  }
+                                                },
+                                                "B": {
+                                                  "block": {
+                                                    "type": "math_number",
+                                                    "fields": {
+                                                      "NUM": 1
+                                                    },
+                                                    "inputs": {}
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          },
+                                          "DO0": {
+                                            "block": {
+                                              "type": "variables_set",
+                                              "fields": {
+                                                "VAR": {
+                                                  "id": "debounce-variable-6"
+                                                }
+                                              },
+                                              "inputs": {
+                                                "VALUE": {
+                                                  "block": {
+                                                    "type": "math_arithmetic",
+                                                    "fields": {
+                                                      "OP": "ADD"
+                                                    },
+                                                    "inputs": {
+                                                      "A": {
+                                                        "block": {
+                                                          "type": "variables_get",
+                                                          "fields": {
+                                                            "VAR": {
+                                                              "id": "debounce-variable-6"
+                                                            }
+                                                          },
+                                                          "inputs": {}
+                                                        }
+                                                      },
+                                                      "B": {
+                                                        "block": {
+                                                          "type": "math_number",
+                                                          "fields": {
+                                                            "NUM": 1
+                                                          },
+                                                          "inputs": {}
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              },
+                                              "next": {
+                                                "block": {
+                                                  "type": "text_print",
+                                                  "fields": {},
+                                                  "inputs": {
+                                                    "TEXT": {
+                                                      "block": {
+                                                        "type": "variables_get",
+                                                        "fields": {
+                                                          "VAR": {
+                                                            "id": "debounce-variable-6"
+                                                          }
+                                                        },
+                                                        "inputs": {}
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "next": {
+                      "block": {
+                        "type": "timing_wait_ms",
+                        "fields": {},
+                        "inputs": {
+                          "MS": {
+                            "block": {
+                              "type": "math_number",
+                              "fields": {
+                                "NUM": 5
+                              },
+                              "inputs": {}
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "x": 24,
+          "y": 420
+        }
+      ]
+    }
+  },
+  "manualCode": null,
+  "libraries": []
+}

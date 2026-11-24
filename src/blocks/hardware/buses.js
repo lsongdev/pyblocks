@@ -1,7 +1,7 @@
 import { common } from 'blockly/core';
 import { Order, pythonGenerator } from 'blockly/python';
-import { blockMessage, t } from './i18n.js';
-import { PythonBlockError } from './python-blocks.js';
+import { blockMessage, t } from '../../i18n/index.js';
+import { PythonBlockError } from '../../python/errors.js';
 
 const input = (name, check = 'Number') => ({ type: 'input_value', name, check });
 const pin = name => input(name, ['Number', 'String']);
@@ -64,7 +64,7 @@ function encodeData(block, generator) {
 function busMethod(socket, method, args, statement = false) {
   return (block, generator) => {
     const receiver = generator.valueToCode(block, socket, Order.MEMBER);
-    if (!receiver) throw new PythonBlockError(t('requiredExpression', socket === 'BUS' ? 'I2C' : 'UART'));
+    if (!receiver) throw new PythonBlockError(t('requiredExpression', socket === 'BUS' ? 'I2C' : t('uart')));
     const parameters = args.map(arg => arg === 'DATA'
       ? encodeData(block, generator)
       : value(block, generator, arg, arg === 'COUNT' ? '1' : '0'));

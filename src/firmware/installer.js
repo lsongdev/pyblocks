@@ -2,7 +2,7 @@ import { ESPLoader, Transport } from 'esptool-js';
 import SparkMD5 from 'spark-md5';
 import { createUSBConnection } from '@microbit/microbit-connection/usb';
 import { ProgressStage } from '@microbit/microbit-connection';
-import './firmware.css';
+import '../styles/firmware.css';
 
 const matrixbitImage = {
   file: 'ESP32_GENERIC-20260824-v1.29.0.bin',
