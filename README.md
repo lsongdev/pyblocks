@@ -64,4 +64,4 @@
 
 拖动积木与代码之间的分隔条调整宽度，拖动代码与串口输出之间的分隔条调整高度。尺寸按比例保存在本地，刷新后恢复。分隔条支持方向键、Shift 加速、Home/End 边界和双击恢复默认尺寸；窄屏隐藏左右分隔条。
 
-指针拖动使用 `https://lsong.org/scripts/dom/resizable.js` 的 `bindResizable`。布局分配、尺寸记忆和键盘操作由编辑器负责；共享模块暂时无法加载时，键盘调整仍然可用。
+面板使用 `https://lsong.org/scripts/dom/resizable.js` 的 `bindSplitter`。共享组件处理拖动、键盘、ARIA、比例布局、尺寸保存和窄屏启停；编辑器只配置最小尺寸、媒体查询和存储键。旁边存在 `../scripts` 工作区时，Vite 自动使用并打包本地实现，方便同步修改和验证；独立 checkout 使用线上模块，新接口需要先发布共享库。
