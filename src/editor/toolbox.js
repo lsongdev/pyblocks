@@ -105,13 +105,11 @@ export function createToolbox() {
         },
       ]),
       category(t('gpio'), '#29806c', faPlug, [
+        { type: 'adc_read_pin', inputs: { PIN: numberInput(0) } },
         { type: 'gpio_read_digital', inputs: { PIN: numberInput(0) } },
         { type: 'gpio_write_digital', inputs: { PIN: numberInput(0) } },
         { type: 'gpio_set_pull', inputs: { PIN: numberInput(0) } },
         { type: 'gpio_on_edge', inputs: { PIN: numberInput(0) } },
-        { kind: 'label', text: 'ADC' },
-        { type: 'adc_create', inputs: { PIN: numberInput(0) } },
-        'adc_read',
       ]),
       category('PWM', '#29806c', faWaveSquare, [
         { type: 'pwm_create', inputs: { PIN: numberInput(0), FREQ: numberInput(440), DUTY: numberInput(0) } },
@@ -181,18 +179,24 @@ export function createToolbox() {
         colour: '#b05039',
         contents: [
           category(t('display'), '#b05039', faDisplay, [
+            'microbit_show', 'microbit_scroll', 'microbit_display_power', 'microbit_display_is_on',
+            { type: 'microbit_set_pixel', inputs: { X: numberInput(0), Y: numberInput(0), BRIGHTNESS: numberInput(9) } },
+            { type: 'microbit_get_pixel', inputs: { X: numberInput(0), Y: numberInput(0) } },
+            'microbit_clear_display',
+            { kind: 'label', text: t('images') },
             'microbit_image_builtin', 'microbit_image_custom',
             { type: 'microbit_image_transform', inputs: { IMAGE: { shadow: { type: 'microbit_image_builtin' } } } },
             { type: 'microbit_image_shift', inputs: { IMAGE: { shadow: { type: 'microbit_image_builtin' } }, AMOUNT: numberInput(1) } },
-            { type: 'microbit_show', inputs: { IMAGE: { shadow: { type: 'microbit_image_builtin' } }, DELAY: numberInput(400) } },
-            { type: 'microbit_scroll', inputs: { TEXT: textInput('Hello!'), DELAY: numberInput(150) } },
-            'microbit_display_power', 'microbit_display_is_on',
-            {
-              type: 'microbit_set_pixel',
-              inputs: { X: numberInput(0), Y: numberInput(0), BRIGHTNESS: numberInput(9) },
-            },
-            { type: 'microbit_get_pixel', inputs: { X: numberInput(0), Y: numberInput(0) } },
-            'microbit_clear_display',
+          ]),
+          category(t('pins'), '#b05039', faPlug, [
+            'microbit_read_digital', 'microbit_write_digital', 'microbit_read_analog',
+            'microbit_set_pull',
+            { type: 'microbit_write_analog', inputs: { DUTY: numberInput(512) } },
+            { type: 'microbit_set_analog_period', inputs: { PERIOD: numberInput(20) } },
+          ]),
+          category(t('buttons'), '#b05039', faHandPointer, [
+            'microbit_on_button_pressed', 'microbit_button_is_pressed', 'microbit_button_was_pressed', 'microbit_button_press_count',
+            'microbit_on_logo_touched', 'microbit_logo_is_touched',
           ]),
           category(t('buzzer'), '#b05039', faVolumeHigh, [
             { type: 'microbit_music_pitch', inputs: { FREQ: numberInput(440), DURATION: numberInput(200) } },
@@ -204,16 +208,6 @@ export function createToolbox() {
           ]),
           category(t('sensors'), '#b05039', faMicrochip, [
             'microbit_light_level', 'microbit_temperature', 'microbit_acceleration', 'microbit_running_time',
-          ]),
-          category(t('pins'), '#b05039', faPlug, [
-            'microbit_read_digital', 'microbit_write_digital', 'microbit_read_analog',
-            'microbit_set_pull',
-            { type: 'microbit_write_analog', inputs: { DUTY: numberInput(512) } },
-            { type: 'microbit_set_analog_period', inputs: { PERIOD: numberInput(20) } },
-          ]),
-          category(t('buttons'), '#b05039', faHandPointer, [
-            'microbit_on_button_pressed', 'microbit_button_is_pressed', 'microbit_button_was_pressed', 'microbit_button_press_count',
-            'microbit_on_logo_touched', 'microbit_logo_is_touched',
           ]),
         ],
       },
