@@ -3,7 +3,7 @@ Firmware sources
 Matrix:bit (official ESP32_GENERIC v1.29.0):
 https://micropython.org/download/ESP32_GENERIC/
 
-BBC Micro:bit V1 and V2 (bundled by the Foundation Python Editor at 292c28eb1cf61e1063470ce977d441ec1e8b3686):
+BBC Micro:bit V1 and V2 (downloaded from the Foundation Python Editor at 292c28eb1cf61e1063470ce977d441ec1e8b3686):
 https://github.com/microbit-foundation/python-editor-v3/tree/292c28eb1cf61e1063470ce977d441ec1e8b3686/src/micropython
 
 

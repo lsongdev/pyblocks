@@ -1,0 +1,20 @@
+{
+  "matrixbit": {
+    "file": "ESP32_GENERIC-20260824-v1.29.0.bin",
+    "version": "1.29.0",
+    "url": "https://micropython.org/resources/firmware/ESP32_GENERIC-20260824-v1.29.0.bin",
+    "sha256": "e67ad6015a0a504c1fec9aa9bbf589d0432ed28e62546f4f8dd8a147f8bd95f6"
+  },
+  "V1": {
+    "file": "microbit-v1.hex",
+    "version": "1.1.1",
+    "url": "https://raw.githubusercontent.com/microbit-foundation/python-editor-v3/292c28eb1cf61e1063470ce977d441ec1e8b3686/src/micropython/microbit-micropython-v1.hex",
+    "sha256": "d3686e669677d456ece9d206a44b8acbe73ddf73e1a3211ff89b93972b953152"
+  },
+  "V2": {
+    "file": "microbit-v2.hex",
+    "version": "2.1.2",
+    "url": "https://raw.githubusercontent.com/microbit-foundation/python-editor-v3/292c28eb1cf61e1063470ce977d441ec1e8b3686/src/micropython/main/microbit-micropython-v2.hex",
+    "sha256": "66fae07b71777e9e3a6b5122a27930b24cc0be5002ab9a67e92494c54a1645ef"
+  }
+}

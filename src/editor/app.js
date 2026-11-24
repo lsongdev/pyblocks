@@ -3,6 +3,7 @@ import { pythonGenerator } from 'blockly/python';
 import { createToolbox, EditorToolbox } from './toolbox.js';
 import { applyLanguage, getSavedLanguage, normalizeLanguage, saveLanguage, t } from '../i18n/index.js';
 import { PythonBlockError } from '../python/errors.js';
+import { setupPanelResize } from './resize.js';
 import { setupDialogs } from './dialogs.js';
 import { createLibraryPanel } from './libraries.js';
 import { example } from './example.js';
@@ -298,6 +299,9 @@ function renderLanguage() {
   document.querySelectorAll('[data-i18n-title]').forEach(element => {
     element.title = t(element.dataset.i18nTitle);
   });
+  document.querySelectorAll('[data-i18n-aria]').forEach(element => {
+    element.setAttribute('aria-label', t(element.dataset.i18nAria));
+  });
   document.querySelector('#firmware-progress').setAttribute('aria-label', t('firmwareProgress'));
   renderStatus(uploadStatus, uploadMessage);
   renderStatus(serialStatus, serialMessage);
@@ -487,3 +491,5 @@ setupDialogs({
   },
   releaseDevice() { serialBusy = false; updateButtons(); },
 });
+
+setupPanelResize().catch(error => console.warn('Panel resize unavailable:', error));

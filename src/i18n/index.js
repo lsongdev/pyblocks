@@ -256,6 +256,8 @@ const messages = {
   wifiIpv4: ["Wi-Fi IPv4 address", "Wi-Fi IPv4 地址"],
   wifiIpv4Hint: ["An empty string until Wi-Fi is connected.", "Wi-Fi 未连接时返回空字符串。"],
   deviceMenu: ["Device", "设备"],
+  resizePanels: ["Resize block and code panels", "调整积木与代码面板大小"],
+  resizeOutput: ["Resize code and serial output", "调整代码与串口输出大小"],
   settingsTitle: ["Settings", "设置"],
   languageLabel: ["Language", "语言"],
   doneButton: ["Done", "完成"],

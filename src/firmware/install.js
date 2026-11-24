@@ -3,20 +3,10 @@ import SparkMD5 from 'spark-md5';
 import { createUSBConnection } from '@microbit/microbit-connection/usb';
 import { ProgressStage } from '@microbit/microbit-connection';
 
-const matrixbitImage = {
-  file: 'ESP32_GENERIC-20260824-v1.29.0.bin',
-  sha256: 'e67ad6015a0a504c1fec9aa9bbf589d0432ed28e62546f4f8dd8a147f8bd95f6',
-};
-const microbitImages = {
-  V1: {
-    file: 'microbit-v1.hex',
-    sha256: 'd3686e669677d456ece9d206a44b8acbe73ddf73e1a3211ff89b93972b953152',
-  },
-  V2: {
-    file: 'microbit-v2.hex',
-    sha256: '66fae07b71777e9e3a6b5122a27930b24cc0be5002ab9a67e92494c54a1645ef',
-  },
-};
+import images from './images.json';
+
+const matrixbitImage = images.matrixbit;
+const microbitImages = { V1: images.V1, V2: images.V2 };
 
 async function fetchImage({ file, sha256 }) {
   const response = await fetch(new URL(`firmware/${file}`, document.baseURI));
@@ -46,7 +36,7 @@ export async function connectFirmware(board, report = () => {}) {
       if (loader.chip.CHIP_NAME !== 'ESP32' || await loader.detectFlashSize() !== '8MB') {
         throw new Error('This installer requires a classic ESP32 with 8 MB flash.');
       }
-      return { label: 'Matrix:bit · ESP32 · 8 MB · MicroPython v1.29.0', close, async install(update) {
+      return { label: `Matrix:bit · ESP32 · 8 MB · MicroPython v${matrixbitImage.version}`, close, async install(update) {
         report('firmwareChecking');
         const data = new Uint8Array(await fetchImage(matrixbitImage));
         report('firmwareWriting');
@@ -79,7 +69,7 @@ export async function connectFirmware(board, report = () => {}) {
     const version = connection.getBoardVersion();
     if (!microbitImages[version]) throw new Error('Unsupported Micro:bit version.');
     return {
-      label: `Micro:bit ${version} · MicroPython`, close,
+      label: `Micro:bit ${version} · MicroPython v${microbitImages[version].version}`, close,
       async install(update) {
         await connection.flash(async boardVersion => {
           const image = microbitImages[boardVersion];

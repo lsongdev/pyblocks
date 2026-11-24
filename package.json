@@ -6,7 +6,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --import ./test/blockly-loader.js --test test/*.test.js"
+    "test": "node --import ./test/blockly-loader.js --test test/*.test.js",
+    "predev": "node tools/prepare-firmware.js",
+    "prebuild": "node tools/prepare-firmware.js"
   },
   "type": "module",
   "private": true,

@@ -1,3 +1,6 @@
 node_modules/
 dist/
 .DS_Store
+public/firmware/*.bin
+public/firmware/*.hex
+public/firmware/*.tmp

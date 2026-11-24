@@ -48,6 +48,20 @@
 | `src/project/` | 项目格式、校验与本地保存 |
 | `src/i18n/`、`src/styles/` | 翻译与样式 |
 | `test/`、`examples/` | 自动化验证与可导入的积木示例 |
-| `public/firmware/` | 固件文件、校验来源和许可证说明 |
+| `src/firmware/images.json` | 固件版本、官方地址与 SHA-256 下载清单 |
+| `tools/prepare-firmware.js` | 开发和构建前下载、缓存并校验固件 |
+| `public/firmware/` | 自动下载的固件缓存（不提交 Git）与许可证说明 |
 
 生成的 Python 变量名、函数名保留合法的中文、日文、韩文等 Unicode 拼写。数字开头会补上 `var_`，非法字符替换为 `_`；关键字、保留名或冲突名称添加数字后缀。项目保存的原始名称和 ID 不变。
+
+## 固件下载与更新
+
+`npm run dev` 和 `npm run build` 会自动执行固件准备脚本，从官方来源下载清单中的固件，核对 SHA-256 后写入 `public/firmware/`。缓存校验通过时直接复用；下载失败或校验不符时停止启动/构建。生产构建会将固件复制到 `dist/firmware/`，供网页同源下载，避免跨域限制。GitHub Pages 的构建流程同样适用。
+
+仓库只保留 `src/firmware/images.json` 中的版本、地址和校验值，不再提交 BIN/HEX 文件。升级时更新清单中的版本、地址与 SHA-256，并验证板级 API；Micro:bit 来源固定到基金会编辑器的具体提交，避免上游分支变化导致校验信息失效。
+
+## 面板大小
+
+拖动积木与代码之间的分隔条调整宽度，拖动代码与串口输出之间的分隔条调整高度。尺寸按比例保存在本地，刷新后恢复。分隔条支持方向键、Shift 加速、Home/End 边界和双击恢复默认尺寸；窄屏隐藏左右分隔条。
+
+指针拖动使用 `https://lsong.org/scripts/dom/resizable.js` 的 `bindResizable`。布局分配、尺寸记忆和键盘操作由编辑器负责；共享模块暂时无法加载时，键盘调整仍然可用。

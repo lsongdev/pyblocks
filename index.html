@@ -16,8 +16,8 @@
         <button id="open-settings" type="button" data-i18n="settingsTitle">Settings</button>
       </nav>
     </header>
-    <main>
-      <section class="panel" aria-labelledby="workspace-label">
+    <main id="editor-panels">
+      <section id="blocks-panel" class="panel" aria-labelledby="workspace-label">
         <div class="panel-heading">
           <h1 id="workspace-label" data-i18n="blockHeading">Block</h1>
           <div class="code-actions project-actions">
@@ -53,7 +53,8 @@
           </section>
         </div>
       </section>
-      <section class="panel" aria-labelledby="code-label">
+      <div id="panel-resizer" class="resize-handle horizontal-resize" role="separator" tabindex="0" aria-orientation="vertical" aria-controls="blocks-panel code-panel" data-i18n-aria="resizePanels" aria-label="Resize block and code panels"></div>
+      <section id="code-panel" class="panel" aria-labelledby="code-label">
         <div class="panel-heading">
           <h2 id="code-label" data-i18n="codeHeading">Code</h2>
           <div class="code-actions">
@@ -66,9 +67,11 @@
         <div class="code-sync" id="code-sync" hidden>
           <button id="use-block-code" type="button" data-i18n="useGeneratedCode">Use generated code</button>
         </div>
+        <div id="output-panels">
         <textarea id="python" aria-labelledby="code-label" spellcheck="false"
           autocapitalize="off" autocomplete="off" wrap="off"></textarea>
-        <section class="serial-panel" aria-labelledby="serial-label">
+        <div id="output-resizer" class="resize-handle vertical-resize" role="separator" tabindex="0" aria-orientation="horizontal" aria-controls="python serial-panel" data-i18n-aria="resizeOutput" aria-label="Resize code and serial output"></div>
+        <section id="serial-panel" class="serial-panel" aria-labelledby="serial-label">
           <div class="serial-heading">
             <h3 id="serial-label" data-i18n="serialOutput">Serial output</h3>
             <div class="code-actions">
@@ -79,6 +82,7 @@
           <p id="serial-status" role="status"></p>
           <pre id="serial-output" aria-labelledby="serial-label" tabindex="0"></pre>
         </section>
+        </div>
       </section>
     </main>
     <dialog id="settings-dialog" aria-labelledby="settings-title">
