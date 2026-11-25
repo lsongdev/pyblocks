@@ -1,0 +1,465 @@
+{
+  "format": "blockly-demo",
+  "version": 1,
+  "workspace": {
+    "variables": [
+      {
+        "id": "client",
+        "name": "客户端"
+      },
+      {
+        "id": "topic",
+        "name": "主题"
+      },
+      {
+        "id": "message",
+        "name": "消息"
+      },
+      {
+        "id": "last",
+        "name": "最近发布时间"
+      }
+    ],
+    "blocks": {
+      "languageVersion": 0,
+      "blocks": [
+        {
+          "type": "wifi_connect",
+          "inputs": {
+            "SSID": {
+              "block": {
+                "type": "text",
+                "fields": {
+                  "TEXT": "YOUR_SSID"
+                }
+              }
+            },
+            "PASSWORD": {
+              "block": {
+                "type": "text",
+                "fields": {
+                  "TEXT": "YOUR_PASSWORD"
+                }
+              }
+            }
+          },
+          "next": {
+            "block": {
+              "type": "controls_whileUntil",
+              "fields": {
+                "MODE": "UNTIL"
+              },
+              "inputs": {
+                "BOOL": {
+                  "block": {
+                    "type": "wifi_connected"
+                  }
+                },
+                "DO": {
+                  "block": {
+                    "type": "timing_wait_ms",
+                    "inputs": {
+                      "MS": {
+                        "block": {
+                          "type": "math_number",
+                          "fields": {
+                            "NUM": 100
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "next": {
+                "block": {
+                  "type": "variables_set",
+                  "fields": {
+                    "VAR": {
+                      "id": "client"
+                    }
+                  },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "mqtt_create",
+                        "inputs": {
+                          "SERVER": {
+                            "block": {
+                              "type": "text",
+                              "fields": {
+                                "TEXT": "broker.emqx.io"
+                              }
+                            }
+                          },
+                          "PORT": {
+                            "block": {
+                              "type": "math_number",
+                              "fields": {
+                                "NUM": 1883
+                              }
+                            }
+                          },
+                          "CLIENT_ID": {
+                            "block": {
+                              "type": "text",
+                              "fields": {
+                                "TEXT": "matrixbit-demo"
+                              }
+                            }
+                          },
+                          "USER": {
+                            "block": {
+                              "type": "text",
+                              "fields": {
+                                "TEXT": ""
+                              }
+                            }
+                          },
+                          "PASSWORD": {
+                            "block": {
+                              "type": "text",
+                              "fields": {
+                                "TEXT": ""
+                              }
+                            }
+                          },
+                          "KEEPALIVE": {
+                            "block": {
+                              "type": "math_number",
+                              "fields": {
+                                "NUM": 60
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "mqtt_connect",
+                      "inputs": {
+                        "CLIENT": {
+                          "block": {
+                            "type": "variables_get",
+                            "fields": {
+                              "VAR": {
+                                "id": "client"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "next": {
+                        "block": {
+                          "type": "mqtt_on_message",
+                          "inputs": {
+                            "CLIENT": {
+                              "block": {
+                                "type": "variables_get",
+                                "fields": {
+                                  "VAR": {
+                                    "id": "client"
+                                  }
+                                }
+                              }
+                            },
+                            "DO": {
+                              "block": {
+                                "type": "text_print",
+                                "inputs": {
+                                  "TEXT": {
+                                    "block": {
+                                      "type": "variables_get",
+                                      "fields": {
+                                        "VAR": {
+                                          "id": "topic"
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "next": {
+                                  "block": {
+                                    "type": "text_print",
+                                    "inputs": {
+                                      "TEXT": {
+                                        "block": {
+                                          "type": "bytes_decode_utf8",
+                                          "inputs": {
+                                            "VALUE": {
+                                              "block": {
+                                                "type": "variables_get",
+                                                "fields": {
+                                                  "VAR": {
+                                                    "id": "message"
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "fields": {
+                            "TOPIC_VAR": {
+                              "id": "topic"
+                            },
+                            "MESSAGE_VAR": {
+                              "id": "message"
+                            }
+                          },
+                          "next": {
+                            "block": {
+                              "type": "mqtt_subscribe",
+                              "inputs": {
+                                "CLIENT": {
+                                  "block": {
+                                    "type": "variables_get",
+                                    "fields": {
+                                      "VAR": {
+                                        "id": "client"
+                                      }
+                                    }
+                                  }
+                                },
+                                "TOPIC": {
+                                  "block": {
+                                    "type": "text",
+                                    "fields": {
+                                      "TEXT": "test"
+                                    }
+                                  }
+                                }
+                              },
+                              "next": {
+                                "block": {
+                                  "type": "variables_set",
+                                  "fields": {
+                                    "VAR": {
+                                      "id": "last"
+                                    }
+                                  },
+                                  "inputs": {
+                                    "VALUE": {
+                                      "block": {
+                                        "type": "timing_ticks_ms"
+                                      }
+                                    }
+                                  },
+                                  "next": {
+                                    "block": {
+                                      "type": "controls_whileUntil",
+                                      "fields": {
+                                        "MODE": "WHILE"
+                                      },
+                                      "inputs": {
+                                        "BOOL": {
+                                          "block": {
+                                            "type": "logic_boolean",
+                                            "fields": {
+                                              "BOOL": "TRUE"
+                                            }
+                                          }
+                                        },
+                                        "DO": {
+                                          "block": {
+                                            "type": "mqtt_check_msg",
+                                            "inputs": {
+                                              "CLIENT": {
+                                                "block": {
+                                                  "type": "variables_get",
+                                                  "fields": {
+                                                    "VAR": {
+                                                      "id": "client"
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "next": {
+                                              "block": {
+                                                "type": "controls_if",
+                                                "inputs": {
+                                                  "IF0": {
+                                                    "block": {
+                                                      "type": "logic_compare",
+                                                      "fields": {
+                                                        "OP": "GTE"
+                                                      },
+                                                      "inputs": {
+                                                        "A": {
+                                                          "block": {
+                                                            "type": "timing_elapsed_ms",
+                                                            "inputs": {
+                                                              "START": {
+                                                                "block": {
+                                                                  "type": "variables_get",
+                                                                  "fields": {
+                                                                    "VAR": {
+                                                                      "id": "last"
+                                                                    }
+                                                                  }
+                                                                }
+                                                              },
+                                                              "END": {
+                                                                "block": {
+                                                                  "type": "timing_ticks_ms"
+                                                                }
+                                                              }
+                                                            }
+                                                          }
+                                                        },
+                                                        "B": {
+                                                          "block": {
+                                                            "type": "math_number",
+                                                            "fields": {
+                                                              "NUM": 10000
+                                                            }
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+                                                  },
+                                                  "DO0": {
+                                                    "block": {
+                                                      "type": "mqtt_publish",
+                                                      "inputs": {
+                                                        "CLIENT": {
+                                                          "block": {
+                                                            "type": "variables_get",
+                                                            "fields": {
+                                                              "VAR": {
+                                                                "id": "client"
+                                                              }
+                                                            }
+                                                          }
+                                                        },
+                                                        "TOPIC": {
+                                                          "block": {
+                                                            "type": "text",
+                                                            "fields": {
+                                                              "TEXT": "blockly/data"
+                                                            }
+                                                          }
+                                                        },
+                                                        "MESSAGE": {
+                                                          "block": {
+                                                            "type": "text_join",
+                                                            "extraState": {
+                                                              "itemCount": 2
+                                                            },
+                                                            "inputs": {
+                                                              "ADD0": {
+                                                                "block": {
+                                                                  "type": "text",
+                                                                  "fields": {
+                                                                    "TEXT": "ADC GPIO33: "
+                                                                  }
+                                                                }
+                                                              },
+                                                              "ADD1": {
+                                                                "block": {
+                                                                  "type": "adc_read_pin",
+                                                                  "inputs": {
+                                                                    "PIN": {
+                                                                      "block": {
+                                                                        "type": "math_number",
+                                                                        "fields": {
+                                                                          "NUM": 33
+                                                                        }
+                                                                      }
+                                                                    }
+                                                                  }
+                                                                }
+                                                              }
+                                                            }
+                                                          }
+                                                        }
+                                                      },
+                                                      "next": {
+                                                        "block": {
+                                                          "type": "mqtt_ping",
+                                                          "inputs": {
+                                                            "CLIENT": {
+                                                              "block": {
+                                                                "type": "variables_get",
+                                                                "fields": {
+                                                                  "VAR": {
+                                                                    "id": "client"
+                                                                  }
+                                                                }
+                                                              }
+                                                            }
+                                                          },
+                                                          "next": {
+                                                            "block": {
+                                                              "type": "variables_set",
+                                                              "fields": {
+                                                                "VAR": {
+                                                                  "id": "last"
+                                                                }
+                                                              },
+                                                              "inputs": {
+                                                                "VALUE": {
+                                                                  "block": {
+                                                                    "type": "timing_ticks_ms"
+                                                                  }
+                                                                }
+                                                              }
+                                                            }
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                },
+                                                "next": {
+                                                  "block": {
+                                                    "type": "timing_wait_ms",
+                                                    "inputs": {
+                                                      "MS": {
+                                                        "block": {
+                                                          "type": "math_number",
+                                                          "fields": {
+                                                            "NUM": 20
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "x": 24,
+          "y": 24
+        }
+      ]
+    }
+  },
+  "manualCode": null,
+  "libraries": []
+}

@@ -140,9 +140,11 @@ export function createToolbox() {
         { type: 'i2c_write_register', inputs: { ADDRESS: numberInput(60), REGISTER: numberInput(0) } },
       ]),
       category(t('uart'), '#3575a6', faRightLeft, [
-        { type: 'uart_create', inputs: {
-          ID: numberInput(1), TX: numberInput(25), RX: numberInput(26), BAUD: numberInput(9600), TIMEOUT: numberInput(100),
-        } },
+        {
+          type: 'uart_create', inputs: {
+            ID: numberInput(1), TX: numberInput(25), RX: numberInput(26), BAUD: numberInput(9600), TIMEOUT: numberInput(100),
+          }
+        },
         'uart_any',
         { type: 'uart_read', inputs: { COUNT: numberInput(1) } },
         'uart_read_line',
@@ -155,6 +157,18 @@ export function createToolbox() {
           inputs: { SSID: textInput('SSID'), PASSWORD: textInput('') },
         },
         'wifi_connected', 'wifi_ipv4', 'wifi_disconnect',
+      ]),
+      category(t('mqttCategory'), '#357d82', faRightLeft, [
+        { type: 'mqtt_create', inputs: {
+          SERVER: textInput('broker.emqx.io'), PORT: numberInput(1883), CLIENT_ID: textInput('blockly-client'),
+          USER: textInput(''), PASSWORD: textInput(''), KEEPALIVE: numberInput(60),
+        } },
+        'mqtt_connect', 'mqtt_on_message',
+        { type: 'mqtt_subscribe', inputs: { TOPIC: textInput('test') } },
+        { type: 'mqtt_publish', inputs: { TOPIC: textInput('blockly/data'), MESSAGE: textInput('Hello') } },
+        'mqtt_check_msg', 'mqtt_ping', 'mqtt_disconnect',
+        { type: 'bytes_encode_utf8', inputs: { VALUE: textInput('Hello') } },
+        'bytes_decode_utf8',
       ]),
       {
         kind: 'iconCategory',
@@ -206,14 +220,6 @@ export function createToolbox() {
             'microbit_on_button_pressed', 'microbit_button_is_pressed', 'microbit_button_was_pressed', 'microbit_button_press_count',
             'microbit_on_logo_touched', 'microbit_logo_is_touched',
           ]),
-          category(t('buzzer'), '#b05039', faVolumeHigh, [
-            { type: 'microbit_music_pitch', inputs: { FREQ: numberInput(440), DURATION: numberInput(200) } },
-            { type: 'microbit_music_play', inputs: { NOTES: { shadow: { type: 'microbit_music_melody' } } } },
-            'microbit_music_melody', 'microbit_music_stop',
-            { type: 'microbit_music_tempo', inputs: { BPM: numberInput(120), TICKS: numberInput(4) } },
-            { type: 'microbit_music_volume', inputs: { VOLUME: numberInput(64) } },
-            'microbit_speaker_power',
-          ]),
           category(t('microbitRadio'), '#b05039', faWifi, [
             'microbit_radio_power',
             { type: 'microbit_radio_config', inputs: { GROUP: numberInput(0), CHANNEL: numberInput(7), POWER: numberInput(6) } },
@@ -229,6 +235,14 @@ export function createToolbox() {
             'microbit_microphone_level', 'microbit_microphone_is_event', 'microbit_microphone_was_event',
             { type: 'microbit_microphone_threshold', inputs: { VALUE: numberInput(128) } },
             'microbit_microphone_current_event', 'microbit_sound_event', 'microbit_microphone_events',
+          ]),
+          category(t('buzzer'), '#b05039', faVolumeHigh, [
+            { type: 'microbit_music_pitch', inputs: { FREQ: numberInput(440), DURATION: numberInput(200) } },
+            { type: 'microbit_music_play', inputs: { NOTES: { shadow: { type: 'microbit_music_melody' } } } },
+            'microbit_music_melody', 'microbit_music_stop',
+            { type: 'microbit_music_tempo', inputs: { BPM: numberInput(120), TICKS: numberInput(4) } },
+            { type: 'microbit_music_volume', inputs: { VOLUME: numberInput(64) } },
+            'microbit_speaker_power',
           ]),
           category(t('sensors'), '#b05039', faMicrochip, [
             'microbit_light_level', 'microbit_temperature', 'microbit_acceleration', 'microbit_running_time',

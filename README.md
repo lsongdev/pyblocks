@@ -85,3 +85,19 @@
 - https://microbit-micropython.readthedocs.io/en/v2-docs/microphone.html
 - https://microbit-micropython.readthedocs.io/en/v2-docs/ble.html
 - https://github.com/micropython/micropython/blob/v1.29.0/ports/nrf/README.md
+
+## MQTT（ESP32 / Matrix:bit）
+
+“MQTT”分类使用 `umqtt.simple.MQTTClient`，项目提供的 ESP32_GENERIC v1.29.0 固件已经内置该模块，无需添加库文件。使用普通 TCP；默认服务器为 `broker.emqx.io`，端口 1883，默认订阅主题为 `test`。当前原版 Pico 和 Micro:bit 固件不作为 MQTT 支持目标。
+
+导入 [MQTT 发布与订阅示例](examples/mqtt-publish-subscribe.blockly.json)，修改 Wi-Fi 名称和密码，按需修改 MQTT 服务器地址。示例等待 Wi-Fi 获得 IP 后连接服务器，订阅 `test`，打印收到的主题和 UTF-8 消息，每 10 秒发布 GPIO33 的 ADC 原始读数到 `blockly/data` 并发送保活请求。GPIO33 对应经典 Matrix:bit 的 P0；读数为 0–65535，并非电压或经过校准的传感器单位。服务器可向控制主题发布文本以验证接收。Wi-Fi 凭据不正确时，示例会继续等待连接；网络连接失败会在串口输出异常。
+
+创建客户端返回对象，可保存到变量；每台设备的客户端 ID 应唯一。用户名为空表示不认证，密码可以为空。保活间隔单位为秒，范围 0–65535，0 禁用保活；需在间隔到期前主动发送 ping，并持续检查接收消息来处理响应。它不会自动发送心跳、恢复 Wi-Fi 或重连 MQTT。积木中的凭据会保存在项目与生成代码中。
+
+先连接，再执行“当 MQTT 收到消息”注册回调，之后订阅主题，并在主循环中调用“检查收到的消息”。每个客户端仅保留最后注册的一个回调。回调的主题参数是文本，消息参数是原始字节，两者是函数局部参数，需在回调内部引用；如需在外部保留数据，请赋值给另一个变量。二进制消息保持字节类型，文本消息可使用“UTF-8 字节解码为文本”；非法 UTF-8 会报错。发布积木接受文本或字节，文本自动按 UTF-8 编码。
+
+回调同步运行于处理 MQTT 的调用中，订阅等待确认和 QoS 1 发布等待确认时也可能触发。请保持处理代码简短，避免在回调里再次调用 MQTT。检查消息在无数据时返回，但开始接收报文后可能等待剩余数据；连接、订阅和 QoS 1 发布也可能阻塞，因此不适合要求严格实时响应的主循环。使用板卡按钮事件积木时，其自动监听循环会在顶层代码结束后启动；本示例的显式无限循环不会结束，不能直接与这些按钮事件组合。
+
+支持 QoS 0/1，QoS 1 可能重复投递。订阅过滤器支持 `+` 和 `#`，发布主题不允许通配符。保留消息由服务器保存，空的保留消息用于清除它。连接积木使用默认的干净会话，重新连接后应重新订阅。端口与保活间隔的数字常量会在生成时校验，使用变量时需自行保证整数和有效范围。
+
+接口依据：[固件模块清单](https://github.com/micropython/micropython/blob/v1.29.0/ports/esp32/boards/manifest.py)、[该固件对应的 MQTTClient 实现](https://github.com/micropython/micropython-lib/blob/ee4bb8ff139e24c42b739935fbd8ec7c4d061e02/micropython/umqtt.simple/umqtt/simple.py)。

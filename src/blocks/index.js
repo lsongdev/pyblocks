@@ -3,6 +3,8 @@ import '../python/names.js';
 import './python.js';
 import './boards/matrixbit.js';
 import './hardware/wifi.js';
+import './hardware/mqtt.js';
+import './shared/bytes.js';
 import './boards/microbit.js';
 import './boards/microbit-radio.js';
 import './boards/microbit-microphone.js';

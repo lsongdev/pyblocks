@@ -94,7 +94,7 @@ Object.assign(pythonGenerator.forBlock, {
   gpio_on_edge: (block, generator) => {
     const pin = pinId(block, generator);
     const trigger = irqTriggers[block.getFieldValue('EDGE')];
-    const { name, code } = eventHandler(block, generator, '_on_gpio_edge', '_gpio_callback_pin');
+    const { name, code } = eventHandler(block, generator, '_on_gpio_edge', { parameters: ['_gpio_callback_pin'] });
     generator.definitions_.gpio_irq_inputs = '_gpio_irq_inputs = []';
     return code +
       `_gpio_irq_inputs.append(_gpio_pin(${pin}, _gpio_pin.IN${pullOption(block)}))\n` +
