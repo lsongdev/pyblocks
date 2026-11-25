@@ -1,5 +1,8 @@
 Firmware sources
 
+Raspberry Pi Pico (official RPI_PICO v1.29.0):
+https://micropython.org/download/RPI_PICO/
+
 Matrix:bit (official ESP32_GENERIC v1.29.0):
 https://micropython.org/download/ESP32_GENERIC/
 

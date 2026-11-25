@@ -6,7 +6,7 @@
 
 编辑器的“上传并运行”按钮通过串口把当前代码写成 `main.py`，需要板卡已经运行支持串口 raw REPL 的 MicroPython。首次安装请在主界面右上角选择“设备 → 安装 MicroPython 固件”，连接板卡后在对话框中确认安装。右上角“设置”可修改语言，选择立即生效并保存在本地。
 
-安装对话框支持经典 ESP32、8 MB Flash 的 Matrix:bit，以及 BBC Micro:bit V1 / V2。它连接板卡、校验所选固件并在用户确认后刷写。固件来源和许可证见 [固件说明](public/firmware/NOTICE.txt)。
+安装对话框支持经典 ESP32、8 MB Flash 的 Matrix:bit，BBC Micro:bit V1 / V2，以及原版 Raspberry Pi Pico（RP2040，不带 Wi-Fi）。它连接板卡、校验所选固件并在用户确认后刷写。固件来源和许可证见 [固件说明](public/firmware/NOTICE.txt)。
 
 下面的外部工具可作为备用。
 
@@ -65,3 +65,23 @@
 拖动积木与代码之间的分隔条调整宽度，拖动代码与串口输出之间的分隔条调整高度。尺寸按比例保存在本地，刷新后恢复。分隔条支持方向键、Shift 加速、Home/End 边界和双击恢复默认尺寸；窄屏隐藏左右分隔条。
 
 面板使用 `https://lsong.org/scripts/dom/resizable.js` 的 `bindSplitter`。共享组件处理拖动、键盘、ARIA、比例布局、尺寸保存和窄屏启停；编辑器只配置最小尺寸、媒体查询和存储键。旁边存在 `../scripts` 工作区时，Vite 自动使用并打包本地实现，方便同步修改和验证；独立 checkout 使用线上模块，新接口需要先发布共享库。
+
+## Raspberry Pi Pico 安装
+
+在“设备 → 安装 MicroPython 固件”中选择 Raspberry Pi Pico。按住 BOOTSEL 键连接 USB，再松开；连接时在浏览器中选择 `RP2 Boot`。确认后通过 WebUSB PICOBOOT 写入官方 UF2，逐块读回比对，通过后重启。固件按清单下载并校验 SHA-256，不提交 Git。
+
+当前仅支持原版 Pico，不支持 Pico W 或 Pico 2。首次进入 BOOTSEL 需要按键操作；MicroPython 已运行时也可在 REPL 中调用 `machine.bootloader()`。安装需要支持 WebUSB 的浏览器及 HTTPS 或 localhost；普通局域网 HTTP 地址不能使用 WebUSB。
+
+## Micro:bit 无线与麦克风
+
+“无线收发”使用基金会固件原生 `radio` 模块，支持 V1/V2：开关、组号/信道/功率配置、文本和字节收发、数据包详情、缓冲设置及恢复默认配置。接收会从队列中取走消息，没有消息时返回 `None`；文本接收可能因解码失败抛出异常。Radio 是 Micro:bit 数据包通信，并非 Wi-Fi 或 BLE。
+
+“麦克风（V2）”使用 `microbit.microphone` 和 `SoundEvent`，包含声音强度、当前事件、历史事件查询及阈值设置。`was_event()` 和 `get_events()` 会清除声音事件历史；声音强度是相对读数，不是校准分贝或录音。V1 没有板载麦克风。
+
+固件选择必须同时匹配板型和积木使用的 API。基金会 V2 固件文档描述了 BLE 刷写服务，但没有通用 BLE 通信积木所需的接口。MicroPython 主线 nRF 移植支持使用 SoftDevice 编译 BLE/ubluepy，其官网下载中的 MICROBIT 目标是 V1，不能作为 V2 基金会固件的直接替代。
+
+接口来源：
+- https://microbit-micropython.readthedocs.io/en/v2-docs/radio.html
+- https://microbit-micropython.readthedocs.io/en/v2-docs/microphone.html
+- https://microbit-micropython.readthedocs.io/en/v2-docs/ble.html
+- https://github.com/micropython/micropython/blob/v1.29.0/ports/nrf/README.md

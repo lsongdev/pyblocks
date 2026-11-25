@@ -172,6 +172,14 @@ export function createToolbox() {
         colour: '#65528e',
         contents: [],
       },
+      category('Pico', '#338060', faMicrochip, [
+        { kind: 'label', text: 'LED' },
+        'pico_led_power',
+        { kind: 'label', text: t('pins') },
+        'pico_pin_number',
+        { kind: 'label', text: t('sensors') },
+        'pico_temperature',
+      ]),
       {
         kind: 'iconCategoryGroup',
         icon: faMicrochip,
@@ -206,6 +214,22 @@ export function createToolbox() {
             { type: 'microbit_music_volume', inputs: { VOLUME: numberInput(64) } },
             'microbit_speaker_power',
           ]),
+          category(t('microbitRadio'), '#b05039', faWifi, [
+            'microbit_radio_power',
+            { type: 'microbit_radio_config', inputs: { GROUP: numberInput(0), CHANNEL: numberInput(7), POWER: numberInput(6) } },
+            { type: 'microbit_radio_send', inputs: { MESSAGE: textInput('Hello') } },
+            'microbit_radio_receive',
+            { kind: 'label', text: t('microbitRadioBytes') },
+            'microbit_radio_send_bytes', 'microbit_radio_receive_bytes', 'microbit_radio_receive_full',
+            { kind: 'label', text: t('settingsTitle') },
+            { type: 'microbit_radio_buffers', inputs: { LENGTH: numberInput(32), QUEUE: numberInput(3) } },
+            'microbit_radio_reset',
+          ]),
+          category(t('microbitMicrophone'), '#b05039', faVolumeHigh, [
+            'microbit_microphone_level', 'microbit_microphone_is_event', 'microbit_microphone_was_event',
+            { type: 'microbit_microphone_threshold', inputs: { VALUE: numberInput(128) } },
+            'microbit_microphone_current_event', 'microbit_sound_event', 'microbit_microphone_events',
+          ]),
           category(t('sensors'), '#b05039', faMicrochip, [
             'microbit_light_level', 'microbit_temperature', 'microbit_acceleration', 'microbit_running_time',
           ]),
@@ -237,6 +261,7 @@ export function createToolbox() {
           ]),
         ],
       },
+
     ],
   };
 }

@@ -4,6 +4,7 @@ import { createUSBConnection } from '@microbit/microbit-connection/usb';
 import { ProgressStage } from '@microbit/microbit-connection';
 
 import images from './images.json';
+import { connectPicoBoot } from '../device/rp2040.js';
 
 const matrixbitImage = images.matrixbit;
 const microbitImages = { V1: images.V1, V2: images.V2 };
@@ -56,6 +57,19 @@ export async function connectFirmware(board, report = () => {}) {
         connected = false;
       } };
     } catch (error) { await close(); throw error; }
+  }
+  if (board === 'pico') {
+    report('firmwareDetecting');
+    const pico = await connectPicoBoot();
+    return {
+      label: `Raspberry Pi Pico · RP2040 · MicroPython v${images.pico.version}`,
+      close: pico.close,
+      async install(progress) {
+        report('firmwareChecking');
+        const bytes = await fetchImage(images.pico);
+        await pico.install(bytes, report, progress);
+      },
+    };
   }
   if (board !== 'microbit') throw new Error('Unsupported board.');
   const connection = createUSBConnection();

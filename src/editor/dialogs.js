@@ -1,3 +1,4 @@
+import { updateProgress } from './progress.js';
 import { t } from '../i18n/index.js';
 import { connectFirmware } from '../firmware/install.js';
 
@@ -11,6 +12,9 @@ export function setupDialogs({ getLanguage, setLanguage, acquireDevice, releaseD
   language.addEventListener('change', () => setLanguage(language.value));
   const dialog = document.querySelector('#firmware-dialog');
   const board = document.querySelector('#firmware-board');
+  const picoHint = document.querySelector('#firmware-pico-hint');
+  const showBoardHint = () => { picoHint.hidden = board.querySelector('input:checked').value !== 'pico'; };
+  board.addEventListener('change', showBoardHint);
   const connect = document.querySelector('#firmware-connect');
   const install = document.querySelector('#firmware-install');
   const close = document.querySelector('#firmware-close');
@@ -39,6 +43,7 @@ export function setupDialogs({ getLanguage, setLanguage, acquireDevice, releaseD
     status.textContent = detected.textContent = '';
     warning.hidden = install.hidden = progress.hidden = true;
     setBusy(false);
+    showBoardHint();
     dialog.showModal();
   });
   dialog.addEventListener('cancel', event => {
@@ -73,11 +78,11 @@ export function setupDialogs({ getLanguage, setLanguage, acquireDevice, releaseD
     if (!session || busy) return;
     setBusy(true);
     progress.hidden = false;
-    progress.removeAttribute('value');
+    updateProgress(progress);
     let success = false;
     try {
-      await session.install(value => { progress.value = value; });
-      progress.value = 1;
+      await session.install(value => updateProgress(progress, value));
+      updateProgress(progress, 1);
       status.textContent = t('firmwareComplete');
       success = true;
     } catch (error) {

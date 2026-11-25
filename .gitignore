@@ -4,3 +4,4 @@ dist/
 public/firmware/*.bin
 public/firmware/*.hex
 public/firmware/*.tmp
+public/firmware/*.uf2

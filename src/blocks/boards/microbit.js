@@ -63,7 +63,7 @@ common.defineBlocksWithJsonArray([
     args0: [value('BPM'), value('TICKS')], ...statement, colour,
   },
   {
-    type: 'microbit_music_volume', message0: blockMessage('microbitMusicVolume'),
+    type: 'microbit_music_volume', message0: blockMessage('microbitMusicVolume'), tooltip: blockMessage('microbitMusicVolumeHint'),
     args0: [value('VOLUME')], ...statement, colour,
   },
   {

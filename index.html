@@ -104,7 +104,12 @@
           <input type="radio" name="firmware-board" value="microbit">
           <span><strong>BBC Micro:bit</strong><small>V1 / V2</small></span>
         </label>
+        <label class="board-card">
+          <input type="radio" name="firmware-board" value="pico">
+          <span><strong>Raspberry Pi Pico</strong><small data-i18n="firmwarePicoModel">RP2040 · without Wi-Fi</small></span>
+        </label>
       </fieldset>
+      <p id="firmware-pico-hint" data-i18n="firmwarePicoHint" hidden>Hold BOOTSEL while connecting Pico over USB, then release it. Select RP2 Boot when connecting.</p>
       <a class="firmware-more" href="https://micropython.org/download/" target="_blank" rel="noopener noreferrer"><span data-i18n="firmwareMore">No matching firmware? Browse MicroPython downloads</span><span aria-hidden="true">↗</span></a>
       <p id="firmware-detected"></p>
       <p id="firmware-warning" class="dialog-warning" data-i18n="firmwareWarning" hidden>Installation replaces the program and files on your board. Back up anything you need before continuing.</p>

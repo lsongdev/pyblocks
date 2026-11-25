@@ -16,5 +16,11 @@
     "version": "2.1.2",
     "url": "https://raw.githubusercontent.com/microbit-foundation/python-editor-v3/292c28eb1cf61e1063470ce977d441ec1e8b3686/src/micropython/main/microbit-micropython-v2.hex",
     "sha256": "66fae07b71777e9e3a6b5122a27930b24cc0be5002ab9a67e92494c54a1645ef"
+  },
+  "pico": {
+    "file": "RPI_PICO-20260824-v1.29.0.uf2",
+    "version": "1.29.0",
+    "url": "https://micropython.org/resources/firmware/RPI_PICO-20260824-v1.29.0.uf2",
+    "sha256": "e1160e602e277d85920adb5fe741435edccba9ba6ecadc85fdab75252eeff4e9"
   }
 }
