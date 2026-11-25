@@ -1,0 +1,108 @@
+{
+  "format": "pyblocks",
+  "version": 1,
+  "workspace": {
+    "variables": [],
+    "blocks": {
+      "languageVersion": 0,
+      "blocks": [
+        {
+          "type": "spike_run",
+          "x": 32,
+          "y": 32,
+          "inputs": {
+            "TASKS": {
+              "block": {
+                "type": "spike_task",
+                "fields": {},
+                "inputs": {
+                  "DO": {
+                    "block": {
+                      "type": "text_print",
+                      "fields": {},
+                      "inputs": {
+                        "TEXT": {
+                          "block": {
+                            "type": "text",
+                            "fields": {
+                              "TEXT": "Listening..."
+                            },
+                            "inputs": {}
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "next": {
+                  "block": {
+                    "type": "spike_on_button_pressed",
+                    "fields": {
+                      "BUTTON": "LEFT"
+                    },
+                    "inputs": {
+                      "DO": {
+                        "block": {
+                          "type": "spike_pixel",
+                          "fields": {},
+                          "inputs": {
+                            "X": {
+                              "block": {
+                                "type": "math_number",
+                                "fields": {
+                                  "NUM": 0
+                                },
+                                "inputs": {}
+                              }
+                            },
+                            "Y": {
+                              "block": {
+                                "type": "math_number",
+                                "fields": {
+                                  "NUM": 0
+                                },
+                                "inputs": {}
+                              }
+                            },
+                            "BRIGHTNESS": {
+                              "block": {
+                                "type": "math_number",
+                                "fields": {
+                                  "NUM": 100
+                                },
+                                "inputs": {}
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "next": {
+                      "block": {
+                        "type": "spike_on_button_pressed",
+                        "fields": {
+                          "BUTTON": "RIGHT"
+                        },
+                        "inputs": {
+                          "DO": {
+                            "block": {
+                              "type": "spike_clear",
+                              "fields": {},
+                              "inputs": {}
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "manualCode": null,
+  "libraries": []
+}

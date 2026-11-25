@@ -20,3 +20,5 @@ import './hardware/ntptime.js';
 import './shared/asyncio.js';
 import './shared/exceptions.js';
 import './shared/text.js';
+
+import './boards/spike.js';

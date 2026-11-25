@@ -1,0 +1,59 @@
+{
+  "format": "pyblocks",
+  "version": 1,
+  "workspace": {
+    "variables": [],
+    "blocks": {
+      "languageVersion": 0,
+      "blocks": [
+        {
+          "type": "spike_run",
+          "x": 32,
+          "y": 32,
+          "inputs": {
+            "TASKS": {
+              "block": {
+                "type": "spike_task",
+                "inputs": {
+                  "DO": {
+                    "block": {
+                      "type": "spike_write",
+                      "inputs": {
+                        "TEXT": {
+                          "shadow": {
+                            "type": "text",
+                            "fields": {
+                              "TEXT": "Hello!"
+                            }
+                          }
+                        },
+                        "BRIGHTNESS": {
+                          "shadow": {
+                            "type": "math_number",
+                            "fields": {
+                              "NUM": 100
+                            }
+                          }
+                        },
+                        "DURATION": {
+                          "shadow": {
+                            "type": "math_number",
+                            "fields": {
+                              "NUM": 500
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "manualCode": null,
+  "libraries": []
+}

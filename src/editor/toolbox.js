@@ -223,6 +223,7 @@ export function createToolbox() {
         contents: [],
       },
       // Keep the library panel unavailable until its workflow is ready.
+
       category('Pico', '#338060', faMicrochip, [
         { kind: 'label', text: 'LED' },
         'pico_led_power',
@@ -309,6 +310,41 @@ export function createToolbox() {
             { type: 'matrixbit_on_touch', inputs: { THRESHOLD: numberInput(400) } },
             { type: 'matrixbit_touch_is_touched', inputs: { THRESHOLD: numberInput(400) } },
             'matrixbit_touch_read',
+          ]),
+        ],
+      },
+
+      {
+        kind: 'iconCategoryGroup', name: 'SPIKE Prime', icon: faMicrochip, colour: '#b08a20',
+        contents: [
+          category(t('spikeProgram'), '#b08a20', faCode, [
+            { kind: 'label', text: t('spikeFirmware') },
+            { type: 'spike_run', inputs: { TASKS: { block: { type: 'spike_task' } } } },
+            'spike_task',
+            { type: 'spike_until', inputs: { CONDITION: { shadow: { type: 'logic_boolean', fields: { BOOL: 'TRUE' } } }, TIMEOUT: numberInput(0) } },
+            { type: 'spike_sleep', inputs: { DURATION: numberInput(500) } },
+          ]),
+          category(t('display'), '#b08a20', faDisplay, [
+            { type: 'spike_write', inputs: { TEXT: textInput('Hello!'), BRIGHTNESS: numberInput(100), DURATION: numberInput(500) } },
+            { type: 'spike_pixel', inputs: { X: numberInput(2), Y: numberInput(2), BRIGHTNESS: numberInput(100) } },
+            'spike_clear',
+          ]),
+          category(t('buttons'), '#b08a20', faHandPointer, ['spike_on_button_pressed', 'spike_button']),
+          category(t('spikeMotors'), '#b08a20', faRotateRight, [
+            { type: 'spike_motor_run', inputs: { SPEED: numberInput(360) } },
+            { type: 'spike_motor_degrees', inputs: { DEGREES: numberInput(360), SPEED: numberInput(360) } },
+            { type: 'spike_motor_time', inputs: { DURATION: numberInput(1000), SPEED: numberInput(360) } },
+            'spike_motor_stop', 'spike_motor_position',
+            { type: 'spike_motor_reset', inputs: { ANGLE: numberInput(0) } },
+            { type: 'spike_pair', fields: { LEFT: 'A', RIGHT: 'B' } },
+            { type: 'spike_tank', inputs: { LEFT_SPEED: numberInput(360), RIGHT_SPEED: numberInput(360) } },
+            { type: 'spike_pair_degrees', inputs: { DEGREES: numberInput(360), STEERING: numberInput(0), SPEED: numberInput(360) } },
+            'spike_pair_stop',
+          ]),
+          category(t('sensors'), '#b08a20', faMicrochip, [
+            'spike_tilt', { type: 'spike_reset_yaw', inputs: { ANGLE: numberInput(0) } },
+            'spike_color', 'spike_color_constant', 'spike_reflection',
+            'spike_distance', 'spike_force', 'spike_force_pressed',
           ]),
         ],
       },
