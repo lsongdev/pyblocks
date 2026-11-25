@@ -1,0 +1,75 @@
+{
+  "format": "blockly-demo",
+  "version": 1,
+  "workspace": {
+    "variables": [],
+    "blocks": {
+      "languageVersion": 0,
+      "blocks": [
+        {
+          "type": "controls_repeat_ext",
+          "inputs": {
+            "TIMES": {
+              "block": {
+                "type": "math_number",
+                "fields": {
+                  "NUM": 5
+                }
+              }
+            },
+            "DO": {
+              "block": {
+                "type": "pico_led_power",
+                "fields": {
+                  "POWER": "on"
+                },
+                "next": {
+                  "block": {
+                    "type": "timing_wait_ms",
+                    "inputs": {
+                      "MS": {
+                        "block": {
+                          "type": "math_number",
+                          "fields": {
+                            "NUM": 500
+                          }
+                        }
+                      }
+                    },
+                    "next": {
+                      "block": {
+                        "type": "pico_led_power",
+                        "fields": {
+                          "POWER": "off"
+                        },
+                        "next": {
+                          "block": {
+                            "type": "timing_wait_ms",
+                            "inputs": {
+                              "MS": {
+                                "block": {
+                                  "type": "math_number",
+                                  "fields": {
+                                    "NUM": 500
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "x": 32,
+          "y": 32
+        }
+      ]
+    }
+  },
+  "manualCode": null,
+  "libraries": []
+}

@@ -1,0 +1,81 @@
+{
+  "format": "blockly-demo",
+  "version": 1,
+  "workspace": {
+    "variables": [
+      {
+        "id": "name",
+        "name": "name"
+      }
+    ],
+    "blocks": {
+      "languageVersion": 0,
+      "blocks": [
+        {
+          "type": "variables_set",
+          "fields": {
+            "VAR": {
+              "id": "name"
+            }
+          },
+          "inputs": {
+            "VALUE": {
+              "block": {
+                "type": "text_input",
+                "inputs": {
+                  "PROMPT": {
+                    "block": {
+                      "type": "text",
+                      "fields": {
+                        "TEXT": "What is your name? "
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "next": {
+            "block": {
+              "type": "text_print",
+              "inputs": {
+                "TEXT": {
+                  "block": {
+                    "type": "text_join",
+                    "inputs": {
+                      "ADD0": {
+                        "block": {
+                          "type": "text",
+                          "fields": {
+                            "TEXT": "Hello, "
+                          }
+                        }
+                      },
+                      "ADD1": {
+                        "block": {
+                          "type": "variables_get",
+                          "fields": {
+                            "VAR": {
+                              "id": "name"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "extraState": {
+                      "itemCount": 2
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "x": 32,
+          "y": 32
+        }
+      ]
+    }
+  },
+  "manualCode": null,
+  "libraries": []
+}
