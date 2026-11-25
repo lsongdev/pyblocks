@@ -10,7 +10,6 @@ import { setupSerialInput } from './serial-input.js';
 import { example } from './example.js';
 import { createProject, parseProject, ProjectError, readAutosave, writeAutosave } from '../project/storage.js';
 import { downloadProgram, manageDeviceFiles, MicroPythonError, monitorPort } from '../device/micropython.js';
-import '../styles/editor.css';
 
 let language = getSavedLanguage();
 applyLanguage(language);
