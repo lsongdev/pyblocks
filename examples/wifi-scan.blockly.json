@@ -1,0 +1,124 @@
+{
+  "format": "blockly-demo",
+  "version": 1,
+  "workspace": {
+    "variables": [
+      {
+        "id": "scan",
+        "name": "扫描结果"
+      },
+      {
+        "id": "row",
+        "name": "网络条目"
+      }
+    ],
+    "blocks": {
+      "languageVersion": 0,
+      "blocks": [
+        {
+          "type": "wifi_interface_power",
+          "fields": {
+            "MODE": "STA"
+          },
+          "next": {
+            "block": {
+              "type": "variables_set",
+              "fields": {
+                "VAR": {
+                  "id": "scan"
+                }
+              },
+              "inputs": {
+                "VALUE": {
+                  "block": {
+                    "type": "wifi_scan"
+                  }
+                }
+              },
+              "next": {
+                "block": {
+                  "type": "controls_forEach",
+                  "fields": {
+                    "VAR": {
+                      "id": "row"
+                    }
+                  },
+                  "inputs": {
+                    "LIST": {
+                      "block": {
+                        "type": "variables_get",
+                        "fields": {
+                          "VAR": {
+                            "id": "scan"
+                          }
+                        }
+                      }
+                    },
+                    "DO": {
+                      "block": {
+                        "type": "text_print",
+                        "inputs": {
+                          "TEXT": {
+                            "block": {
+                              "type": "wifi_scan_field",
+                              "fields": {
+                                "FIELD": "0"
+                              },
+                              "inputs": {
+                                "RESULT": {
+                                  "block": {
+                                    "type": "variables_get",
+                                    "fields": {
+                                      "VAR": {
+                                        "id": "row"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "next": {
+                          "block": {
+                            "type": "text_print",
+                            "inputs": {
+                              "TEXT": {
+                                "block": {
+                                  "type": "wifi_scan_field",
+                                  "fields": {
+                                    "FIELD": "3"
+                                  },
+                                  "inputs": {
+                                    "RESULT": {
+                                      "block": {
+                                        "type": "variables_get",
+                                        "fields": {
+                                          "VAR": {
+                                            "id": "row"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "x": 24,
+          "y": 24
+        }
+      ]
+    }
+  },
+  "manualCode": null,
+  "libraries": []
+}

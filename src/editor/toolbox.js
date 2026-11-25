@@ -71,6 +71,10 @@ export function createToolbox() {
       category(t('logic'), '%{BKY_LOGIC_HUE}', faCodeBranch, [
         'controls_if', 'logic_compare', 'logic_operation', 'logic_negate',
         'logic_boolean', 'logic_null', 'logic_ternary',
+        { kind: 'label', text: t('exceptionCategory') },
+        'exception_try', 'exception_catch',
+        { type: 'exception_raise', inputs: { MESSAGE: textInput('error') } },
+        'exception_reraise', 'exception_text',
       ]),
       category(t('loops'), '%{BKY_LOOPS_HUE}', faRotateRight, [
         { type: 'controls_repeat_ext', inputs: { TIMES: numberInput(10) } },
@@ -86,6 +90,9 @@ export function createToolbox() {
       category(t('text'), '%{BKY_TEXTS_HUE}', faFont, [
         'text', 'text_join', 'text_length', 'text_isEmpty', 'text_changeCase',
         { type: 'text_print', inputs: { TEXT: textInput('Hello') } },
+        { type: 'bytes_encode_utf8', inputs: { VALUE: textInput('Hello') } },
+        'bytes_decode_utf8',
+        { type: 'text_input', inputs: { PROMPT: textInput('> ') } },
       ]),
       category(t('lists'), '%{BKY_LISTS_HUE}', faListUl, [
         'lists_create_with', 'lists_length', 'lists_isEmpty',
@@ -98,11 +105,19 @@ export function createToolbox() {
       ]),
       category(t('timing'), '#94722a', faClock, [
         { type: 'timing_wait_ms', inputs: { MS: numberInput(100) } },
-        'timing_ticks_ms',
+        'timing_ticks_ms', 'timing_epoch_seconds', 'timing_datetime',
         {
           type: 'timing_elapsed_ms',
           inputs: { START: numberInput(0), END: { shadow: { type: 'timing_ticks_ms' } } },
         },
+        { kind: 'label', text: t('ntpTitle') },
+        { type: 'ntptime_config', inputs: { HOST: textInput('pool.ntp.org'), TIMEOUT: numberInput(1) } },
+        'ntptime_sync', 'ntptime_time',
+      ]),
+      category(t('asyncCategory'), '#7755aa', faRotateRight, [
+        'asyncio_run', 'asyncio_create_task',
+        { type: 'asyncio_sleep', inputs: { DURATION: numberInput(100) } },
+        'asyncio_wait_task', 'asyncio_await_task', 'asyncio_return', 'asyncio_cancel_task',
       ]),
       category(t('gpio'), '#29806c', faPlug, [
         { type: 'adc_read_pin', inputs: { PIN: numberInput(0) } },
@@ -110,6 +125,14 @@ export function createToolbox() {
         { type: 'gpio_write_digital', inputs: { PIN: numberInput(0) } },
         { type: 'gpio_set_pull', inputs: { PIN: numberInput(0) } },
         { type: 'gpio_on_edge', inputs: { PIN: numberInput(0) } },
+      ]),
+      category('I2C', '#298477', faCodeBranch, [
+        { type: 'i2c_create', inputs: { ID: numberInput(0), SCL: numberInput(22), SDA: numberInput(23), FREQ: numberInput(100000) } },
+        'i2c_scan',
+        { type: 'i2c_read', inputs: { ADDRESS: numberInput(60), COUNT: numberInput(1) } },
+        { type: 'i2c_write', inputs: { ADDRESS: numberInput(60) } },
+        { type: 'i2c_read_register', inputs: { ADDRESS: numberInput(60), REGISTER: numberInput(0), COUNT: numberInput(1) } },
+        { type: 'i2c_write_register', inputs: { ADDRESS: numberInput(60), REGISTER: numberInput(0) } },
       ]),
       category('PWM', '#29806c', faWaveSquare, [
         { type: 'pwm_create', inputs: { PIN: numberInput(0), FREQ: numberInput(440), DUTY: numberInput(0) } },
@@ -125,20 +148,6 @@ export function createToolbox() {
         { type: 'servo_pulse', inputs: { PIN: numberInput(18), PULSE: numberInput(1500) } },
         { type: 'servo_stop', inputs: { PIN: numberInput(18) } },
       ]),
-      category(t('neopixelCategory'), '#864ba0', faLightbulb, [
-        { type: 'neopixel_create', inputs: { PIN: numberInput(0), COUNT: numberInput(1) } },
-        { type: 'neopixel_set', inputs: { INDEX: numberInput(0), RED: numberInput(32), GREEN: numberInput(0), BLUE: numberInput(0) } },
-        { type: 'neopixel_fill', inputs: { RED: numberInput(0), GREEN: numberInput(0), BLUE: numberInput(0) } },
-        'neopixel_write',
-      ]),
-      category('I2C', '#298477', faCodeBranch, [
-        { type: 'i2c_create', inputs: { ID: numberInput(0), SCL: numberInput(22), SDA: numberInput(23), FREQ: numberInput(100000) } },
-        'i2c_scan',
-        { type: 'i2c_read', inputs: { ADDRESS: numberInput(60), COUNT: numberInput(1) } },
-        { type: 'i2c_write', inputs: { ADDRESS: numberInput(60) } },
-        { type: 'i2c_read_register', inputs: { ADDRESS: numberInput(60), REGISTER: numberInput(0), COUNT: numberInput(1) } },
-        { type: 'i2c_write_register', inputs: { ADDRESS: numberInput(60), REGISTER: numberInput(0) } },
-      ]),
       category(t('uart'), '#3575a6', faRightLeft, [
         {
           type: 'uart_create', inputs: {
@@ -152,23 +161,58 @@ export function createToolbox() {
         'uart_close',
       ]),
       category(t('wifiCategory'), '#357d82', faWifi, [
+        { kind: 'label', text: t('wifiStation') },
         {
           type: 'wifi_connect',
           inputs: { SSID: textInput('SSID'), PASSWORD: textInput('') },
         },
         'wifi_connected', 'wifi_ipv4', 'wifi_disconnect',
+        'wifi_status', 'wifi_status_constant', 'wifi_rssi',
+        { type: 'wifi_reconnects', inputs: { COUNT: numberInput(3) } },
+        { kind: 'label', text: t('wifiScanTitle') },
+        'wifi_scan', 'wifi_scan_field',
+        { kind: 'label', text: t('wifiAccessPoint') },
+        {
+          type: 'wifi_ap_config', inputs: {
+            SSID: textInput('MicroPython-AP'), PASSWORD: textInput('change-me-123'), CHANNEL: numberInput(1), CLIENTS: numberInput(4),
+          }
+        },
+        { type: 'wifi_interface_power', fields: { MODE: 'AP' } },
+        'wifi_ap_has_clients', 'wifi_ap_stations',
+        { kind: 'label', text: t('wifiInterfaceTitle') },
+        'wifi_interface_power', 'wifi_interface_active', 'wifi_mac',
+        { type: 'wifi_network_address', fields: { MODE: 'AP' } },
+        {
+          type: 'wifi_set_ipv4', fields: { MODE: 'AP' }, inputs: {
+            IP: textInput('192.168.4.1'), SUBNET: textInput('255.255.255.0'),
+            GATEWAY: textInput('192.168.4.1'), DNS: textInput('8.8.8.8'),
+          }
+        },
+      ]),
+      category(t('httpCategory'), '#357d82', faRightLeft, [
+        { type: 'http_request', inputs: { URL: textInput('http://example.com/'), TIMEOUT: numberInput(10) } },
+        { type: 'http_header', inputs: { VALUE: textInput('application/json') } },
+        'http_with_response', 'http_status_code', 'http_response_text', 'http_response_content', 'http_response_json',
+        { type: 'http_response_header', inputs: { NAME: textInput('Content-Type') } },
+        'http_close',
       ]),
       category(t('mqttCategory'), '#357d82', faRightLeft, [
-        { type: 'mqtt_create', inputs: {
-          SERVER: textInput('broker.emqx.io'), PORT: numberInput(1883), CLIENT_ID: textInput('blockly-client'),
-          USER: textInput(''), PASSWORD: textInput(''), KEEPALIVE: numberInput(60),
-        } },
+        {
+          type: 'mqtt_create', inputs: {
+            SERVER: textInput('broker.emqx.io'), PORT: numberInput(1883), CLIENT_ID: textInput('blockly-client'),
+            USER: textInput(''), PASSWORD: textInput(''), KEEPALIVE: numberInput(60),
+          }
+        },
         'mqtt_connect', 'mqtt_on_message',
         { type: 'mqtt_subscribe', inputs: { TOPIC: textInput('test') } },
         { type: 'mqtt_publish', inputs: { TOPIC: textInput('blockly/data'), MESSAGE: textInput('Hello') } },
         'mqtt_check_msg', 'mqtt_ping', 'mqtt_disconnect',
-        { type: 'bytes_encode_utf8', inputs: { VALUE: textInput('Hello') } },
-        'bytes_decode_utf8',
+      ]),
+      category(t('neopixelCategory'), '#864ba0', faLightbulb, [
+        { type: 'neopixel_create', inputs: { PIN: numberInput(0), COUNT: numberInput(1) } },
+        { type: 'neopixel_set', inputs: { INDEX: numberInput(0), RED: numberInput(32), GREEN: numberInput(0), BLUE: numberInput(0) } },
+        { type: 'neopixel_fill', inputs: { RED: numberInput(0), GREEN: numberInput(0), BLUE: numberInput(0) } },
+        'neopixel_write',
       ]),
       {
         kind: 'iconCategory',

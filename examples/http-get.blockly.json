@@ -1,0 +1,155 @@
+{
+  "format": "blockly-demo",
+  "version": 1,
+  "workspace": {
+    "variables": [
+      {
+        "id": "http-response",
+        "name": "响应"
+      }
+    ],
+    "blocks": {
+      "languageVersion": 0,
+      "blocks": [
+        {
+          "type": "wifi_connect",
+          "inputs": {
+            "SSID": {
+              "block": {
+                "type": "text",
+                "fields": {
+                  "TEXT": "YOUR_SSID"
+                }
+              }
+            },
+            "PASSWORD": {
+              "block": {
+                "type": "text",
+                "fields": {
+                  "TEXT": "YOUR_PASSWORD"
+                }
+              }
+            }
+          },
+          "next": {
+            "block": {
+              "type": "controls_whileUntil",
+              "fields": {
+                "MODE": "UNTIL"
+              },
+              "inputs": {
+                "BOOL": {
+                  "block": {
+                    "type": "wifi_connected"
+                  }
+                },
+                "DO": {
+                  "block": {
+                    "type": "timing_wait_ms",
+                    "inputs": {
+                      "MS": {
+                        "block": {
+                          "type": "math_number",
+                          "fields": {
+                            "NUM": 100
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "next": {
+                "block": {
+                  "type": "http_with_response",
+                  "fields": {
+                    "VAR": {
+                      "id": "http-response"
+                    }
+                  },
+                  "inputs": {
+                    "RESPONSE": {
+                      "block": {
+                        "type": "http_request",
+                        "inputs": {
+                          "URL": {
+                            "block": {
+                              "type": "text",
+                              "fields": {
+                                "TEXT": "http://example.com/"
+                              }
+                            }
+                          },
+                          "TIMEOUT": {
+                            "block": {
+                              "type": "math_number",
+                              "fields": {
+                                "NUM": 10
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "DO": {
+                      "block": {
+                        "type": "text_print",
+                        "inputs": {
+                          "TEXT": {
+                            "block": {
+                              "type": "http_status_code",
+                              "inputs": {
+                                "RESPONSE": {
+                                  "block": {
+                                    "type": "variables_get",
+                                    "fields": {
+                                      "VAR": {
+                                        "id": "http-response"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "next": {
+                          "block": {
+                            "type": "text_print",
+                            "inputs": {
+                              "TEXT": {
+                                "block": {
+                                  "type": "http_response_text",
+                                  "inputs": {
+                                    "RESPONSE": {
+                                      "block": {
+                                        "type": "variables_get",
+                                        "fields": {
+                                          "VAR": {
+                                            "id": "http-response"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "x": 24,
+          "y": 24
+        }
+      ]
+    }
+  },
+  "manualCode": null,
+  "libraries": []
+}

@@ -1,0 +1,166 @@
+{
+  "format": "blockly-demo",
+  "version": 1,
+  "workspace": {
+    "variables": [
+      {
+        "id": "input",
+        "name": "输入内容"
+      },
+      {
+        "id": "error",
+        "name": "异常"
+      }
+    ],
+    "blocks": {
+      "languageVersion": 0,
+      "blocks": [
+        {
+          "type": "controls_whileUntil",
+          "fields": {
+            "MODE": "WHILE"
+          },
+          "inputs": {
+            "BOOL": {
+              "block": {
+                "type": "logic_boolean",
+                "fields": {
+                  "BOOL": "TRUE"
+                }
+              }
+            },
+            "DO": {
+              "block": {
+                "type": "exception_try",
+                "inputs": {
+                  "DO": {
+                    "block": {
+                      "type": "variables_set",
+                      "fields": {
+                        "VAR": {
+                          "id": "input"
+                        }
+                      },
+                      "inputs": {
+                        "VALUE": {
+                          "block": {
+                            "type": "text_input",
+                            "inputs": {
+                              "PROMPT": {
+                                "block": {
+                                  "type": "text",
+                                  "fields": {
+                                    "TEXT": "Integer> "
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "next": {
+                        "block": {
+                          "type": "text_print",
+                          "inputs": {
+                            "TEXT": {
+                              "block": {
+                                "type": "python_call",
+                                "inputs": {
+                                  "CALLABLE": {
+                                    "block": {
+                                      "type": "python_name",
+                                      "fields": {
+                                        "NAME": "int"
+                                      }
+                                    }
+                                  },
+                                  "ARGS": {
+                                    "block": {
+                                      "type": "python_argument",
+                                      "inputs": {
+                                        "VALUE": {
+                                          "block": {
+                                            "type": "variables_get",
+                                            "fields": {
+                                              "VAR": {
+                                                "id": "input"
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "HANDLERS": {
+                    "block": {
+                      "type": "exception_catch",
+                      "fields": {
+                        "TYPE": "ValueError",
+                        "VAR": {
+                          "id": "error"
+                        }
+                      },
+                      "inputs": {
+                        "DO": {
+                          "block": {
+                            "type": "text_print",
+                            "inputs": {
+                              "TEXT": {
+                                "block": {
+                                  "type": "exception_text",
+                                  "inputs": {
+                                    "ERROR": {
+                                      "block": {
+                                        "type": "variables_get",
+                                        "fields": {
+                                          "VAR": {
+                                            "id": "error"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "FINALLY": {
+                    "block": {
+                      "type": "text_print",
+                      "inputs": {
+                        "TEXT": {
+                          "block": {
+                            "type": "text",
+                            "fields": {
+                              "TEXT": "Finished this attempt"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "x": 24,
+          "y": 24
+        }
+      ]
+    }
+  },
+  "manualCode": null,
+  "libraries": []
+}

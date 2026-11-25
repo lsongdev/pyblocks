@@ -76,11 +76,22 @@
             <h3 id="serial-label" data-i18n="serialOutput">Serial output</h3>
             <div class="code-actions">
               <button id="serial-connect" type="button" disabled>Connect</button>
+              <button id="serial-interrupt" type="button" data-i18n="serialInterrupt" data-i18n-title="serialInterruptHint" disabled>Interrupt</button>
+              <button id="serial-reset" type="button" data-i18n="serialReset" data-i18n-title="serialResetHint" disabled>Soft reset</button>
               <button id="serial-clear" type="button" data-i18n="serialClear" disabled>Clear</button>
             </div>
           </div>
           <p id="serial-status" role="status"></p>
           <pre id="serial-output" aria-labelledby="serial-label" tabindex="0"></pre>
+          <form id="serial-input-form" class="serial-input-form">
+            <input id="serial-input" type="text" data-i18n-aria="serialInput" aria-label="Serial input"
+              autocomplete="off" autocapitalize="off" spellcheck="false" disabled>
+            <select id="serial-line-ending" data-i18n-aria="serialLineEnding" aria-label="Line ending" disabled>
+              <option value="CR">CR</option><option value="LF">LF</option><option value="CRLF">CRLF</option>
+              <option value="NONE" data-i18n="serialNoEnding">None</option>
+            </select>
+            <button id="serial-send" type="submit" data-i18n="serialSend" disabled>Send</button>
+          </form>
         </section>
         </div>
       </section>

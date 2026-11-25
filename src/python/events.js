@@ -1,6 +1,7 @@
 import { Names } from 'blockly/core';
+import { functionContext } from './async-context.js';
 
-export function eventHandler(block, generator, baseName, { parameters = [], setup = '' } = {}) {
+export function eventHandler(block, generator, baseName, { parameters = [], setup = '', asynchronous = false } = {}) {
   const name = generator.nameDB_.getDistinctName(baseName, Names.NameType.PROCEDURE);
   const variables = new Set();
   const bodyBlock = block.getInputTargetBlock('DO');
@@ -11,6 +12,6 @@ export function eventHandler(block, generator, baseName, { parameters = [], setu
     }
   }
   const globals = variables.size ? `${generator.INDENT}global ${[...variables].join(', ')}\n` : '';
-  const body = generator.statementToCode(block, 'DO') || `${generator.INDENT}pass\n`;
-  return { name, code: `def ${name}(${parameters.join(', ')}):\n${globals}${setup}${body}\n` };
+  const body = functionContext(generator, asynchronous, () => generator.statementToCode(block, 'DO')) || `${generator.INDENT}pass\n`;
+  return { name, code: `${asynchronous ? 'async ' : ''}def ${name}(${parameters.join(', ')}):\n${globals}${setup}${body}\n` };
 }

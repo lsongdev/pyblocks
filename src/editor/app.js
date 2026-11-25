@@ -6,6 +6,7 @@ import { PythonBlockError } from '../python/errors.js';
 import { setupPanelResize } from './resize.js';
 import { setupDialogs } from './dialogs.js';
 import { createLibraryPanel } from './libraries.js';
+import { setupSerialInput } from './serial-input.js';
 import { example } from './example.js';
 import { createProject, parseProject, ProjectError, readAutosave, writeAutosave } from '../project/storage.js';
 import { downloadProgram, manageDeviceFiles, MicroPythonError, monitorPort } from '../device/micropython.js';
@@ -74,6 +75,11 @@ const serialOutputLimit = 32_768;
 let serialBusy = false;
 let serialSession;
 let serialMessage = ['serialDisconnected'];
+const serialInput = setupSerialInput({
+  getSession: () => serialSession,
+  isBusy: () => serialBusy,
+  onError: error => setSerialStatus('serialSendFailed', error),
+});
 let generatedCode = null;
 let manuallyEdited = false;
 let uploadMessage;
@@ -303,6 +309,7 @@ function renderLanguage() {
     element.setAttribute('aria-label', t(element.dataset.i18nAria));
   });
   document.querySelector('#firmware-progress').setAttribute('aria-label', t('firmwareProgress'));
+  document.querySelector('#serial-input').placeholder = t('serialInputPlaceholder');
   renderStatus(uploadStatus, uploadMessage);
   renderStatus(serialStatus, serialMessage);
   setProjectStatus(projectMessage);
@@ -328,6 +335,7 @@ window.setLanguage = (requested, { persist = true } = {}) => {
 };
 
 function updateButtons() {
+  serialInput.update();
   download.disabled = !code.value.trim();
   upload.disabled = download.disabled || serialBusy || !navigator.serial;
   document.querySelector('#open-firmware').disabled = serialBusy;

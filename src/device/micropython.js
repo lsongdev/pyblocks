@@ -7,7 +7,17 @@ export class MicroPythonError extends Error {
 
 const encoder = new TextEncoder();
 
+async function writeSerialText(writer, text) {
+  const bytes = encoder.encode(text);
+  for (let offset = 0; offset < bytes.length; offset += 64) {
+    if (offset) await new Promise(resolve => setTimeout(resolve, 10));
+    await writer.write(bytes.subarray(offset, offset + 64));
+  }
+}
+
 function streamOutput(port, reader, decoder, onOutput, pending = '') {
+  let closing = false;
+  let writes = Promise.resolve();
   const done = (async () => {
     try {
       if (pending) onOutput(pending);
@@ -20,7 +30,9 @@ function streamOutput(port, reader, decoder, onOutput, pending = '') {
       const tail = decoder.decode();
       if (tail) onOutput(tail);
     } finally {
+      closing = true;
       reader.releaseLock();
+      await writes.catch(() => {});
       await port.close();
     }
   })();
@@ -28,7 +40,17 @@ function streamOutput(port, reader, decoder, onOutput, pending = '') {
   return {
     port,
     done,
+    write(text) {
+      if (closing) return Promise.reject(new Error('Serial session is closed'));
+      const operation = writes.catch(() => {}).then(async () => {
+        const writer = port.writable.getWriter();
+        try { await writeSerialText(writer, text); } finally { writer.releaseLock(); }
+      });
+      writes = operation;
+      return operation;
+    },
     async close() {
+      closing = true;
       await reader.cancel().catch(() => {});
       await done.catch(() => {});
     },
@@ -55,14 +77,7 @@ async function runOnBoard(port, onOutput, operation) {
     writer = port.writable.getWriter();
     let pending = '';
 
-    async function write(text) {
-      const bytes = encoder.encode(text);
-      // USB serial writes can outrun small UART receive buffers on the board.
-      for (let offset = 0; offset < bytes.length; offset += 64) {
-        if (offset) await new Promise(resolve => setTimeout(resolve, 10));
-        await writer.write(bytes.subarray(offset, offset + 64));
-      }
-    }
+    const write = text => writeSerialText(writer, text);
 
     async function readUntil(marker) {
       const timeout = setTimeout(() => void reader.cancel().catch(() => {}), 4000);

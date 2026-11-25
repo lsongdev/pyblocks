@@ -144,9 +144,13 @@ test('MQTT and UTF-8 blocks instantiate in both languages and are available in t
     const category = createToolbox().contents.find(item => item.name === 'MQTT');
     assert.equal(category.contents.find(item => item.type === 'mqtt_create').inputs.SERVER.shadow.fields.TEXT, 'broker.emqx.io');
     assert.equal(category.contents.find(item => item.type === 'mqtt_subscribe').inputs.TOPIC.shadow.fields.TEXT, 'test');
+    const textCategory = createToolbox().contents.find(item => item.contents?.some(entry => entry.type === 'text'));
+    const conversions = textCategory.contents.filter(entry => ['bytes_encode_utf8', 'bytes_decode_utf8'].includes(entry.type));
+    assert.equal(conversions.length, 2);
+    assert.ok(!category.contents.some(entry => entry.type.startsWith('bytes_')));
     const workspace = new Blockly.Workspace();
     try {
-      for (const entry of category.contents) {
+      for (const entry of [...category.contents, ...conversions]) {
         const block = workspace.newBlock(entry.type);
         assert.ok(!block.toString().includes('%{BKY_'), entry.type);
       }

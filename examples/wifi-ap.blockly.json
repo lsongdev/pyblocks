@@ -1,0 +1,88 @@
+{
+  "format": "blockly-demo",
+  "version": 1,
+  "workspace": {
+    "variables": [],
+    "blocks": {
+      "languageVersion": 0,
+      "blocks": [
+        {
+          "type": "wifi_ap_config",
+          "inputs": {
+            "SSID": {
+              "block": {
+                "type": "text",
+                "fields": {
+                  "TEXT": "MicroPython-AP"
+                }
+              }
+            },
+            "PASSWORD": {
+              "block": {
+                "type": "text",
+                "fields": {
+                  "TEXT": "change-me-123"
+                }
+              }
+            },
+            "CHANNEL": {
+              "block": {
+                "type": "math_number",
+                "fields": {
+                  "NUM": 1
+                }
+              }
+            },
+            "CLIENTS": {
+              "block": {
+                "type": "math_number",
+                "fields": {
+                  "NUM": 4
+                }
+              }
+            }
+          },
+          "next": {
+            "block": {
+              "type": "wifi_interface_power",
+              "fields": {
+                "MODE": "AP"
+              },
+              "next": {
+                "block": {
+                  "type": "text_print",
+                  "inputs": {
+                    "TEXT": {
+                      "block": {
+                        "type": "wifi_network_address",
+                        "fields": {
+                          "MODE": "AP"
+                        }
+                      }
+                    }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "text_print",
+                      "inputs": {
+                        "TEXT": {
+                          "block": {
+                            "type": "wifi_ap_stations"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "x": 24,
+          "y": 24
+        }
+      ]
+    }
+  },
+  "manualCode": null,
+  "libraries": []
+}

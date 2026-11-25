@@ -1,0 +1,270 @@
+{
+  "format": "blockly-demo",
+  "version": 1,
+  "workspace": {
+    "variables": [
+      {
+        "id": "clock",
+        "name": "时钟任务"
+      },
+      {
+        "id": "heartbeat",
+        "name": "心跳任务"
+      }
+    ],
+    "blocks": {
+      "languageVersion": 0,
+      "blocks": [
+        {
+          "type": "wifi_connect",
+          "inputs": {
+            "SSID": {
+              "block": {
+                "type": "text",
+                "fields": {
+                  "TEXT": "YOUR_SSID"
+                }
+              }
+            },
+            "PASSWORD": {
+              "block": {
+                "type": "text",
+                "fields": {
+                  "TEXT": "YOUR_PASSWORD"
+                }
+              }
+            }
+          },
+          "next": {
+            "block": {
+              "type": "controls_whileUntil",
+              "fields": {
+                "MODE": "UNTIL"
+              },
+              "inputs": {
+                "BOOL": {
+                  "block": {
+                    "type": "wifi_connected"
+                  }
+                },
+                "DO": {
+                  "block": {
+                    "type": "timing_wait_ms",
+                    "inputs": {
+                      "MS": {
+                        "block": {
+                          "type": "math_number",
+                          "fields": {
+                            "NUM": 100
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "next": {
+                "block": {
+                  "type": "ntptime_config",
+                  "inputs": {
+                    "HOST": {
+                      "block": {
+                        "type": "text",
+                        "fields": {
+                          "TEXT": "pool.ntp.org"
+                        }
+                      }
+                    },
+                    "TIMEOUT": {
+                      "block": {
+                        "type": "math_number",
+                        "fields": {
+                          "NUM": 2
+                        }
+                      }
+                    }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "ntptime_sync",
+                      "next": {
+                        "block": {
+                          "type": "asyncio_run",
+                          "inputs": {
+                            "DO": {
+                              "block": {
+                                "type": "variables_set",
+                                "fields": {
+                                  "VAR": {
+                                    "id": "clock"
+                                  }
+                                },
+                                "inputs": {
+                                  "VALUE": {
+                                    "block": {
+                                      "type": "asyncio_create_task",
+                                      "inputs": {
+                                        "DO": {
+                                          "block": {
+                                            "type": "controls_repeat_ext",
+                                            "inputs": {
+                                              "TIMES": {
+                                                "block": {
+                                                  "type": "math_number",
+                                                  "fields": {
+                                                    "NUM": 3
+                                                  }
+                                                }
+                                              },
+                                              "DO": {
+                                                "block": {
+                                                  "type": "text_print",
+                                                  "inputs": {
+                                                    "TEXT": {
+                                                      "block": {
+                                                        "type": "timing_datetime"
+                                                      }
+                                                    }
+                                                  },
+                                                  "next": {
+                                                    "block": {
+                                                      "type": "asyncio_sleep",
+                                                      "inputs": {
+                                                        "DURATION": {
+                                                          "block": {
+                                                            "type": "math_number",
+                                                            "fields": {
+                                                              "NUM": 1000
+                                                            }
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "next": {
+                                  "block": {
+                                    "type": "variables_set",
+                                    "fields": {
+                                      "VAR": {
+                                        "id": "heartbeat"
+                                      }
+                                    },
+                                    "inputs": {
+                                      "VALUE": {
+                                        "block": {
+                                          "type": "asyncio_create_task",
+                                          "inputs": {
+                                            "DO": {
+                                              "block": {
+                                                "type": "controls_repeat_ext",
+                                                "inputs": {
+                                                  "TIMES": {
+                                                    "block": {
+                                                      "type": "math_number",
+                                                      "fields": {
+                                                        "NUM": 3
+                                                      }
+                                                    }
+                                                  },
+                                                  "DO": {
+                                                    "block": {
+                                                      "type": "text_print",
+                                                      "inputs": {
+                                                        "TEXT": {
+                                                          "block": {
+                                                            "type": "text",
+                                                            "fields": {
+                                                              "TEXT": "heartbeat"
+                                                            }
+                                                          }
+                                                        }
+                                                      },
+                                                      "next": {
+                                                        "block": {
+                                                          "type": "asyncio_sleep",
+                                                          "inputs": {
+                                                            "DURATION": {
+                                                              "block": {
+                                                                "type": "math_number",
+                                                                "fields": {
+                                                                  "NUM": 500
+                                                                }
+                                                              }
+                                                            }
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    },
+                                    "next": {
+                                      "block": {
+                                        "type": "asyncio_wait_task",
+                                        "inputs": {
+                                          "TASK": {
+                                            "block": {
+                                              "type": "variables_get",
+                                              "fields": {
+                                                "VAR": {
+                                                  "id": "clock"
+                                                }
+                                              }
+                                            }
+                                          }
+                                        },
+                                        "next": {
+                                          "block": {
+                                            "type": "asyncio_wait_task",
+                                            "inputs": {
+                                              "TASK": {
+                                                "block": {
+                                                  "type": "variables_get",
+                                                  "fields": {
+                                                    "VAR": {
+                                                      "id": "heartbeat"
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "x": 24,
+          "y": 24
+        }
+      ]
+    }
+  },
+  "manualCode": null,
+  "libraries": []
+}

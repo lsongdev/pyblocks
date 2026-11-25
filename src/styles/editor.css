@@ -229,3 +229,11 @@ dialog .board-card { display: flex; align-items: flex-start; gap: 10px; margin: 
   #blocks-panel, #code-panel { flex: none; }
   .horizontal-resize { display: none; }
 }
+
+.serial-input-form { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 12px; border-top: 1px solid #dcd9ed; }
+.serial-input-form input { flex: 1 1 120px; min-width: 0; width: 100%; }
+.serial-input-form input, .serial-input-form select { border: 1px solid #c9c2da; border-radius: 6px; padding: 6px; background: white; color: #29213e; }
+.serial-input-form button { padding: 6px 8px; font-size: .8125rem; }
+.serial-input-form :disabled { opacity: .5; cursor: default; }
+.serial-heading { flex-wrap: wrap; }
+.serial-heading .code-actions { flex-wrap: wrap; }

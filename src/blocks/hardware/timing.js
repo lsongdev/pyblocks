@@ -6,6 +6,8 @@ const colour = 40;
 const value = name => ({ type: 'input_value', name, check: 'Number' });
 
 common.defineBlocksWithJsonArray([
+  { type: 'timing_epoch_seconds', message0: blockMessage('epochSeconds'), tooltip: blockMessage('epochSecondsHint'), output: 'Number', colour },
+  { type: 'timing_datetime', message0: blockMessage('utcDatetime'), tooltip: blockMessage('utcDatetimeHint'), output: 'Array', colour },
   {
     type: 'timing_wait_ms',
     message0: blockMessage('waitMs'),
@@ -44,6 +46,8 @@ function integer(block, generator, input) {
 }
 
 Object.assign(pythonGenerator.forBlock, {
+  timing_epoch_seconds: (_block, generator) => [timeCall(generator, 'time'), Order.FUNCTION_CALL],
+  timing_datetime: (_block, generator) => [timeCall(generator, 'gmtime'), Order.FUNCTION_CALL],
   timing_wait_ms: (block, generator) =>
     `${timeCall(generator, 'sleep_ms', [integer(block, generator, 'MS')])}\n`,
   timing_ticks_ms: (_block, generator) => [timeCall(generator, 'ticks_ms'), Order.FUNCTION_CALL],
