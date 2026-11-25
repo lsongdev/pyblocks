@@ -6,7 +6,7 @@ const languages = {
   en: { index: 0, blockly: English },
   'zh-CN': { index: 1, blockly: SimplifiedChinese },
 };
-const storageKey = 'blockly-demo.language';
+const storageKey = 'pyblocks.language';
 
 const messages = {
   wifiStation: ["STA (connect to router)", "STA（连接路由器）"],
@@ -231,7 +231,7 @@ const messages = {
   microbitAcceleration: ["acceleration %1 (mg)", "%1 轴加速度（mg）"],
   wifiCategory: ["Wi-Fi", "网络"],
   neopixelCategory: ["NeoPixel", "像素灯"],
-  title: ["PyBlocks", "PyBlocks 积木编程"],
+  title: ["PyBlocks", "派积木"],
   i2cCreate: ["I2C bus %1 SCL %2 SDA %3 frequency (Hz) %4", "I2C 总线 %1 SCL %2 SDA %3 频率（Hz）%4"],
   i2cScan: ["scan I2C bus %1", "扫描 I2C 总线 %1"],
   i2cRead: ["read on I2C %1 address %2 bytes %3", "从 I2C %1 的地址 %2 读取 %3 字节"],

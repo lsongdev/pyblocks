@@ -4,14 +4,14 @@ export async function setupPanelResize() {
     minBefore: 320,
     minAfter: 270,
     media: '(min-width: 761px)',
-    storageKey: 'blockly-demo.panel-width',
+    storageKey: 'pyblocks.panel-width',
   });
   const disposeOutput = bindSplitter(document.querySelector('#output-resizer'), {
     axis: 'vertical',
     minBefore: 80,
     minAfter: 100,
     initialRatio: .65,
-    storageKey: 'blockly-demo.code-height',
+    storageKey: 'pyblocks.code-height',
   });
   return () => { disposePanels(); disposeOutput(); };
 }

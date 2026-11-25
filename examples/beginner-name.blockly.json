@@ -1,5 +1,5 @@
 {
-  "format": "blockly-demo",
+  "format": "pyblocks",
   "version": 1,
   "workspace": {
     "variables": [

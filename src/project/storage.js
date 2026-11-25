@@ -1,6 +1,6 @@
-const format = 'blockly-demo';
+const format = 'pyblocks';
 const version = 1;
-const storageKey = 'blockly-demo.project';
+const storageKey = 'pyblocks.project';
 
 export class ProjectError extends Error {
   constructor(code) {
