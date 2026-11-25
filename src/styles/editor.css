@@ -183,11 +183,7 @@ button:disabled { opacity: .45; cursor: default; }
 .app-brand img { display: block; width: 32px; height: 32px; object-fit: contain; }
 .app-toolbar strong { font-size: 1rem; }
 .app-menu { margin-left: auto; display: flex; align-items: center; gap: 8px; }
-.app-menu button, .app-menu summary { background: #eee9ff; color: #473779; font-size: .875rem; }
-.app-menu summary { padding: 10px 12px; border-radius: 9px; cursor: pointer; font-weight: 650; }
-.app-menu details { position: relative; }
-.menu-popup { position: absolute; top: calc(100% + 6px); right: 0; z-index: 100; min-width: 230px; padding: 6px; background: white; border: 1px solid #dcd9ed; border-radius: 10px; box-shadow: 0 6px 24px #24213d22; }
-.menu-popup button { width: 100%; text-align: left; }
+.app-menu button { background: #eee9ff; color: #473779; font-size: .875rem; }
 dialog { width: min(480px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); overflow: auto; padding: 24px; border: 1px solid #dcd9ed; border-radius: 16px; color: inherit; box-shadow: 0 12px 60px #24213d44; }
 dialog::backdrop { background: #24213d66; }
 dialog h2 { font-size: 1.15rem; margin-bottom: 20px; }

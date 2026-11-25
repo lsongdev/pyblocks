@@ -258,7 +258,7 @@ The activities use the English interface on [PyBlocks](https://blocks.lsong.org/
 If compatible MicroPython is already installed, start with the hello activity. Otherwise:
 
 1. Back up any board files you want to keep.
-2. Open **Device → Install MicroPython firmware**.
+2. Open **Install MicroPython firmware**.
 3. Select the exact board model and choose **Connect board**.
 4. Select its USB device, review the detected board and warning, and confirm installation.
 5. Keep USB connected until writing and verification finish.

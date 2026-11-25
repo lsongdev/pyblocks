@@ -1,6 +1,6 @@
 import { CollapsibleToolboxCategory, registry, Toolbox, ToolboxCategory } from 'blockly/core';
 import {
-  faCode, faCalculator, faCodeBranch, faCube, faEquals, faFont, faListUl, faMicrochip, faRotateRight, faDisplay, faWifi, faPlug, faHandPointer, faClock, faFolderOpen, faBook, faWaveSquare, faLightbulb, faVolumeHigh, faRightLeft,
+  faCode, faCalculator, faCodeBranch, faCube, faEquals, faFont, faListUl, faMicrochip, faRotateRight, faDisplay, faWifi, faPlug, faHandPointer, faClock, faFolderOpen, faWaveSquare, faLightbulb, faVolumeHigh, faRightLeft,
 } from '@fortawesome/free-solid-svg-icons';
 import { t } from '../i18n/index.js';
 
@@ -222,14 +222,7 @@ export function createToolbox() {
         colour: '#65528e',
         contents: [],
       },
-      {
-        kind: 'iconCategory',
-        toolboxitemid: 'libraries',
-        name: t('libraries'),
-        icon: faBook,
-        colour: '#65528e',
-        contents: [],
-      },
+      // Keep the library panel unavailable until its workflow is ready.
       category('Pico', '#338060', faMicrochip, [
         { kind: 'label', text: 'LED' },
         'pico_led_power',

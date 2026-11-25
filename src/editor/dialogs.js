@@ -39,7 +39,6 @@ export function setupDialogs({ getLanguage, setLanguage, acquireDevice, releaseD
     finally { if (leased) { leased = false; releaseDevice(); } }
   }
   document.querySelector('#open-firmware').addEventListener('click', () => {
-    document.querySelector('#device-menu').open = false;
     status.textContent = detected.textContent = '';
     warning.hidden = install.hidden = progress.hidden = true;
     setBusy(false);
