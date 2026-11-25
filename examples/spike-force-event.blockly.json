@@ -1,0 +1,111 @@
+{
+  "format": "pyblocks",
+  "version": 1,
+  "workspace": {
+    "variables": [],
+    "blocks": {
+      "languageVersion": 0,
+      "blocks": [
+        {
+          "type": "spike_run",
+          "fields": {},
+          "inputs": {
+            "DO": {
+              "block": {
+                "type": "text_print",
+                "fields": {},
+                "inputs": {
+                  "TEXT": {
+                    "block": {
+                      "type": "text",
+                      "fields": {
+                        "TEXT": "Listening..."
+                      },
+                      "inputs": {}
+                    }
+                  }
+                },
+                "next": {
+                  "block": {
+                    "type": "spike_on_condition",
+                    "inputs": {
+                      "DO": {
+                        "block": {
+                          "type": "spike_pixel",
+                          "fields": {},
+                          "inputs": {
+                            "X": {
+                              "block": {
+                                "type": "math_number",
+                                "fields": {
+                                  "NUM": 0
+                                },
+                                "inputs": {}
+                              }
+                            },
+                            "Y": {
+                              "block": {
+                                "type": "math_number",
+                                "fields": {
+                                  "NUM": 0
+                                },
+                                "inputs": {}
+                              }
+                            },
+                            "BRIGHTNESS": {
+                              "block": {
+                                "type": "math_number",
+                                "fields": {
+                                  "NUM": 100
+                                },
+                                "inputs": {}
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "CONDITION": {
+                        "block": {
+                          "type": "spike_button_pressed",
+                          "fields": {
+                            "BUTTON": "LEFT"
+                          }
+                        }
+                      }
+                    },
+                    "next": {
+                      "block": {
+                        "type": "spike_on_condition",
+                        "inputs": {
+                          "DO": {
+                            "block": {
+                              "type": "spike_clear",
+                              "fields": {},
+                              "inputs": {}
+                            }
+                          },
+                          "CONDITION": {
+                            "block": {
+                              "type": "spike_force_pressed",
+                              "fields": {
+                                "PORT": "C"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "x": 32,
+          "y": 32
+        }
+      ]
+    }
+  },
+  "manualCode": null,
+  "libraries": []
+}

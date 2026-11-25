@@ -8,38 +8,26 @@
       "blocks": [
         {
           "type": "spike_run",
-          "x": 32,
-          "y": 32,
+          "fields": {},
           "inputs": {
-            "TASKS": {
+            "DO": {
               "block": {
-                "type": "spike_task",
+                "type": "text_print",
                 "fields": {},
                 "inputs": {
-                  "DO": {
+                  "TEXT": {
                     "block": {
-                      "type": "text_print",
-                      "fields": {},
-                      "inputs": {
-                        "TEXT": {
-                          "block": {
-                            "type": "text",
-                            "fields": {
-                              "TEXT": "Listening..."
-                            },
-                            "inputs": {}
-                          }
-                        }
-                      }
+                      "type": "text",
+                      "fields": {
+                        "TEXT": "Listening..."
+                      },
+                      "inputs": {}
                     }
                   }
                 },
                 "next": {
                   "block": {
-                    "type": "spike_on_button_pressed",
-                    "fields": {
-                      "BUTTON": "LEFT"
-                    },
+                    "type": "spike_on_condition",
                     "inputs": {
                       "DO": {
                         "block": {
@@ -75,20 +63,33 @@
                             }
                           }
                         }
+                      },
+                      "CONDITION": {
+                        "block": {
+                          "type": "spike_button_pressed",
+                          "fields": {
+                            "BUTTON": "LEFT"
+                          }
+                        }
                       }
                     },
                     "next": {
                       "block": {
-                        "type": "spike_on_button_pressed",
-                        "fields": {
-                          "BUTTON": "RIGHT"
-                        },
+                        "type": "spike_on_condition",
                         "inputs": {
                           "DO": {
                             "block": {
                               "type": "spike_clear",
                               "fields": {},
                               "inputs": {}
+                            }
+                          },
+                          "CONDITION": {
+                            "block": {
+                              "type": "spike_button_pressed",
+                              "fields": {
+                                "BUTTON": "RIGHT"
+                              }
                             }
                           }
                         }
@@ -98,7 +99,9 @@
                 }
               }
             }
-          }
+          },
+          "x": 32,
+          "y": 32
         }
       ]
     }

@@ -8,48 +8,41 @@
       "blocks": [
         {
           "type": "spike_run",
-          "x": 32,
-          "y": 32,
           "inputs": {
-            "TASKS": {
+            "DO": {
               "block": {
-                "type": "spike_task",
+                "type": "spike_write",
                 "inputs": {
-                  "DO": {
-                    "block": {
-                      "type": "spike_write",
-                      "inputs": {
-                        "TEXT": {
-                          "shadow": {
-                            "type": "text",
-                            "fields": {
-                              "TEXT": "Hello!"
-                            }
-                          }
-                        },
-                        "BRIGHTNESS": {
-                          "shadow": {
-                            "type": "math_number",
-                            "fields": {
-                              "NUM": 100
-                            }
-                          }
-                        },
-                        "DURATION": {
-                          "shadow": {
-                            "type": "math_number",
-                            "fields": {
-                              "NUM": 500
-                            }
-                          }
-                        }
+                  "TEXT": {
+                    "shadow": {
+                      "type": "text",
+                      "fields": {
+                        "TEXT": "Hello!"
+                      }
+                    }
+                  },
+                  "BRIGHTNESS": {
+                    "shadow": {
+                      "type": "math_number",
+                      "fields": {
+                        "NUM": 100
+                      }
+                    }
+                  },
+                  "DURATION": {
+                    "shadow": {
+                      "type": "math_number",
+                      "fields": {
+                        "NUM": 500
                       }
                     }
                   }
                 }
               }
             }
-          }
+          },
+          "x": 32,
+          "y": 32
         }
       ]
     }

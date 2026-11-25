@@ -22,16 +22,13 @@ function define(type, message, args, output, hint) {
 }
 define('run', 'spikeRun', [], undefined, 'spikeRunHint');
 definitions[0].message1 = blockMessage('buttonEventBody');
-definitions[0].args1 = [{ type: 'input_statement', name: 'TASKS', check: 'SpikeTask' }];
+definitions[0].args1 = [{ type: 'input_statement', name: 'DO' }];
 for (const [type, message, args, hint] of [
-  ['task', 'spikeTask', [], 'spikeTaskHint'],
-  ['on_button_pressed', 'spikeOnButton', [dropdown('BUTTON', ['LEFT', 'RIGHT'].map(b => [blockMessage(b === 'LEFT' ? 'spikeLeft' : 'spikeRight'), b]))], 'spikeOnButtonHint'],
+  ['on_condition', 'spikeOnCondition', [{ type: 'input_value', name: 'CONDITION', check: 'Boolean' }], 'spikeOnConditionHint'],
 ]) {
-  define(type, message, args, undefined, hint);
-  Object.assign(definitions.at(-1), {
-    previousStatement: 'SpikeTask', nextStatement: 'SpikeTask',
+  definitions.push({ type: `spike_${type}`, message0: blockMessage(message), args0: args,
     message1: blockMessage('buttonEventBody'), args1: [{ type: 'input_statement', name: 'DO' }],
-  });
+    colour, ...statement, tooltip: blockMessage(hint) });
 }
 define('until', 'spikeUntil', [{ type: 'input_value', name: 'CONDITION', check: 'Boolean' }, number('TIMEOUT')], undefined, 'spikeUntilHint');
 define('sleep', 'spikeSleep', [number('DURATION')]);
@@ -39,6 +36,7 @@ define('write', 'spikeWrite', [{ type: 'input_value', name: 'TEXT', check: 'Stri
 define('clear', 'spikeClear', []);
 define('pixel', 'spikePixel', [number('X'), number('Y'), number('BRIGHTNESS')], undefined, 'spikePixelHint');
 define('button', 'spikeButton', [dropdown('BUTTON', ['LEFT', 'RIGHT'].map(b => [blockMessage(b === 'LEFT' ? 'spikeLeft' : 'spikeRight'), b]))], 'Number', 'spikeButtonHint');
+define('button_pressed', 'spikeButtonPressed', [dropdown('BUTTON', ['LEFT', 'RIGHT'].map(b => [blockMessage(b === 'LEFT' ? 'spikeLeft' : 'spikeRight'), b]))], 'Boolean', 'spikeButtonPressedHint');
 define('tilt', 'spikeTilt', [dropdown('AXIS', ['Yaw', 'Pitch', 'Roll'].map((axis, i) => [blockMessage(`spike${axis}`), String(i)]))], 'Number', 'spikeTiltHint');
 define('reset_yaw', 'spikeResetYaw', [number('ANGLE')]);
 define('motor_run', 'spikeMotorRun', [port(), number('SPEED')], undefined, 'spikeMotorHint');
@@ -81,57 +79,63 @@ function call(type, name, method, args, { awaited = false, output = false } = {}
     return output ? [code, Order.FUNCTION_CALL] : `${awaited ? 'await ' : ''}${code}\n`;
   };
 }
-// Task blocks describe awaitables passed to runloop.run(), not detached tasks.
-const taskLists = new WeakSet();
+const runContexts = new WeakMap();
+function requireEventScope(b, g) {
+  const context = runContexts.get(g);
+  if (!context || b.getSurroundParent() !== context.block) throw new PythonBlockError(t('spikeEventScope'));
+  return context;
+}
 pythonGenerator.forBlock.spike_run = (b, g) => {
   if (inAsyncFunction(g)) throw new PythonBlockError(t('asyncNestedRun'));
-  const runloop = module(g, 'runloop');
-  taskLists.add(g);
-  let tasks;
-  try { tasks = g.statementToCode(b, 'TASKS'); }
-  finally { taskLists.delete(g); }
-  if (!tasks) throw new PythonBlockError(t('spikeTasksRequired'));
-  return `${runloop}.run(\n${tasks})\n`;
+  const previous = runContexts.get(g);
+  const context = { block: b, listeners: [] };
+  runContexts.set(g, context);
+  try {
+    const runloop = module(g, 'runloop');
+    const { name, code } = eventHandler(b, g, '_spike_task', { asynchronous: true });
+    g.definitions_[name] = code;
+    return `${runloop}.run(\n${[name, ...context.listeners].map(task => `${g.INDENT}${task}(),`).join('\n')}\n)\n`;
+  } finally {
+    if (previous) runContexts.set(g, previous);
+    else runContexts.delete(g);
+  }
 };
-function taskHandler(b, g, generate) {
-  if (!taskLists.has(g)) throw new PythonBlockError(t('spikeTaskContext'));
-  taskLists.delete(g);
-  try { return generate(); }
-  finally { taskLists.add(g); }
+function conditionCode(b, g) {
+  const condition = functionContext(g, false, () => g.valueToCode(b, 'CONDITION', Order.NONE));
+  if (!condition) throw new PythonBlockError(t('requiredExpression', t('spikeCondition')));
+  return condition;
 }
-pythonGenerator.forBlock.spike_task = (b, g) => taskHandler(b, g, () => {
-  const { name, code } = eventHandler(b, g, '_spike_task', { asynchronous: true });
-  g.definitions_[name] = code;
-  return `${name}(),\n`;
-});
 pythonGenerator.forBlock.spike_until = (b, g) => {
   requireAsync(g);
   // The predicate is a synchronous lambda, even inside an async task.
-  const condition = functionContext(g, false, () => g.valueToCode(b, 'CONDITION', Order.NONE));
-  if (!condition) throw new PythonBlockError(t('requiredExpression', t('spikeCondition')));
+  const condition = conditionCode(b, g);
   return `await ${module(g, 'runloop')}.until(lambda: ${condition}, timeout=${value(b, g, 'TIMEOUT')})\n`;
 };
-pythonGenerator.forBlock.spike_on_button_pressed = (b, g) => taskHandler(b, g, () => {
+function conditionEvent(b, g, condition) {
   const runloop = module(g, 'runloop');
-  const button = module(g, 'button');
-  const read = `${button}.pressed(${button}.${b.getFieldValue('BUTTON')})`;
-  const { name, code } = eventHandler(b, g, '_spike_on_press', { asynchronous: true });
-  const watcher = g.nameDB_.getDistinctName('_spike_watch_button', Names.NameType.PROCEDURE);
+  const { name, code } = eventHandler(b, g, '_spike_on_true', { asynchronous: true });
+  const watcher = g.nameDB_.getDistinctName('_spike_watch_condition', Names.NameType.PROCEDURE);
   g.definitions_[name] = code;
   g.definitions_[watcher] = `async def ${watcher}():
-    await ${runloop}.until(lambda: ${read} == 0)
+    await ${runloop}.until(lambda: not (${condition}))
     while True:
-        await ${runloop}.until(lambda: ${read} > 0)
+        await ${runloop}.until(lambda: ${condition})
         await ${name}()
-        await ${runloop}.until(lambda: ${read} == 0)
+        await ${runloop}.until(lambda: not (${condition}))
 `;
-  return `${watcher}(),\n`;
-});
+  requireEventScope(b, g).listeners.push(watcher);
+  return '';
+}
+pythonGenerator.forBlock.spike_on_condition = (b, g) => {
+  requireEventScope(b, g);
+  return conditionEvent(b, g, conditionCode(b, g));
+};
 call('sleep', 'runloop', 'sleep_ms', (b, g) => value(b, g, 'DURATION'), { awaited: true });
 call('write', 'light_matrix', 'write', (b, g) => `${value(b, g, 'TEXT', "''")}, intensity=${value(b, g, 'BRIGHTNESS', '100')}, time_per_character=${value(b, g, 'DURATION', '500')}`, { awaited: true });
 call('clear', 'light_matrix', 'clear', () => '');
 call('pixel', 'light_matrix', 'set_pixel', (b, g) => ['X', 'Y', 'BRIGHTNESS'].map(n => value(b, g, n)).join(', '));
 call('button', 'button', 'pressed', (b, g) => `${module(g, 'button')}.${b.getFieldValue('BUTTON')}`, { output: true });
+pythonGenerator.forBlock.spike_button_pressed = (b, g) => [`${module(g, 'button')}.pressed(${module(g, 'button')}.${b.getFieldValue('BUTTON')}) > 0`, Order.RELATIONAL];
 pythonGenerator.forBlock.spike_tilt = (b, g) => [`${module(g, 'motion_sensor')}.tilt_angles()[${b.getFieldValue('AXIS')}]`, Order.MEMBER];
 call('reset_yaw', 'motion_sensor', 'reset_yaw', (b, g) => value(b, g, 'ANGLE'));
 call('motor_run', 'motor', 'run', (b, g) => `${selectedPort(b, g)}, ${value(b, g, 'SPEED')}`);

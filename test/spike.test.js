@@ -12,7 +12,7 @@ const b = (type, fields = {}, inputs = {}) => ({ type, fields, inputs: Object.fr
 const num = NUM => b('math_number', { NUM });
 const text = TEXT => b('text', { TEXT });
 const print = TEXT => b('text_print', {}, { TEXT });
-const run = DO => b('spike_run', {}, { TASKS: b('spike_task', {}, { DO }) });
+const run = DO => b('spike_run', {}, { DO });
 function chain(...blocks) {
   blocks.slice(0, -1).forEach((block, i) => { block.next = { block: blocks[i + 1] }; });
   return blocks[0];
@@ -40,12 +40,10 @@ test('SPIKE toolbox blocks in both languages compile, including all awaited acti
     const entries = group.contents.flatMap(item => item.contents).filter(item => item.kind === 'block');
     assert.equal(entries.length, 27);
     for (const entry of entries) {
-      if (['spike_run', 'spike_task', 'spike_on_button_pressed'].includes(entry.type)) continue;
+      if (['spike_run', 'spike_on_condition'].includes(entry.type)) continue;
       const workspace = new Blockly.Workspace();
       try {
-        const root = workspace.newBlock('spike_run');
-        const task = workspace.newBlock('spike_task');
-        root.getInput('TASKS').connection.connect(task.previousConnection);
+        const task = workspace.newBlock('spike_run');
         Blockly.serialization.blocks.append(entry, workspace);
         const block = workspace.getAllBlocks(false).find(item => item.type === entry.type);
         if (block.previousConnection) task.getInput('DO').connection.connect(block.previousConnection);
@@ -64,8 +62,8 @@ test('SPIKE toolbox blocks in both languages compile, including all awaited acti
 
 test('SPIKE awaited operations require async scope and reject nested event loops', () => {
   for (const type of ['spike_until', 'spike_sleep', 'spike_write', 'spike_motor_degrees', 'spike_motor_time', 'spike_pair_degrees']) {
-    assert.throws(() => generate([b(type)]), /async task/);
-    assert.throws(() => generate([b('procedures_defnoreturn', { NAME: 'sync' }, { STACK: b(type) })]), /async task/);
+    assert.throws(() => generate([b(type)]), /SPIKE task/);
+    assert.throws(() => generate([b('procedures_defnoreturn', { NAME: 'sync' }, { STACK: b(type) })]), /SPIKE task/);
   }
   assert.throws(() => generate([run(b('spike_run'))]), /run/);
 });
@@ -135,7 +133,7 @@ test('SPIKE hello example generates native runloop code', () => {
 });
 
 test('SPIKE until re-evaluates its predicate, passes timeout, and resumes on timeout', () => {
-  const condition = b('logic_compare', { OP: 'GT' }, { A: b('spike_button'), B: num(0) });
+  const condition = b('spike_button_pressed');
   const code = generate([run(chain(
     b('spike_until', {}, { CONDITION: condition, TIMEOUT: num(0) }),
     print(text('pressed')),
@@ -169,24 +167,24 @@ assert calls == [0, 30]
   }))]), /async/);
 });
 
-test('SPIKE task list is explicit and rejects orphan tasks and listeners', () => {
-  assert.throws(() => generate([b('spike_task')]), /Connect SPIKE/);
-  assert.throws(() => generate([b('spike_on_button_pressed')]), /Connect SPIKE/);
-  assert.throws(() => generate([b('spike_run')]), /at least one/);
-  // A failed generation must not leak task-list or async context into the next run.
+test('SPIKE events require explicit scope and generation state does not leak', () => {
+  assert.throws(() => generate([run(b('spike_run'))]), /run/);
+  assert.throws(() => generate([b('spike_on_condition')]), /directly inside/);
   assert.throws(() => generate([run(b('spike_until'))]), /condition/);
-  assert.throws(() => generate([b('spike_task')]), /Connect SPIKE/);
-  assert.match(generate([run(print(text('ok')))]), /print\('ok'\)/);
+  const code = generate([run(print(text('ok')))]);
+  assert.equal((code.match(/_spike_runloop.run\(/g) || []).length, 1);
+  assert.match(code, /print\('ok'\)/);
+  assert.doesNotMatch(generate([print(text('plain'))]), /runloop/);
 });
 
 test('SPIKE polling listeners share runloop, ignore startup hold, re-arm and remain independent', () => {
-  const listener = (BUTTON, message) => b('spike_on_button_pressed', { BUTTON }, {
+  const listener = (BUTTON, message) => b('spike_on_condition', {}, { CONDITION: b('spike_button_pressed', { BUTTON }),
     DO: chain(print(text(message)), b('spike_sleep', {}, { DURATION: num(1) })),
   });
-  const code = generate([b('spike_run', {}, { TASKS: chain(
-    b('spike_task', {}, { DO: print(text('started')) }),
-    listener('LEFT', 'left'), listener('RIGHT', 'right'), listener('LEFT', 'left2'),
-  ) })]);
+  const code = generate([run(chain(print(text('started')),
+    listener('LEFT', 'left'), listener('RIGHT', 'right'),
+    b('spike_on_condition', {}, { CONDITION: b('spike_force_pressed', { PORT: 'C' }), DO: print(text('left2')) }),
+  ))]);
   assert.equal((code.match(/_spike_runloop.run\(/g) || []).length, 1);
   python(`import sys, types, asyncio
 state = {1: 100, 2: 0}
@@ -228,7 +226,21 @@ def run(*tasks):
         try: await asyncio.gather(*tasks, driver())
         except Done: pass
     asyncio.run(together())
-sys.modules['hub'] = types.SimpleNamespace(button=types.SimpleNamespace(LEFT=1, RIGHT=2, pressed=lambda b: state[b]))
+sys.modules['hub'] = types.SimpleNamespace(button=types.SimpleNamespace(LEFT=1, RIGHT=2, pressed=lambda b: state[b]), port=types.SimpleNamespace(C=2))
+sys.modules['force_sensor'] = types.SimpleNamespace(pressed=lambda port: state[1] > 0)
 sys.modules['runloop'] = types.SimpleNamespace(run=run, until=until, sleep_ms=sleep_ms)
 ${code}`);
+});
+
+test('SPIKE run blocks execute independently in program order', () => {
+  const code = generate([chain(run(print(text('first'))), print(text('between')), run(print(text('second'))))]);
+  assert.equal((code.match(/_spike_runloop.run\(/g) || []).length, 2);
+  const output = python(`import sys, types, asyncio
+sys.modules['runloop'] = types.SimpleNamespace(run=asyncio.run)
+${code}`);
+  assert.equal(output.trim(), 'first\nbetween\nsecond');
+  assert.throws(() => generate([b('spike_on_condition', {}, { CONDITION: b('spike_button_pressed') })]), /directly inside/);
+  assert.throws(() => generate([run(b('controls_repeat_ext', {}, {
+    TIMES: num(2), DO: b('spike_on_condition', {}, { CONDITION: b('spike_button_pressed') }),
+  }))]), /directly inside/);
 });

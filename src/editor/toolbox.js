@@ -319,8 +319,8 @@ export function createToolbox() {
         contents: [
           category(t('spikeProgram'), '#b08a20', faCode, [
             { kind: 'label', text: t('spikeFirmware') },
-            { type: 'spike_run', inputs: { TASKS: { block: { type: 'spike_task' } } } },
-            'spike_task',
+            'spike_run',
+            { type: 'spike_on_condition', inputs: { CONDITION: { shadow: { type: 'logic_boolean', fields: { BOOL: 'FALSE' } } } } },
             { type: 'spike_until', inputs: { CONDITION: { shadow: { type: 'logic_boolean', fields: { BOOL: 'TRUE' } } }, TIMEOUT: numberInput(0) } },
             { type: 'spike_sleep', inputs: { DURATION: numberInput(500) } },
           ]),
@@ -329,7 +329,7 @@ export function createToolbox() {
             { type: 'spike_pixel', inputs: { X: numberInput(2), Y: numberInput(2), BRIGHTNESS: numberInput(100) } },
             'spike_clear',
           ]),
-          category(t('buttons'), '#b08a20', faHandPointer, ['spike_on_button_pressed', 'spike_button']),
+          category(t('buttons'), '#b08a20', faHandPointer, ['spike_button_pressed', 'spike_button']),
           category(t('spikeMotors'), '#b08a20', faRotateRight, [
             { type: 'spike_motor_run', inputs: { SPEED: numberInput(360) } },
             { type: 'spike_motor_degrees', inputs: { DEGREES: numberInput(360), SPEED: numberInput(360) } },
