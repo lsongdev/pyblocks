@@ -1,5 +1,5 @@
 export async function setupPanelResize() {
-  const { bindSplitter } = await import('https://lsong.org/scripts/dom/resizable.js');
+  const { bindSplitter } = await import('shared-panel-resizable');
   const disposePanels = bindSplitter(document.querySelector('#panel-resizer'), {
     minBefore: 320,
     minAfter: 270,

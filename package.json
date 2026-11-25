@@ -1,5 +1,5 @@
 {
-  "name": "blockly-demo",
+  "name": "pyblocks",
   "version": "1.0.0",
   "description": "",
   "scripts": {
@@ -20,6 +20,7 @@
     "spark-md5": "3.0.2"
   },
   "devDependencies": {
-    "vite": "^8.3.8"
+    "vite": "^8.3.8",
+    "vite-plugin-pwa": "^2.0.0"
   }
 }

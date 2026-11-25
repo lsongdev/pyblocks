@@ -16,6 +16,7 @@ let language = getSavedLanguage();
 applyLanguage(language);
 
 const workspace = Blockly.inject('workspace', {
+  media: import.meta.env.PROD ? `${import.meta.env.BASE_URL}blockly-media/` : undefined,
   toolbox: createToolbox(),
   plugins: { toolbox: EditorToolbox },
   trashcan: true,

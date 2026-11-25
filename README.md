@@ -1,6 +1,12 @@
-# MicroPython Blocks
+# PyBlocks
 
-[打开积木编辑器](https://lsong.org/blockly-demo/)
+[打开积木编辑器](https://blocks.lsong.org/)
+
+## 安装与离线使用（PWA）
+
+在 HTTPS 网站上打开编辑器后，可通过浏览器菜单中的“安装应用”或“添加到主屏幕”安装。首次联网打开并完成缓存后，编辑器、Blockly 图片与音效以及随应用提供的固件均可离线使用。项目仍自动保存在当前浏览器的本地存储中，也可用“保存项目”导出备份。设备连接仍需浏览器支持 Web Serial / WebUSB。
+
+新版本在所有编辑器窗口关闭后启用，不会自动刷新正在编辑或连接板卡的窗口。PWA 仅在生产构建启用；使用 `npm run build` 后运行 `npm run preview`，可在 localhost 测试安装和离线刷新。部署时完整上传 `dist/`，支持站点根目录或 `/pyblocks/` 等子目录。应用图标可通过 `python3 tools/generate-pwa-icons.py` 重新生成。
 
 ## 首次安装 MicroPython
 
@@ -64,7 +70,7 @@
 
 拖动积木与代码之间的分隔条调整宽度，拖动代码与串口输出之间的分隔条调整高度。尺寸按比例保存在本地，刷新后恢复。分隔条支持方向键、Shift 加速、Home/End 边界和双击恢复默认尺寸；窄屏隐藏左右分隔条。
 
-面板使用 `https://lsong.org/scripts/dom/resizable.js` 的 `bindSplitter`。共享组件处理拖动、键盘、ARIA、比例布局、尺寸保存和窄屏启停；编辑器只配置最小尺寸、媒体查询和存储键。旁边存在 `../scripts` 工作区时，Vite 自动使用并打包本地实现，方便同步修改和验证；独立 checkout 使用线上模块，新接口需要先发布共享库。
+面板使用 `https://lsong.org/scripts/dom/resizable.js` 的 `bindSplitter`。共享组件处理拖动、键盘、ARIA、比例布局、尺寸保存和窄屏启停；编辑器只配置最小尺寸、媒体查询和存储键。旁边存在 `../scripts` 工作区时，Vite 自动使用并打包本地实现，方便同步修改和验证；独立 checkout 由 Vite 获取线上模块并打包，使离线时仍可调整面板，新接口需要先发布共享库。
 
 ## Raspberry Pi Pico 安装
 
