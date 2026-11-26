@@ -1,4 +1,4 @@
-import { Transport } from 'esptool-js';
+import { ESPLoader, Transport } from 'esptool-js';
 import SparkMD5 from 'spark-md5';
 import { createUSBConnection } from '@microbit/microbit-connection/usb';
 import { ProgressStage } from '@microbit/microbit-connection';
@@ -6,7 +6,7 @@ import { ProgressStage } from '@microbit/microbit-connection';
 import images from './images.json';
 import { connectPicoBoot } from '../device/rp2040.js';
 
-import { createClassicReset, FirmwareESPLoader, resetEsp32 } from './esp32.js';
+import { resetEsp32 } from './esp32.js';
 import { getFirmwareFamily, matchFirmware } from './catalog.js';
 import { uiflowBootSetup } from './uiflow.js';
 import { executeProgram } from '../device/micropython.js';
@@ -33,12 +33,7 @@ export async function connectFirmware(familyId, report = () => {}) {
   if (family.transport === 'serial') {
     const port = await navigator.serial.requestPort();
     const transport = new Transport(port);
-    const terminal = { clean() {}, write: s => console.log('[esptool]', s), writeLine: s => console.log('[esptool]', s) };
-    const loader = new FirmwareESPLoader({ transport, baudrate: 115200, terminal, debugLogging: true, resetConstructors: { classicReset: createClassicReset } });
-    const portId = () => {
-      const vid = transport.getVid(), pid = transport.getPid();
-      return vid === undefined ? 'unknown USB bridge' : `USB ${vid.toString(16).padStart(4, '0')}:${(pid ?? 0).toString(16).padStart(4, '0')}`;
-    };
+    const loader = new ESPLoader({ transport, baudrate: 115200 });
     let connected = true;
 
     const close = async () => {
@@ -80,12 +75,7 @@ export async function connectFirmware(familyId, report = () => {}) {
           await session.close();
         }
       } };
-    } catch (error) {
-      const id = portId();
-      await close();
-      if (error instanceof Error) error.message = `${error.message} (${id})`;
-      throw error;
-    }
+    } catch (error) { await close(); throw error; }
   }
   if (family.transport === 'rp2040') {
     report('firmwareDetecting');
