@@ -22,3 +22,7 @@ import './shared/exceptions.js';
 import './shared/text.js';
 
 import './boards/spike.js';
+
+import './boards/m5stack.js';
+
+import './shared/condition-events.js';

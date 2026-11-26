@@ -60,3 +60,35 @@ test('write errors release locks, and disconnection closes the session', async (
   assert.ok(device.port.closed);
   await assert.rejects(session.write('x'), /closed/);
 });
+
+test('executeProgram runs setup through raw REPL without replacing files and returns a closable session', async () => {
+  const { executeProgram } = await import('../src/device/micropython.js');
+  let device;
+  let command = '';
+  let commands = [];
+  let raw = false;
+  device = mockPort(async chunk => {
+    const text = new TextDecoder().decode(chunk);
+    const respond = value => device.controller.enqueue(new TextEncoder().encode(value));
+    if (text === '\r\x03\x03\x02') respond('>>>');
+    else if (text === '\x01') { raw = true; respond('raw REPL; CTRL-B to exit\r\n>'); }
+    else if (text === '\x02') { raw = false; respond('>>>'); }
+    else if (text === '\x04' && !raw) respond('MPY: soft reboot\r\n');
+    else {
+      command += text;
+      if (command.endsWith('\x04')) {
+        commands.push(command.slice(0, -1));
+        command = '';
+        respond('OKconfigured\r\n\x04\x04>');
+      }
+    }
+  });
+  const source = 'print("' + 'setup'.repeat(30) + '")';
+  let output = '';
+  const session = await executeProgram(device.port, source, text => { output += text; });
+  assert.deepEqual(commands, [source]);
+  assert.ok(!commands.some(command => /open\(|main.py/.test(command)));
+  assert.match(output, /MPY: soft reboot/);
+  await session.close();
+  assert.ok(device.port.closed);
+});

@@ -1,0 +1,118 @@
+{
+  "format": "pyblocks",
+  "version": 1,
+  "workspace": {
+    "variables": [],
+    "blocks": {
+      "languageVersion": 0,
+      "blocks": [
+        {
+          "type": "m5_begin",
+          "fields": {},
+          "inputs": {},
+          "next": {
+            "block": {
+              "type": "controls_whileUntil",
+              "fields": {
+                "MODE": "WHILE"
+              },
+              "inputs": {
+                "BOOL": {
+                  "block": {
+                    "type": "logic_boolean",
+                    "fields": {
+                      "BOOL": "TRUE"
+                    },
+                    "inputs": {}
+                  }
+                },
+                "DO": {
+                  "block": {
+                    "type": "m5_update",
+                    "fields": {},
+                    "inputs": {},
+                    "next": {
+                      "block": {
+                        "type": "text_print",
+                        "fields": {},
+                        "inputs": {
+                          "TEXT": {
+                            "block": {
+                              "type": "m5_stick_accel",
+                              "fields": {
+                                "AXIS": "Z"
+                              },
+                              "inputs": {}
+                            }
+                          }
+                        },
+                        "next": {
+                          "block": {
+                            "type": "events_when",
+                            "fields": {
+                              "STABLE": 0
+                            },
+                            "inputs": {
+                              "CONDITION": {
+                                "block": {
+                                  "type": "m5_button",
+                                  "fields": {
+                                    "BUTTON": "BtnA",
+                                    "METHOD": "isPressed"
+                                  },
+                                  "inputs": {}
+                                }
+                              },
+                              "DO": {
+                                "block": {
+                                  "type": "text_print",
+                                  "fields": {},
+                                  "inputs": {
+                                    "TEXT": {
+                                      "block": {
+                                        "type": "text",
+                                        "fields": {
+                                          "TEXT": "A pressed"
+                                        },
+                                        "inputs": {}
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "next": {
+                              "block": {
+                                "type": "timing_wait_ms",
+                                "fields": {},
+                                "inputs": {
+                                  "MS": {
+                                    "block": {
+                                      "type": "math_number",
+                                      "fields": {
+                                        "NUM": 50
+                                      },
+                                      "inputs": {}
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "x": 32,
+          "y": 32
+        }
+      ]
+    }
+  },
+  "manualCode": null,
+  "libraries": []
+}

@@ -19,7 +19,8 @@
 
       <nav class="app-menu" aria-label="Application">
         <button id="open-firmware" type="button" data-i18n="firmwareTitle">Install MicroPython firmware</button>
-        <button id="open-settings" type="button" data-i18n="settingsTitle">Settings</button>
+        <button id="toggle-language" type="button" aria-label="切换语言" title="切换语言"><span id="language-icon" aria-hidden="true">中</span></button>
+        <button id="toggle-theme" type="button" aria-label="切换主题" title="切换主题"></button>
       </nav>
     </header>
     <main id="editor-panels">
@@ -102,38 +103,46 @@
         </div>
       </section>
     </main>
-    <dialog id="settings-dialog" aria-labelledby="settings-title">
-      <h2 id="settings-title" data-i18n="settingsTitle">Settings</h2>
-      <label for="setting-language" data-i18n="languageLabel">Language</label>
-      <select id="setting-language"><option value="en">English</option><option value="zh-CN">简体中文</option></select>
-      <form method="dialog" class="dialog-actions"><button data-i18n="doneButton">Done</button></form>
-    </dialog>
     <dialog id="firmware-dialog" aria-labelledby="firmware-title">
       <h2 id="firmware-title" data-i18n="firmwareTitle">Install MicroPython firmware</h2>
-      <p data-i18n="firmwareIntro">Choose your board and connect it over USB.</p>
-      <fieldset id="firmware-board" class="board-options">
-        <legend data-i18n="firmwareBoard">Board</legend>
-        <label class="board-card">
-          <input type="radio" name="firmware-board" value="matrixbit" checked>
-          <span><strong>Matrix:bit</strong><small>ESP32 · 8 MB</small></span>
-        </label>
-        <label class="board-card">
-          <input type="radio" name="firmware-board" value="microbit">
-          <span><strong>BBC Micro:bit</strong><small>V1 / V2</small></span>
-        </label>
-        <label class="board-card">
-          <input type="radio" name="firmware-board" value="pico">
-          <span><strong>Raspberry Pi Pico</strong><small data-i18n="firmwarePicoModel">RP2040 · without Wi-Fi</small></span>
-        </label>
-      </fieldset>
-      <p id="firmware-pico-hint" data-i18n="firmwarePicoHint" hidden>Hold BOOTSEL while connecting Pico over USB, then release it. Select RP2 Boot when connecting.</p>
-      <a class="firmware-more" href="https://micropython.org/download/" target="_blank" rel="noopener noreferrer"><span data-i18n="firmwareMore">No matching firmware? Browse MicroPython downloads</span><span aria-hidden="true">↗</span></a>
-      <p id="firmware-detected"></p>
+      <p data-i18n="firmwareIntro">Choose a device family, then connect and detect its hardware.</p>
+      <section id="firmware-select-step" aria-labelledby="firmware-step-select">
+        <h3 id="firmware-step-select" data-i18n="firmwareStepSelect">1. Choose and connect</h3>
+        <fieldset id="firmware-family" class="firmware-families">
+          <legend data-i18n="firmwareFamily">Device family</legend>
+          <label class="board-card"><input type="radio" name="firmware-family" value="esp32" checked><strong>ESP32</strong></label>
+          <label class="board-card"><input type="radio" name="firmware-family" value="m5stack"><strong>M5Stack</strong></label>
+          <label class="board-card"><input type="radio" name="firmware-family" value="microbit"><strong>Micro:bit</strong></label>
+          <label class="board-card"><input type="radio" name="firmware-family" value="raspberry"><strong>Raspberry Pi</strong></label>
+        </fieldset>
+        <label for="firmware-model" data-i18n="firmwareModel">Model</label>
+        <select id="firmware-model"></select>
+        <p id="firmware-model-hint" class="firmware-hint"></p>
+      </section>
+      <section id="firmware-review" aria-labelledby="firmware-step-review" hidden>
+        <h3 id="firmware-step-review" data-i18n="firmwareStepReview">2. Review and install</h3>
+        <dl class="firmware-details">
+          <dt data-i18n="firmwareDetectedChip">Detected chip</dt><dd id="firmware-chip"></dd>
+          <dt data-i18n="firmwareDetectedCapacity">Flash capacity</dt><dd id="firmware-capacity"></dd>
+          <dt data-i18n="firmwareModel">Model</dt><dd id="firmware-resolved-model"></dd>
+          <dt data-i18n="firmwareImage">Firmware</dt><dd id="firmware-image"></dd>
+        </dl>
+        <div id="firmware-manual-capacity" hidden>
+          <label for="firmware-capacity-choice" data-i18n="firmwareManualCapacity">Flash capacity (manual confirmation)</label>
+          <select id="firmware-capacity-choice"></select>
+          <p class="firmware-hint" data-i18n="firmwareManualHint">Could not detect capacity. Select it only from your hardware specifications.</p>
+        </div>
+        <p id="firmware-match" role="status"></p>
+        <button id="firmware-suggestion" type="button" hidden></button>
+        <p id="firmware-capabilities" class="firmware-hint"></p>
+      </section>
+      <a id="firmware-more" class="firmware-more" href="https://micropython.org/download/" target="_blank" rel="noopener noreferrer"><span>No matching firmware? Browse MicroPython downloads</span><span aria-hidden="true">↗</span></a>
       <p id="firmware-warning" class="dialog-warning" data-i18n="firmwareWarning" hidden>Installation replaces the program and files on your board. Back up anything you need before continuing.</p>
       <p id="firmware-status" role="status" aria-live="polite"></p>
       <progress id="firmware-progress" max="1" aria-label="Firmware installation progress" hidden></progress>
       <div class="dialog-actions">
         <button id="firmware-close" type="button" data-i18n="closeButton">Close</button>
+        <button id="firmware-reselect" type="button" data-i18n="firmwareReselect" hidden>Choose another device</button>
         <button id="firmware-connect" type="button" data-i18n="firmwareConnect">Connect board</button>
         <button id="firmware-install" class="primary" type="button" data-i18n="firmwareInstall" hidden>Install firmware</button>
       </div>

@@ -1,5 +1,5 @@
 {
-  "matrixbit": {
+  "esp32": {
     "file": "ESP32_GENERIC-20260824-v1.29.0.bin",
     "version": "1.29.0",
     "url": "https://micropython.org/resources/firmware/ESP32_GENERIC-20260824-v1.29.0.bin",
@@ -22,5 +22,35 @@
     "version": "1.29.0",
     "url": "https://micropython.org/resources/firmware/RPI_PICO-20260824-v1.29.0.uf2",
     "sha256": "e1160e602e277d85920adb5fe741435edccba9ba6ecadc85fdab75252eeff4e9"
+  },
+  "m5basic4": {
+    "file": "uiflow-50e4407-esp32-4mb-basic-v2.5.3-20260911.bin",
+    "version": "2.5.3",
+    "url": "https://github.com/m5stack/uiflow-micropython/releases/download/2.5.3/uiflow-50e4407-esp32-4mb-basic-v2.5.3-20260911.bin",
+    "sha256": "7ca47f1fa6cae4e9e87f445409ccd01ef3f01d5188d3273af4352797b4ac13c0"
+  },
+  "m5basic16": {
+    "file": "uiflow-50e4407-esp32-16mb-basic-v2.5.3-20260911.bin",
+    "version": "2.5.3",
+    "url": "https://github.com/m5stack/uiflow-micropython/releases/download/2.5.3/uiflow-50e4407-esp32-16mb-basic-v2.5.3-20260911.bin",
+    "sha256": "a8a9c27353b4cc7e7d2f59f99f04285661d1ed5f9d1ca8a890acee627c71c566"
+  },
+  "m5stickc": {
+    "file": "uiflow-50e4407-esp32-4mb-stickc-v2.5.3-20260911.bin",
+    "version": "2.5.3",
+    "url": "https://github.com/m5stack/uiflow-micropython/releases/download/2.5.3/uiflow-50e4407-esp32-4mb-stickc-v2.5.3-20260911.bin",
+    "sha256": "bb2548a5ba70da8c018585e1415c644c15b07ee6d097158873bb54971c442e25"
+  },
+  "esp32s3": {
+    "file": "ESP32_GENERIC_S3-20260824-v1.29.0.bin",
+    "version": "1.29.0",
+    "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S3-20260824-v1.29.0.bin",
+    "sha256": "1dd9dcd27ba2d6a1cb7f7b49a063f46d3d807d68b0151161233920228285e300"
+  },
+  "esp32s3oct": {
+    "file": "ESP32_GENERIC_S3-SPIRAM_OCT-20260824-v1.29.0.bin",
+    "version": "1.29.0",
+    "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S3-SPIRAM_OCT-20260824-v1.29.0.bin",
+    "sha256": "ab24eadfe3ef0e6ee38834d730e648def7cd82f3fa51ee0bbc59c29a6e1bd176"
   }
 }

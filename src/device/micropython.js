@@ -199,6 +199,12 @@ os.remove(${boardPath(temporary)})`);
   }
 }
 
+// Execute setup code without replacing user files, then restart and return a monitor session.
+export async function executeProgram(port, source, onOutput = () => {}) {
+  const { session } = await runOnBoard(port, onOutput, execute => execute(source));
+  return session;
+}
+
 export async function downloadProgram(port, source, onOutput, libraries = []) {
   const { session } = await runOnBoard(port, onOutput, async execute => {
     const filesystem = await boardFilesystem(execute);

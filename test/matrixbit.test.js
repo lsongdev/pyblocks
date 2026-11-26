@@ -6,6 +6,7 @@ import { pythonGenerator } from 'blockly/python';
 import { applyLanguage } from '../src/i18n/index.js';
 import { createToolbox } from '../src/editor/toolbox.js';
 import '../src/blocks/boards/matrixbit.js';
+import '../src/blocks/shared/condition-events.js';
 import '../src/blocks/hardware/gpio.js';
 import '../src/blocks/hardware/pwm.js';
 import '../src/blocks/hardware/buses.js';
@@ -38,10 +39,11 @@ test('PYTHON pads map to the six ESP32 touch pins and compare adjustable thresho
 });
 
 test('same pad events retain independent thresholds while sharing a TouchPad instance', () => {
-  const event = threshold => ({type:'matrixbit_on_touch', fields:{PAD:'P'}, inputs:{THRESHOLD:number(threshold)}});
-  const code = generate(event(200), event(400));
-  const sources = [...code.matchAll(/setdefault\('([^']+)'/g)].map(match => match[1]);
-  assert.equal(new Set(sources).size, 2);
+  const event = threshold => ({type:'events_when', fields:{STABLE:25}, inputs:{
+    CONDITION:{block:{type:'matrixbit_touch_is_touched',fields:{PAD:'P'},inputs:{THRESHOLD:number(threshold)}}},
+  }});
+  const first = event(200);
+  const code = generate(first, event(400));
   assert.equal(code.match(/= _matrixbit_touchpad\(/g).length, 1);
   assert.match(code, /read\(\) < int\(200\), 25/);
   assert.match(code, /read\(\) < int\(400\), 25/);
@@ -50,7 +52,7 @@ test('same pad events retain independent thresholds while sharing a TouchPad ins
 test('new Matrixbit controls generate in both languages', () => {
   for (const language of ['en', 'zh-CN']) {
     applyLanguage(language);
-    for (const type of ['matrixbit_pin_number', 'matrixbit_touch_read', 'matrixbit_touch_is_touched', 'matrixbit_on_touch']) {
+    for (const type of ['matrixbit_pin_number', 'matrixbit_touch_read', 'matrixbit_touch_is_touched']) {
       assert.doesNotThrow(() => generate({type}));
     }
   }

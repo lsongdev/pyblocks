@@ -259,13 +259,11 @@ If compatible MicroPython is already installed, start with the hello activity. O
 
 1. Back up any board files you want to keep.
 2. Open **Install MicroPython firmware**.
-3. Select the exact board model and choose **Connect board**.
-4. Select its USB device, review the detected board and warning, and confirm installation.
-5. Keep USB connected until writing and verification finish.
+3. Choose a **device family**, then its exact model (or automatic chip/version detection where offered). Click **Connect and detect**.
+4. Select the USB device. Review the chip, capacity and matching firmware. If there is no match, change the selection or follow the official firmware link.
+5. Click **Install firmware** only after checking the result, and keep USB connected until writing and verification finish.
 
-![The real firmware installer with board choices and the Connect board button.](images/04-firmware.webp)
-
-*This picture shows the board-selection step, before connecting or installing anything.*
+See the [firmware installation guide](firmware.md) for supported families, automatic detection and capacity handling.
 
 Installation replaces existing programs and files. Program uploads write `main.py` and attached libraries. The original Pico requires **BOOTSEL** mode and WebUSB for firmware installation, then normal MicroPython mode for program uploads. Close other applications using the serial port.
 

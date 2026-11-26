@@ -5,6 +5,7 @@ import 'blockly/blocks';
 import { pythonGenerator } from 'blockly/python';
 import { applyLanguage } from '../src/i18n/index.js';
 import '../src/blocks/boards/microbit.js';
+import '../src/blocks/shared/condition-events.js';
 
 applyLanguage('en');
 
@@ -59,7 +60,7 @@ test('new block definitions and generators work in both languages', () => {
     'microbit_show', 'microbit_scroll', 'microbit_display_power', 'microbit_display_is_on',
     'microbit_music_pitch', 'microbit_music_melody', 'microbit_music_play', 'microbit_music_stop',
     'microbit_music_tempo', 'microbit_music_volume', 'microbit_speaker_power',
-    'microbit_logo_is_touched', 'microbit_on_logo_touched',
+    'microbit_logo_is_touched',
     'microbit_write_analog', 'microbit_set_analog_period', 'microbit_set_pull',
     'microbit_light_level', 'microbit_temperature', 'microbit_running_time', 'microbit_acceleration',
   ];
@@ -70,19 +71,20 @@ test('new block definitions and generators work in both languages', () => {
   applyLanguage('en');
 });
 
-test('V2 logo touch works as a Boolean condition and shares the button dispatcher', () => {
+test('V2 logo touch works as a Boolean condition and uses the generic condition event', () => {
   const condition = generate({ type: 'controls_if', inputs: {
     IF0: { block: { type: 'microbit_logo_is_touched' } },
     DO0: { block: { type: 'microbit_clear_display' } },
   } });
   assert.match(condition, /if _microbit.pin_logo.is_touched\(\):/);
 
-  const event = generate({ type: 'microbit_on_logo_touched', inputs: {
-    DO: { block: { type: 'microbit_clear_display' } },
-  }, next: undefined });
-  assert.match(event, /setdefault\('microbit_logo', \(lambda: _microbit.pin_logo.is_touched\(\), 0, \[\]\)\)/);
-  assert.match(event, /def _on_microbit_logo_pressed\(\):\n  _microbit_display.clear\(\)/);
-  assert.match(event, /_button_dispatch\(\)\s*$/);
+  const event = generate({type:'events_when', inputs:{
+    CONDITION:{block:{type:'microbit_logo_is_touched'}},
+    DO:{block:{type:'microbit_clear_display'}},
+  }});
+  assert.match(event, /if _condition_sample\(_condition_state, _microbit.pin_logo.is_touched\(\), 0\):\n  _microbit_display.clear\(\)/);
+  assert.doesNotMatch(event, /while True|_run_condition_events/);
+
 });
 
 test('music supports a sustained background tone and stops the selected output', () => {

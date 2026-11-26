@@ -82,6 +82,10 @@ export function createToolbox() {
         { type: 'controls_for', inputs: { FROM: numberInput(1), TO: numberInput(10), BY: numberInput(1) } },
         'controls_forEach', 'controls_flow_statements',
       ]),
+      category(t('eventsCategory'), '#b57a36', faHandPointer, [
+        { type: 'events_when', inputs: { CONDITION: { shadow: { type: 'logic_boolean', fields: { BOOL: 'FALSE' } } } } },
+        { type: 'events_when_async', inputs: { CONDITION: { shadow: { type: 'logic_boolean', fields: { BOOL: 'FALSE' } } } } },
+      ]),
       category(t('math'), '%{BKY_MATH_HUE}', faCalculator, [
         'math_number',
         { type: 'math_arithmetic', inputs: { A: numberInput(1), B: numberInput(1) } },
@@ -255,8 +259,8 @@ export function createToolbox() {
             { type: 'microbit_set_analog_period', inputs: { PERIOD: numberInput(20) } },
           ]),
           category(t('buttons'), '#b05039', faHandPointer, [
-            'microbit_on_button_pressed', 'microbit_button_is_pressed', 'microbit_button_was_pressed', 'microbit_button_press_count',
-            'microbit_on_logo_touched', 'microbit_logo_is_touched',
+            'microbit_button_is_pressed', 'microbit_button_was_pressed', 'microbit_button_press_count',
+            'microbit_logo_is_touched',
           ]),
           category(t('microbitRadio'), '#b05039', faWifi, [
             'microbit_radio_power',
@@ -306,14 +310,36 @@ export function createToolbox() {
           ]),
           category(t('pins'), '#745ba5', faPlug, ['matrixbit_pin_number']),
           category(t('buttons'), '#745ba5', faHandPointer, [
-            'matrixbit_on_button_pressed', 'matrixbit_button_is_pressed',
-            { type: 'matrixbit_on_touch', inputs: { THRESHOLD: numberInput(400) } },
+            'matrixbit_button_is_pressed',
             { type: 'matrixbit_touch_is_touched', inputs: { THRESHOLD: numberInput(400) } },
             'matrixbit_touch_read',
           ]),
         ],
       },
 
+      {
+        kind: 'iconCategoryGroup', name: 'M5Stack', icon: faMicrochip, colour: '#b83a36',
+        contents: [
+          category(t('m5Program'), '#b83a36', faCode, [
+            { kind: 'label', text: t('m5Firmware') }, 'm5_begin', 'm5_update',
+          ]),
+          category(t('display'), '#b83a36', faDisplay, [
+            { type: 'm5_fill', inputs: { COLOR: numberInput(0) } },
+            { type: 'm5_text_color', inputs: { FOREGROUND: numberInput(16777215), BACKGROUND: numberInput(0) } },
+            { type: 'm5_text_size', inputs: { SIZE: numberInput(2) } },
+            { type: 'm5_text', inputs: { TEXT: textInput('Hello!'), X: numberInput(8), Y: numberInput(8) } },
+            'm5_rotation', { type: 'm5_brightness', inputs: { VALUE: numberInput(128) } }, 'm5_dimension',
+            { type: 'm5_pixel', inputs: { X: numberInput(10), Y: numberInput(10), COLOR: numberInput(16711680) } },
+            { type: 'm5_line', inputs: { X1: numberInput(0), Y1: numberInput(0), X2: numberInput(40), Y2: numberInput(40), COLOR: numberInput(65280) } },
+            { type: 'm5_rectangle', inputs: { X: numberInput(8), Y: numberInput(40), WIDTH: numberInput(30), HEIGHT: numberInput(20), COLOR: numberInput(255) } },
+          ]),
+          category(t('buttons'), '#b83a36', faHandPointer, ['m5_button']),
+          category(t('sensors'), '#b83a36', faMicrochip, [
+            { kind: 'label', text: t('m5StickSensors') },
+            'm5_stick_accel', 'm5_stick_gyro', 'm5_stick_battery',
+          ]),
+        ],
+      },
       {
         kind: 'iconCategoryGroup', name: 'SPIKE Prime', icon: faMicrochip, colour: '#b08a20',
         contents: [

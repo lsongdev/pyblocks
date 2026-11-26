@@ -3,6 +3,7 @@ import { Order, pythonGenerator } from 'blockly/python';
 import { blockMessage, t } from '../../i18n/index.js';
 import { PythonBlockError } from '../../python/errors.js';
 import { eventHandler } from '../../python/events.js';
+import { asyncioEntry } from '../../python/event-scheduler.js';
 import { inAsyncFunction } from '../../python/async-context.js';
 
 const colour = 260;
@@ -43,9 +44,9 @@ function taskCode(block, generator, order = Order.NONE) {
 Object.assign(pythonGenerator.forBlock, {
   asyncio_run(block, generator) {
     if (inAsyncFunction(generator)) throw new PythonBlockError(t('asyncNestedRun'));
-    const asyncModule = module(generator);
+    module(generator);
     const { name, code } = eventHandler(block, generator, '_async_main', { asynchronous: true });
-    return `${code}${asyncModule}.run(${name}())\n`;
+    return code + asyncioEntry(generator, `${name}()`);
   },
   asyncio_create_task(block, generator) {
     requireAsync(generator);

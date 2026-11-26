@@ -1,0 +1,50 @@
+{
+  "format": "pyblocks",
+  "version": 1,
+  "workspace": {
+    "variables": [],
+    "blocks": {
+      "languageVersion": 0,
+      "blocks": [
+        {
+          "type": "events_when_async",
+          "fields": {
+            "STABLE": 25
+          },
+          "inputs": {
+            "CONDITION": {
+              "block": {
+                "type": "matrixbit_button_is_pressed",
+                "fields": {
+                  "BUTTON": "a"
+                },
+                "inputs": {}
+              }
+            },
+            "DO": {
+              "block": {
+                "type": "text_print",
+                "fields": {},
+                "inputs": {
+                  "TEXT": {
+                    "block": {
+                      "type": "text",
+                      "fields": {
+                        "TEXT": "A pressed"
+                      },
+                      "inputs": {}
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "x": 32,
+          "y": 32
+        }
+      ]
+    }
+  },
+  "manualCode": null,
+  "libraries": []
+}

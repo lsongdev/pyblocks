@@ -1,4 +1,4 @@
-import { ESPLoader, Transport } from 'esptool-js';
+import { Transport } from 'esptool-js';
 import SparkMD5 from 'spark-md5';
 import { createUSBConnection } from '@microbit/microbit-connection/usb';
 import { ProgressStage } from '@microbit/microbit-connection';
@@ -6,8 +6,10 @@ import { ProgressStage } from '@microbit/microbit-connection';
 import images from './images.json';
 import { connectPicoBoot } from '../device/rp2040.js';
 
-const matrixbitImage = images.matrixbit;
-const microbitImages = { V1: images.V1, V2: images.V2 };
+import { createClassicReset, FirmwareESPLoader, resetEsp32 } from './esp32.js';
+import { getFirmwareFamily, matchFirmware } from './catalog.js';
+import { uiflowBootSetup } from './uiflow.js';
+import { executeProgram } from '../device/micropython.js';
 
 async function fetchImage({ file, sha256 }) {
   const response = await fetch(new URL(`firmware/${file}`, document.baseURI));
@@ -19,31 +21,45 @@ async function fetchImage({ file, sha256 }) {
   return bytes;
 }
 
-export async function connectFirmware(board, report = () => {}) {
-  if (board === 'matrixbit') {
+export async function connectFirmware(familyId, report = () => {}) {
+  const family = getFirmwareFamily(familyId);
+  if (!family) throw new Error('Unsupported device family.');
+  const resolve = (selection, device) => matchFirmware(selection, device, images);
+  const requireTarget = (selection, device) => {
+    const match = resolve(selection, device);
+    if (!match.supported) throw new Error('No compatible firmware for this selection and device.');
+    return match.target;
+  };
+  if (family.transport === 'serial') {
     const port = await navigator.serial.requestPort();
     const transport = new Transport(port);
-    const loader = new ESPLoader({ transport, baudrate: 115200 });
-    let connected = false;
+    const terminal = { clean() {}, write: s => console.log('[esptool]', s), writeLine: s => console.log('[esptool]', s) };
+    const loader = new FirmwareESPLoader({ transport, baudrate: 115200, terminal, debugLogging: true, resetConstructors: { classicReset: createClassicReset } });
+    const portId = () => {
+      const vid = transport.getVid(), pid = transport.getPid();
+      return vid === undefined ? 'unknown USB bridge' : `USB ${vid.toString(16).padStart(4, '0')}:${(pid ?? 0).toString(16).padStart(4, '0')}`;
+    };
+    let connected = true;
 
     const close = async () => {
-      if (connected) { connected = false; await loader.after().catch(() => {}); }
+      if (connected) { connected = false; await resetEsp32(transport).catch(() => {}); }
       await transport.disconnect().catch(() => {});
     };
     try {
       report('firmwareDetecting');
       await loader.main();
       connected = true;
-      if (loader.chip.CHIP_NAME !== 'ESP32' || await loader.detectFlashSize() !== '8MB') {
-        throw new Error('This installer requires a classic ESP32 with 8 MB flash.');
-      }
-      return { label: `Matrix:bit · ESP32 · 8 MB · MicroPython v${matrixbitImage.version}`, close, async install(update) {
+      const detectedSize = await loader.detectFlashSize();
+      const device = { transport: 'serial', chip: loader.chip.CHIP_NAME,
+        flashSize: /^\d+(KB|MB)$/.test(detectedSize) ? detectedSize : null };
+      return { device, match: selection => resolve(selection, device), close, async install(selection, update) {
+        const target = requireTarget(selection, device);
         report('firmwareChecking');
-        const data = new Uint8Array(await fetchImage(matrixbitImage));
+        const data = new Uint8Array(await fetchImage(target.image));
         report('firmwareWriting');
         await loader.writeFlash({
-          fileArray: [{ data, address: 0x1000 }],
-          flashSize: '8MB',
+          fileArray: [{ data, address: target.address }],
+          flashSize: target.flashSize,
           flashMode: 'keep',
           flashFreq: 'keep',
           eraseAll: true,
@@ -53,25 +69,39 @@ export async function connectFirmware(board, report = () => {}) {
           },
           calculateMD5Hash: image => SparkMD5.ArrayBuffer.hash(image.slice().buffer),
         });
-        await loader.after();
+        await resetEsp32(transport);
         connected = false;
+        if (target.uiflow) {
+          report('firmwareConfiguring');
+          await transport.disconnect();
+          // Allow the freshly installed firmware to reach its startup/REPL.
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          const session = await executeProgram(port, uiflowBootSetup);
+          await session.close();
+        }
       } };
-    } catch (error) { await close(); throw error; }
+    } catch (error) {
+      const id = portId();
+      await close();
+      if (error instanceof Error) error.message = `${error.message} (${id})`;
+      throw error;
+    }
   }
-  if (board === 'pico') {
+  if (family.transport === 'rp2040') {
     report('firmwareDetecting');
     const pico = await connectPicoBoot();
+    const device = { transport: 'rp2040', chip: 'RP2040', flashSize: null };
     return {
-      label: `Raspberry Pi Pico · RP2040 · MicroPython v${images.pico.version}`,
+      device, match: selection => resolve(selection, device),
       close: pico.close,
-      async install(progress) {
+      async install(selection, progress) {
+        const target = requireTarget(selection, device);
         report('firmwareChecking');
-        const bytes = await fetchImage(images.pico);
+        const bytes = await fetchImage(target.image);
         await pico.install(bytes, report, progress);
       },
     };
   }
-  if (board !== 'microbit') throw new Error('Unsupported board.');
   const connection = createUSBConnection();
   const close = async () => {
     await connection.disconnect().catch(() => {});
@@ -81,12 +111,13 @@ export async function connectFirmware(board, report = () => {}) {
     report('firmwareDetecting');
     await connection.connect();
     const version = connection.getBoardVersion();
-    if (!microbitImages[version]) throw new Error('Unsupported Micro:bit version.');
+    const device = { transport: 'microbit', version, chip: version === 'V1' ? 'nRF51822' : version === 'V2' ? 'nRF52833' : '?', flashSize: null };
     return {
-      label: `Micro:bit ${version} · MicroPython v${microbitImages[version].version}`, close,
-      async install(update) {
+      device, match: selection => resolve(selection, device), close,
+      async install(selection, update) {
+        requireTarget(selection, device);
         await connection.flash(async boardVersion => {
-          const image = microbitImages[boardVersion];
+          const image = requireTarget(selection, { ...device, version: boardVersion }).image;
           if (!image) throw new Error('Unsupported Micro:bit version.');
           report('firmwareChecking');
           const bytes = await fetchImage(image);

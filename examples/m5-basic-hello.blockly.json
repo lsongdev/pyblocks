@@ -1,0 +1,116 @@
+{
+  "format": "pyblocks",
+  "version": 1,
+  "workspace": {
+    "variables": [],
+    "blocks": {
+      "languageVersion": 0,
+      "blocks": [
+        {
+          "type": "m5_begin",
+          "fields": {},
+          "inputs": {},
+          "next": {
+            "block": {
+              "type": "m5_fill",
+              "fields": {},
+              "inputs": {
+                "COLOR": {
+                  "block": {
+                    "type": "math_number",
+                    "fields": {
+                      "NUM": 0
+                    },
+                    "inputs": {}
+                  }
+                }
+              },
+              "next": {
+                "block": {
+                  "type": "m5_text_color",
+                  "fields": {},
+                  "inputs": {
+                    "FOREGROUND": {
+                      "block": {
+                        "type": "math_number",
+                        "fields": {
+                          "NUM": 16777215
+                        },
+                        "inputs": {}
+                      }
+                    },
+                    "BACKGROUND": {
+                      "block": {
+                        "type": "math_number",
+                        "fields": {
+                          "NUM": 0
+                        },
+                        "inputs": {}
+                      }
+                    }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "m5_text_size",
+                      "fields": {},
+                      "inputs": {
+                        "SIZE": {
+                          "block": {
+                            "type": "math_number",
+                            "fields": {
+                              "NUM": 2
+                            },
+                            "inputs": {}
+                          }
+                        }
+                      },
+                      "next": {
+                        "block": {
+                          "type": "m5_text",
+                          "fields": {},
+                          "inputs": {
+                            "TEXT": {
+                              "block": {
+                                "type": "text",
+                                "fields": {
+                                  "TEXT": "Hello!"
+                                },
+                                "inputs": {}
+                              }
+                            },
+                            "X": {
+                              "block": {
+                                "type": "math_number",
+                                "fields": {
+                                  "NUM": 8
+                                },
+                                "inputs": {}
+                              }
+                            },
+                            "Y": {
+                              "block": {
+                                "type": "math_number",
+                                "fields": {
+                                  "NUM": 8
+                                },
+                                "inputs": {}
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "x": 32,
+          "y": 32
+        }
+      ]
+    }
+  },
+  "manualCode": null,
+  "libraries": []
+}

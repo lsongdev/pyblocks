@@ -1,0 +1,83 @@
+{
+  "format": "pyblocks",
+  "version": 1,
+  "workspace": {
+    "variables": [],
+    "blocks": {
+      "languageVersion": 0,
+      "blocks": [
+        {
+          "type": "controls_whileUntil",
+          "fields": {
+            "MODE": "WHILE"
+          },
+          "x": 32,
+          "y": 32,
+          "inputs": {
+            "BOOL": {
+              "shadow": {
+                "type": "logic_boolean",
+                "fields": {
+                  "BOOL": "TRUE"
+                }
+              }
+            },
+            "DO": {
+              "block": {
+                "type": "events_when",
+                "fields": {
+                  "STABLE": 0
+                },
+                "inputs": {
+                  "CONDITION": {
+                    "block": {
+                      "type": "microbit_button_is_pressed",
+                      "fields": {
+                        "BUTTON": "a"
+                      },
+                      "inputs": {}
+                    }
+                  },
+                  "DO": {
+                    "block": {
+                      "type": "text_print",
+                      "fields": {},
+                      "inputs": {
+                        "TEXT": {
+                          "block": {
+                            "type": "text",
+                            "fields": {
+                              "TEXT": "A pressed"
+                            },
+                            "inputs": {}
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "next": {
+                  "block": {
+                    "type": "timing_wait_ms",
+                    "inputs": {
+                      "MS": {
+                        "shadow": {
+                          "type": "math_number",
+                          "fields": {
+                            "NUM": 10
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "manualCode": null,
+  "libraries": []
+}

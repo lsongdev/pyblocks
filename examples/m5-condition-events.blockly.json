@@ -1,0 +1,111 @@
+{
+  "format": "pyblocks",
+  "version": 1,
+  "workspace": {
+    "variables": [],
+    "blocks": {
+      "languageVersion": 0,
+      "blocks": [
+        {
+          "type": "m5_begin",
+          "fields": {},
+          "inputs": {},
+          "x": 32,
+          "y": 32
+        },
+        {
+          "type": "asyncio_run",
+          "fields": {},
+          "inputs": {
+            "DO": {
+              "block": {
+                "type": "controls_whileUntil",
+                "fields": {
+                  "MODE": "WHILE"
+                },
+                "inputs": {
+                  "BOOL": {
+                    "block": {
+                      "type": "logic_boolean",
+                      "fields": {
+                        "BOOL": "TRUE"
+                      },
+                      "inputs": {}
+                    }
+                  },
+                  "DO": {
+                    "block": {
+                      "type": "m5_update",
+                      "fields": {},
+                      "inputs": {},
+                      "next": {
+                        "block": {
+                          "type": "asyncio_sleep",
+                          "fields": {
+                            "UNIT": "MS"
+                          },
+                          "inputs": {
+                            "DURATION": {
+                              "block": {
+                                "type": "math_number",
+                                "fields": {
+                                  "NUM": 10
+                                },
+                                "inputs": {}
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "x": 32,
+          "y": 252
+        },
+        {
+          "type": "events_when_async",
+          "fields": {
+            "STABLE": 0
+          },
+          "inputs": {
+            "CONDITION": {
+              "block": {
+                "type": "m5_button",
+                "fields": {
+                  "BUTTON": "BtnA",
+                  "METHOD": "isPressed"
+                },
+                "inputs": {}
+              }
+            },
+            "DO": {
+              "block": {
+                "type": "text_print",
+                "fields": {},
+                "inputs": {
+                  "TEXT": {
+                    "block": {
+                      "type": "text",
+                      "fields": {
+                        "TEXT": "A pressed"
+                      },
+                      "inputs": {}
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "x": 32,
+          "y": 472
+        }
+      ]
+    }
+  },
+  "manualCode": null,
+  "libraries": []
+}

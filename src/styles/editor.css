@@ -184,6 +184,9 @@ button:disabled { opacity: .45; cursor: default; }
 .app-toolbar strong { font-size: 1rem; }
 .app-menu { margin-left: auto; display: flex; align-items: center; gap: 8px; }
 .app-menu button { background: #eee9ff; color: #473779; font-size: .875rem; }
+.app-menu #toggle-theme { display: inline-grid; place-items: center; width: 40px; height: 40px; padding: 10px; }
+.app-menu #toggle-theme svg { display: block; width: 20px; height: 20px; overflow: visible; }
+.app-menu #toggle-language { min-width: 40px; height: 40px; padding: 8px; }
 dialog { width: min(480px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); overflow: auto; padding: 24px; border: 1px solid #dcd9ed; border-radius: 16px; color: inherit; box-shadow: 0 12px 60px #24213d44; }
 dialog::backdrop { background: #24213d66; }
 dialog h2 { font-size: 1.15rem; margin-bottom: 20px; }
@@ -196,15 +199,22 @@ dialog p { font-size: .9rem; line-height: 1.6; overflow-wrap: anywhere; }
 .dialog-warning { padding: 12px; background: #fff3db; border-radius: 8px; }
 dialog progress { width: 100%; accent-color: #55448c; }
 
-.board-options { display: grid; grid-template-columns: 1fr; gap: 12px; border: 0; padding: 0; margin: 20px 0; }
-.board-options legend { margin-bottom: 10px; font-weight: 650; }
-dialog .board-card { display: flex; align-items: flex-start; gap: 10px; margin: 0; padding: 16px 12px; border: 2px solid #dcd9ed; border-radius: 12px; cursor: pointer; }
+#firmware-dialog { width: min(560px, calc(100vw - 32px)); }
+#firmware-dialog h3 { margin: 20px 0 12px; font-size: .95rem; }
+.firmware-families { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; border: 0; padding: 0; margin: 16px 0; }
+.firmware-families legend { margin-bottom: 10px; font-weight: 650; }
+dialog .board-card { display: flex; align-items: center; gap: 8px; margin: 0; padding: 12px; border: 2px solid #dcd9ed; border-radius: 10px; cursor: pointer; min-width: 0; }
 .board-card:has(input:checked) { border-color: #55448c; background: #f5f3fa; }
 .board-card:focus-within { outline: 3px solid #8979d1; outline-offset: 3px; }
-.board-card input { margin: 3px 0 0; accent-color: #55448c; }
-.board-card strong { display: block; font-size: .9rem; }
-.board-card small { display: block; margin-top: 6px; font-size: .8rem; font-weight: 400; color: #655d7b; }
-.board-options:disabled .board-card { opacity: .6; cursor: default; }
+.board-card input { margin: 0; accent-color: #55448c; }
+.board-card strong { font-size: .875rem; overflow-wrap: anywhere; }
+.firmware-families:disabled .board-card { opacity: .6; cursor: default; }
+.firmware-details { display: grid; grid-template-columns: minmax(85px, auto) minmax(0, 1fr); gap: 10px 16px; padding: 16px; margin: 16px 0; background: #f5f3fa; border-radius: 10px; font-size: .875rem; line-height: 1.5; }
+.firmware-details dt { color: #655d7b; }
+.firmware-details dd { margin: 0; overflow-wrap: anywhere; white-space: pre-line; }
+.firmware-hint { color: #655d7b; }
+.firmware-match-ok { color: #276c44; }
+#firmware-suggestion { background: #eee9ff; color: #473779; }
 .firmware-more { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #55448c; font-size: .875rem; line-height: 1.5; text-underline-offset: 3px; }
 .firmware-more:focus-visible { outline: 3px solid #8979d1; outline-offset: 3px; border-radius: 4px; }
 
@@ -235,3 +245,16 @@ dialog .board-card { display: flex; align-items: flex-start; gap: 10px; margin: 
 .serial-input-form :disabled { opacity: .5; cursor: default; }
 .serial-heading { flex-wrap: wrap; }
 .serial-heading .code-actions { flex-wrap: wrap; }
+
+:root[data-theme="dark"] { color-scheme: dark; color: #e7e5f2; background: #171622; }
+:root[data-theme="dark"] .panel { background: #211f2c; border-color: #3c394b; }
+:root[data-theme="dark"] .panel-heading, :root[data-theme="dark"] .serial-panel, :root[data-theme="dark"] .serial-input-form { border-color: #3c394b; }
+:root[data-theme="dark"] #python, :root[data-theme="dark"] #serial-output { background: #191822; color: #e7e5f2; }
+:root[data-theme="dark"] .app-menu button, :root[data-theme="dark"] .project-actions button, :root[data-theme="dark"] .serial-heading button, :root[data-theme="dark"] .code-sync button, :root[data-theme="dark"] .toolbox-panel button, :root[data-theme="dark"] .dialog-actions button, :root[data-theme="dark"] #firmware-suggestion { background: #363144; color: #e7e1ff; }
+:root[data-theme="dark"] .serial-input-form input, :root[data-theme="dark"] .serial-input-form select, :root[data-theme="dark"] dialog select { background: #211f2c; color: #e7e5f2; border-color: #514d60; }
+:root[data-theme="dark"] dialog { background: #211f2c; border-color: #3c394b; }
+:root[data-theme="dark"] .firmware-details, :root[data-theme="dark"] .board-card:has(input:checked) { background: #2b2838; }
+:root[data-theme="dark"] .firmware-details dt, :root[data-theme="dark"] .firmware-hint { color: #b7b2c8; }
+:root[data-theme="dark"] .dialog-warning { background: #49391f; }
+:root[data-theme="dark"] .vertical-resize { background: #211f2c; }
+:root[data-theme="dark"] .resize-handle::after { background: #514d60; }

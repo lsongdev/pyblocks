@@ -1,7 +1,6 @@
-import { common, Names } from 'blockly/core';
+import { common } from 'blockly/core';
 import { Order, pythonGenerator } from 'blockly/python';
 import { blockMessage } from '../../i18n/index.js';
-import { buttonEventBlock, buttonEventCode } from '../shared/button-events.js';
 
 const frameBufferSetup = `_matrixbit_pixels = bytearray(128 * 64 // 8)
 _matrixbit_screen = _matrixbit_framebuf.FrameBuffer(
@@ -53,12 +52,6 @@ common.defineBlocksWithJsonArray([
     args0: [touchKey, thresholdInput], tooltip: blockMessage('matrixTouchHint'), output: 'Boolean', colour: 260,
   },
   {
-    type: 'matrixbit_on_touch', message0: blockMessage('matrixOnTouch'),
-    args0: [touchKey, thresholdInput],
-    message1: blockMessage('buttonEventBody'), args1: [{ type: 'input_statement', name: 'DO' }],
-    tooltip: blockMessage('matrixTouchEventHint'), hat: 'cap', colour: 260,
-  },
-  {
     type: 'matrixbit_rgb_set',
     message0: blockMessage('matrixRgbSet'),
     args0: [
@@ -108,7 +101,6 @@ common.defineBlocksWithJsonArray([
     output: 'Boolean',
     colour: 260,
   },
-  buttonEventBlock('matrixbit_on_button_pressed', 260),
 ]);
 
 pythonGenerator.addReservedWords(
@@ -163,11 +155,6 @@ Object.assign(pythonGenerator.forBlock, {
   matrixbit_pin_number: block => [String(boardPins[block.getFieldValue('PIN')]), Order.ATOMIC],
   matrixbit_touch_read: (block, generator) => [touchRead(block, generator), Order.FUNCTION_CALL],
   matrixbit_touch_is_touched: (block, generator) => [touchedExpression(block, generator), Order.RELATIONAL],
-  matrixbit_on_touch: (block, generator) => {
-    // Separate event sources let the same pad have handlers with different thresholds.
-    const source = generator.nameDB_.getDistinctName(`matrixbit_touch_${block.getFieldValue('PAD')}`, Names.NameType.PROCEDURE);
-    return buttonEventCode(block, generator, source, touchedExpression(block, generator), 25);
-  },
   matrixbit_rgb_set: (block, generator) => {
     generator.definitions_.import_matrixbit_pin = pinImport;
     generator.definitions_.import_matrixbit_neopixel = 'from neopixel import NeoPixel as _matrixbit_neopixel';
@@ -177,8 +164,6 @@ Object.assign(pythonGenerator.forBlock, {
     return `_matrixbit_rgb[${index}] = (${rgb.join(', ')})\n_matrixbit_rgb.write()\n`;
   },
   matrixbit_button_is_pressed: (block, generator) => [pressedExpression(block, generator), Order.RELATIONAL],
-  matrixbit_on_button_pressed: (block, generator) =>
-    buttonEventCode(block, generator, `matrixbit_${block.getFieldValue('BUTTON')}`, pressedExpression(block, generator), 25),
   matrixbit_oled_text: (block, generator) => {
     const text = generator.valueToCode(block, 'TEXT', Order.NONE) || "''";
     const color = block.getFieldValue('COLOR');

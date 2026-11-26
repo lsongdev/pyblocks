@@ -30,6 +30,10 @@ The installer supports classic ESP32 Matrix:bit (8 MB), micro:bit V1/V2, and the
 
 SPIKE Prime blocks target the official SPIKE App 3 firmware. They currently generate Python for use in the SPIKE App; direct USB/BLE upload from PyBlocks is not implemented yet. See the [SPIKE Prime guide](docs/spike-prime.md).
 
+M5Stack Core/Basic (4 or 16 MB) and original M5Stick-C (4 MB) use model-specific UIFlow2 firmware. See the [M5Stack guide](docs/m5stack.md) for installation, display, buttons, and Stick-C sensors.
+
+Shared [condition events](docs/events.md) offer synchronous and asyncio blocks; hardware updates remain explicit. SPIKE retains its own runloop.
+
 ## Development
 
 Requires Node.js 24+.

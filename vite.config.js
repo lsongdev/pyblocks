@@ -54,6 +54,8 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,png,svg,gif,cur,mp3,bin,hex,uf2,txt}'],
+        // Full 16 MB UIFlow filesystem images are fetched on demand, not precached.
+        globIgnores: ['**/*16mb*.bin'],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         // This is a single-page editor, scoped to its deployment directory.
         navigateFallback: 'index.html',

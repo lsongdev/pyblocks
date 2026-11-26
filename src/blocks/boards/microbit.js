@@ -1,7 +1,6 @@
 import { common, Extensions } from 'blockly/core';
 import { Order, pythonGenerator } from 'blockly/python';
 import { blockMessage } from '../../i18n/index.js';
-import { buttonEventBlock, buttonEventCode } from '../shared/button-events.js';
 
 const colour = 20;
 const statement = { previousStatement: null, nextStatement: null };
@@ -257,7 +256,6 @@ common.defineBlocksWithJsonArray([
     output: 'Number',
     colour,
   },
-  buttonEventBlock('microbit_on_button_pressed', colour),
   {
     type: 'microbit_logo_is_touched',
     message0: blockMessage('microbitLogoIsTouched'),
@@ -265,15 +263,7 @@ common.defineBlocksWithJsonArray([
     output: 'Boolean',
     colour,
   },
-  {
-    type: 'microbit_on_logo_touched',
-    message0: blockMessage('microbitOnLogoTouched'),
-    message1: blockMessage('buttonEventBody'),
-    args1: [{ type: 'input_statement', name: 'DO' }],
-    tooltip: blockMessage('microbitLogoEventHint'),
-    colour,
-    hat: 'cap',
-  },
+
 ]);
 
 pythonGenerator.addReservedWords('_microbit_display,_microbit,_microbit_music');
@@ -323,9 +313,6 @@ Object.assign(pythonGenerator.forBlock, {
   microbit_logo_is_touched: (_block, generator) => [
     `${microbitModule(generator)}.pin_logo.is_touched()`, Order.FUNCTION_CALL,
   ],
-  microbit_on_logo_touched: (block, generator) => buttonEventCode(
-    block, generator, 'microbit_logo', `${microbitModule(generator)}.pin_logo.is_touched()`, 0,
-  ),
   microbit_music_pitch: (block, generator) => {
     const [frequency, duration] = integers(block, generator, ['FREQ', 'DURATION']);
     return `${musicModule(generator)}.pitch(${frequency}, ${duration}, pin=${edgePin(block, generator)}, wait=${booleanField(block, 'WAIT')})\n`;
@@ -376,10 +363,6 @@ Object.assign(pythonGenerator.forBlock, {
   microbit_acceleration: (block, generator) => [
     `${microbitModule(generator)}.accelerometer.get_${block.getFieldValue('AXIS')}()`, Order.FUNCTION_CALL,
   ],
-  microbit_on_button_pressed: (block, generator) => {
-    const [pressed] = buttonCall(block, generator, 'is_pressed');
-    return buttonEventCode(block, generator, `microbit_${block.getFieldValue('BUTTON')}`, pressed, 0);
-  },
   microbit_button_is_pressed: (block, generator) => buttonCall(block, generator, 'is_pressed'),
   microbit_button_was_pressed: (block, generator) => buttonCall(block, generator, 'was_pressed'),
   microbit_button_press_count: (block, generator) => buttonCall(block, generator, 'get_presses'),
