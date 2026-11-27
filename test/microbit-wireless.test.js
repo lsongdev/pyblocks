@@ -5,8 +5,7 @@ import 'blockly/blocks';
 import { pythonGenerator } from 'blockly/python';
 import { applyLanguage } from '../src/i18n/index.js';
 import { createToolbox } from '../src/editor/toolbox.js';
-import '../src/blocks/boards/microbit-radio.js';
-import '../src/blocks/boards/microbit-microphone.js';
+import '../src/blocks/boards/microbit.js';
 const number = NUM => ({ block: { type: 'math_number', fields: { NUM } } });
 function generate(blocks) {
   const workspace = new Blockly.Workspace();

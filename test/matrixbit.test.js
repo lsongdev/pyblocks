@@ -8,6 +8,7 @@ import { createToolbox } from '../src/editor/toolbox.js';
 import '../src/blocks/boards/matrixbit.js';
 import '../src/blocks/shared/condition-events.js';
 import '../src/blocks/hardware/gpio.js';
+import '../src/blocks/hardware/touch.js';
 import '../src/blocks/hardware/pwm.js';
 import '../src/blocks/hardware/buses.js';
 
@@ -30,33 +31,103 @@ test('Microbit image blocks are available in Display without a separate Images c
   }
 });
 
-test('PYTHON pads map to the six ESP32 touch pins and compare adjustable thresholds', () => {
-  for (const [PAD, pin] of Object.entries({P:27, Y:14, T:12, H:13, O:15, N:4})) {
-    const code = generate({type:'matrixbit_touch_is_touched', fields:{PAD}, inputs:{THRESHOLD:number(250)}});
-    assert.ok(code.includes(`_matrixbit_touch_${PAD} = _matrixbit_touchpad(_matrixbit_pin(${pin}))`));
-    assert.ok(code.includes(`_matrixbit_touch_${PAD}.read() < int(250)`));
+test('Matrixbit pin mapping annotates touch keys and A/B buttons', () => {
+  for (const [language, buttonA, buttonB, touchP, touchN] of [
+    ['en', 'P5 → GPIO0 (button A)', 'P11 → GPIO2 (button B)', 'P23 → GPIO27 (touch key P)', 'P28 → GPIO4 (touch key N)'],
+    ['zh-CN', 'P5 → GPIO0 (按键 A)', 'P11 → GPIO2 (按键 B)', 'P23 → GPIO27 (触摸键 P)', 'P28 → GPIO4 (触摸键 N)'],
+  ]) {
+    applyLanguage(language);
+    const workspace = new Blockly.Workspace();
+    try {
+      const options = workspace.newBlock('matrixbit_pin_number').getField('PIN').getOptions(false);
+      const labels = Object.fromEntries(options.map(([label, value]) => [value, label]));
+      assert.equal(labels['0'], 'P0 → GPIO33');
+      assert.equal(labels['5'], buttonA);
+      assert.equal(labels['11'], buttonB);
+      assert.equal(labels['23'], touchP);
+      assert.equal(labels['28'], touchN);
+    } finally { workspace.dispose(); }
+  }
+  applyLanguage('en');
+  for (const old of [
+    'matrixbit_touch_pin', 'matrixbit_touch_read', 'matrixbit_touch_is_touched',
+  ]) assert.equal(Blockly.Blocks[old], undefined);
+});
+
+test('Matrixbit A/B button block reads active-low pins with pull-up', () => {
+  for (const [BUTTON, pin, name] of [['a', 0, '_matrixbit_button_a'], ['b', 2, '_matrixbit_button_b']]) {
+    const code = generate({type:'matrixbit_button_is_pressed',fields:{BUTTON}});
+    assert.ok(code.includes(`${name} = _matrixbit_pin(${pin}, _matrixbit_pin.IN, _matrixbit_pin.PULL_UP)`));
+    assert.ok(code.includes(`${name}.value() == 0`));
   }
 });
 
-test('same pad events retain independent thresholds while sharing a TouchPad instance', () => {
+test('Matrixbit touch and button pins work through generic TouchPad and GPIO blocks', () => {
+  const pin = PIN => ({block:{type:'matrixbit_pin_number',fields:{PIN}}});
+  const touch = generate({type:'touchpad_read', inputs:{PIN:pin('23')}});
+  assert.ok(touch.includes('_touchpad_type(_touchpad_pin(27)).read()'));
+  const button = generate({type:'gpio_read_digital', fields:{PULL:'UP'}, inputs:{PIN:pin('5')}});
+  assert.match(button, /_gpio_pin\(0, _gpio_pin.IN, pull=_gpio_pin.PULL_UP\)\.value\(\)/);
+});
+
+test('same touch key events keep independent thresholds through the pin mapping', () => {
   const event = threshold => ({type:'events_when', fields:{STABLE:25}, inputs:{
-    CONDITION:{block:{type:'matrixbit_touch_is_touched',fields:{PAD:'P'},inputs:{THRESHOLD:number(threshold)}}},
+    CONDITION:{block:{type:'touchpad_is_touched',inputs:{
+      PIN:{block:{type:'matrixbit_pin_number',fields:{PIN:'23'}}}, THRESHOLD:number(threshold),
+    }}},
   }});
-  const first = event(200);
-  const code = generate(first, event(400));
-  assert.equal(code.match(/= _matrixbit_touchpad\(/g).length, 1);
-  assert.match(code, /read\(\) < int\(200\), 25/);
-  assert.match(code, /read\(\) < int\(400\), 25/);
+  const code = generate(event(200), event(400));
+  assert.match(code, /_touchpad_type\(_touchpad_pin\(27\)\)\.read\(\) < int\(200\), 25/);
+  assert.match(code, /_touchpad_type\(_touchpad_pin\(27\)\)\.read\(\) < int\(400\), 25/);
 });
 
 test('new Matrixbit controls generate in both languages', () => {
   for (const language of ['en', 'zh-CN']) {
     applyLanguage(language);
-    for (const type of ['matrixbit_pin_number', 'matrixbit_touch_read', 'matrixbit_touch_is_touched']) {
+    for (const type of ['matrixbit_pin_number', 'matrixbit_button_is_pressed', 'matrixbit_neopixel']) {
       assert.doesNotThrow(() => generate({type}));
     }
   }
   applyLanguage('en');
+});
+
+test('Matrixbit Pins provides a preconfigured NeoPixel strip for generic pixel blocks', () => {
+  const pins = createToolbox().contents
+    .find(category => category.name === 'Matrix:bit').contents
+    .find(category => category.name === 'Pins');
+  assert.ok(pins.contents.some(block => block.type === 'matrixbit_pin_number'));
+  assert.ok(pins.contents.some(block => block.type === 'matrixbit_button_is_pressed'));
+  assert.ok(pins.contents.some(block => block.type === 'matrixbit_neopixel'));
+
+  const strip = () => ({block:{type:'matrixbit_neopixel'}});
+  const code = generate(
+    {type:'neopixel_set', inputs:{
+      PIXELS:strip(), INDEX:number(1), RED:number(10), GREEN:number(20), BLUE:number(30),
+    }},
+    {type:'neopixel_write', inputs:{PIXELS:strip()}},
+  );
+  assert.match(code, /from neopixel import NeoPixel as _matrixbit_neopixel/);
+  assert.match(code, /_matrixbit_leds = _matrixbit_neopixel\(_matrixbit_pin\(17\), 3\)/);
+  assert.match(code, /_matrixbit_leds\[1\] = \(10, 20, 30\)/);
+  assert.match(code, /_matrixbit_leds\.write\(\)/);
+  assert.equal(code.match(/_matrixbit_leds = /g).length, 1);
+});
+
+test('Matrixbit no longer exposes the separate RGB light category', () => {
+  const matrixbit = createToolbox().contents.find(category => category.name === 'Matrix:bit');
+  assert.ok(!matrixbit.contents.some(category => category.name === 'RGB' || category.name === '彩灯'));
+  assert.ok(!matrixbit.contents.some(category =>
+    category.contents?.some(block => block.type === 'matrixbit_rgb_set')));
+  assert.equal(Blockly.Blocks.matrixbit_rgb_set, undefined);
+});
+
+test('Matrixbit A/B button lives in Pins without a separate Buttons group', () => {
+  const matrixbit = createToolbox().contents.find(category => category.name === 'Matrix:bit');
+  assert.ok(!matrixbit.contents.some(category => category.name === 'Buttons' || category.name === '按键'));
+  const pins = matrixbit.contents.find(category => category.name === 'Pins');
+  assert.deepEqual(pins.contents.filter(block => block.type).map(block => block.type), [
+    'matrixbit_pin_number', 'matrixbit_button_is_pressed', 'matrixbit_neopixel',
+  ]);
 });
 
 test('Matrixbit board pin numbers plug into generic GPIO, PWM and UART inputs', () => {

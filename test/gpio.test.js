@@ -45,9 +45,12 @@ test('new GPIO blocks and pull controls work in both languages', () => {
   applyLanguage('en');
 });
 
-test('Pins groups digital I/O and ADC without invented analog output wrappers', () => {
+test('Pins groups digital I/O, ADC and touch keys without invented analog output wrappers', () => {
   const category = createToolbox().contents.find(category=>category.contents?.some(block=>block.type==='gpio_set_pull'));
-  assert.deepEqual(category.contents.filter(block=>block.type).map(block=>block.type).sort(), ['adc_read_pin','gpio_on_edge','gpio_read_digital','gpio_set_pull','gpio_write_digital']);
+  assert.equal(category.name, 'Pins');
+  assert.deepEqual(category.contents.filter(block=>block.type).map(block=>block.type).sort(), ['adc_read_pin','gpio_on_edge','gpio_read_digital','gpio_set_pull','gpio_write_digital','touchpad_is_touched','touchpad_read']);
+  assert.ok(!category.contents.some(block=>block.kind==='label' && block.text==='Buttons'));
+  assert.ok(category.contents.some(block=>block.kind==='label' && block.text==='Touch keys'));
   for (const type of ['gpio_write_analog','gpio_stop_analog','gpio_read_adc']) {
     assert.equal(Blockly.Blocks[type],undefined);
     assert.equal(pythonGenerator.forBlock[type],undefined);

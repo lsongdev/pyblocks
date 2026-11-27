@@ -137,7 +137,7 @@ test('generic events compile for all state sources in both languages without tou
     const toolbox = JSON.stringify(createToolbox());
     for (const old of ['microbit_on_button_pressed','matrixbit_on_button_pressed','matrixbit_on_touch','microbit_on_logo_touched']) assert.ok(!toolbox.includes(old));
     assert.ok(toolbox.includes('spike_on_condition'));
-    for (const condition of [b('microbit_button_is_pressed'),b('microbit_logo_is_touched'),b('matrixbit_button_is_pressed'),b('matrixbit_touch_is_touched',{}, {THRESHOLD:num(400)}),b('m5_button')]) {
+    for (const condition of [b('microbit_button_is_pressed'),b('microbit_logo_is_touched'),b('matrixbit_button_is_pressed',{BUTTON:'a'}),b('touchpad_is_touched',{}, {PIN:b('matrixbit_pin_number',{PIN:'23'}), THRESHOLD:num(400)}),b('m5_button')]) {
       const code = generate([when(condition,print(text('event')),25)]);
       python(`compile(${JSON.stringify(code)}, '<events>', 'exec')`);
     }

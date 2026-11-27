@@ -108,7 +108,7 @@ The edge detector uses `utime.ticks_ms()` and `ticks_diff()` for wrap-safe debou
 
 Use current-state readers (`is_pressed()`, `isPressed()`, touch comparisons), not readers that consume event history, such as micro:bit `was_pressed()`, when independent checks must observe the same state.
 
-The specialized Micro:bit/Matrix:bit button and touch events have been replaced; native state readers remain. Older saved event blocks are not automatically migrated.
+The specialized Micro:bit/Matrix:bit button and touch events have been replaced; native state readers remain. Matrix:bit exposes an A/B button block in Pins, while its PYTHON touch keys use generic TouchPad blocks through the pin mapping. Older saved event and board-specific touch/button blocks are not automatically migrated.
 
 ## Validation
 

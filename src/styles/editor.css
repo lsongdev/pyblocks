@@ -248,7 +248,9 @@ dialog .board-card { display: flex; align-items: center; gap: 8px; margin: 0; pa
 
 :root[data-theme="dark"] { color-scheme: dark; color: #e7e5f2; background: #171622; }
 :root[data-theme="dark"] .panel { background: #211f2c; border-color: #3c394b; }
-:root[data-theme="dark"] .panel-heading, :root[data-theme="dark"] .serial-panel, :root[data-theme="dark"] .serial-input-form { border-color: #3c394b; }
+:root[data-theme="dark"] .panel-heading, 
+:root[data-theme="dark"] .serial-panel, 
+:root[data-theme="dark"] .serial-input-form { border-color: #3c394b; }
 :root[data-theme="dark"] #python, :root[data-theme="dark"] #serial-output { background: #191822; color: #e7e5f2; }
 :root[data-theme="dark"] .app-menu button, :root[data-theme="dark"] .project-actions button, :root[data-theme="dark"] .serial-heading button, :root[data-theme="dark"] .code-sync button, :root[data-theme="dark"] .toolbox-panel button, :root[data-theme="dark"] .dialog-actions button, :root[data-theme="dark"] #firmware-suggestion { background: #363144; color: #e7e1ff; }
 :root[data-theme="dark"] .serial-input-form input, :root[data-theme="dark"] .serial-input-form select, :root[data-theme="dark"] dialog select { background: #211f2c; color: #e7e5f2; border-color: #514d60; }

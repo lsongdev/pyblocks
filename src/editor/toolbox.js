@@ -1,6 +1,6 @@
 import { CollapsibleToolboxCategory, registry, Toolbox, ToolboxCategory } from 'blockly/core';
 import {
-  faCode, faCalculator, faCodeBranch, faCube, faEquals, faFont, faListUl, faMicrochip, faRotateRight, faDisplay, faWifi, faPlug, faHandPointer, faClock, faFolderOpen, faWaveSquare, faLightbulb, faVolumeHigh, faRightLeft,
+  faCode, faCalculator, faCodeBranch, faCube, faEquals, faFont, faListUl, faMicrochip, faRotateRight, faDisplay, faWifi, faPlug, faHandPointer, faClock, faFolderOpen, faWaveSquare, faLightbulb, faVolumeHigh, faMicrophone, faRightLeft,
 } from '@fortawesome/free-solid-svg-icons';
 import { t } from '../i18n/index.js';
 
@@ -123,12 +123,15 @@ export function createToolbox() {
         { type: 'asyncio_sleep', inputs: { DURATION: numberInput(100) } },
         'asyncio_wait_task', 'asyncio_await_task', 'asyncio_return', 'asyncio_cancel_task',
       ]),
-      category(t('gpio'), '#29806c', faPlug, [
+      category(t('pins'), '#29806c', faPlug, [
         { type: 'adc_read_pin', inputs: { PIN: numberInput(0) } },
         { type: 'gpio_read_digital', inputs: { PIN: numberInput(0) } },
         { type: 'gpio_write_digital', inputs: { PIN: numberInput(0) } },
         { type: 'gpio_set_pull', inputs: { PIN: numberInput(0) } },
         { type: 'gpio_on_edge', inputs: { PIN: numberInput(0) } },
+        { kind: 'label', text: t('touchKeys') },
+        { type: 'touchpad_read', inputs: { PIN: numberInput(0) } },
+        { type: 'touchpad_is_touched', inputs: { PIN: numberInput(0), THRESHOLD: numberInput(400) } },
       ]),
       category('I2C', '#298477', faCodeBranch, [
         { type: 'i2c_create', inputs: { ID: numberInput(0), SCL: numberInput(22), SDA: numberInput(23), FREQ: numberInput(100000) } },
@@ -237,6 +240,26 @@ export function createToolbox() {
         'pico_temperature',
       ]),
       {
+        kind: 'iconCategoryGroup', name: 'M5Stack', icon: faMicrochip, colour: '#b83a36',
+        contents: [
+          category(t('m5Program'), '#b83a36', faCode, ['m5_begin', 'm5_update']),
+          category(t('display'), '#b83a36', faDisplay, [
+            { type: 'm5_fill', inputs: { COLOR: numberInput(0) } },
+            { type: 'm5_text_color', inputs: { FOREGROUND: numberInput(16777215), BACKGROUND: numberInput(0) } },
+            { type: 'm5_text_size', inputs: { SIZE: numberInput(2) } },
+            { type: 'm5_text', inputs: { TEXT: textInput('Hello!'), X: numberInput(8), Y: numberInput(8) } },
+            'm5_rotation', { type: 'm5_brightness', inputs: { VALUE: numberInput(128) } }, 'm5_dimension',
+            { type: 'm5_pixel', inputs: { X: numberInput(10), Y: numberInput(10), COLOR: numberInput(16711680) } },
+            { type: 'm5_line', inputs: { X1: numberInput(0), Y1: numberInput(0), X2: numberInput(40), Y2: numberInput(40), COLOR: numberInput(65280) } },
+            { type: 'm5_rectangle', inputs: { X: numberInput(8), Y: numberInput(40), WIDTH: numberInput(30), HEIGHT: numberInput(20), COLOR: numberInput(255) } },
+          ]),
+          category(t('buttons'), '#b83a36', faHandPointer, ['m5_button']),
+          category(t('sensors'), '#b83a36', faMicrochip, [
+            'm5_stick_accel', 'm5_stick_gyro', 'm5_stick_battery',
+          ]),
+        ],
+      },
+      {
         kind: 'iconCategoryGroup',
         icon: faMicrochip,
         name: 'Micro:bit',
@@ -273,7 +296,7 @@ export function createToolbox() {
             { type: 'microbit_radio_buffers', inputs: { LENGTH: numberInput(32), QUEUE: numberInput(3) } },
             'microbit_radio_reset',
           ]),
-          category(t('microbitMicrophone'), '#b05039', faVolumeHigh, [
+          category(t('microbitMicrophone'), '#b05039', faMicrophone, [
             'microbit_microphone_level', 'microbit_microphone_is_event', 'microbit_microphone_was_event',
             { type: 'microbit_microphone_threshold', inputs: { VALUE: numberInput(128) } },
             'microbit_microphone_current_event', 'microbit_sound_event', 'microbit_microphone_events',
@@ -305,38 +328,10 @@ export function createToolbox() {
             { type: 'matrixbit_oled_pixel', inputs: { X: numberInput(0), Y: numberInput(0) } },
             'matrixbit_oled_clear', 'matrixbit_oled_flush',
           ]),
-          category('RGB', '#864ba0', faLightbulb, [
-            { type: 'matrixbit_rgb_set', inputs: { RED: numberInput(32), GREEN: numberInput(0), BLUE: numberInput(0) } },
-          ]),
-          category(t('pins'), '#745ba5', faPlug, ['matrixbit_pin_number']),
-          category(t('buttons'), '#745ba5', faHandPointer, [
+          category(t('pins'), '#745ba5', faPlug, [
+            'matrixbit_pin_number',
             'matrixbit_button_is_pressed',
-            { type: 'matrixbit_touch_is_touched', inputs: { THRESHOLD: numberInput(400) } },
-            'matrixbit_touch_read',
-          ]),
-        ],
-      },
-
-      {
-        kind: 'iconCategoryGroup', name: 'M5Stack', icon: faMicrochip, colour: '#b83a36',
-        contents: [
-          category(t('m5Program'), '#b83a36', faCode, [
-            { kind: 'label', text: t('m5Firmware') }, 'm5_begin', 'm5_update',
-          ]),
-          category(t('display'), '#b83a36', faDisplay, [
-            { type: 'm5_fill', inputs: { COLOR: numberInput(0) } },
-            { type: 'm5_text_color', inputs: { FOREGROUND: numberInput(16777215), BACKGROUND: numberInput(0) } },
-            { type: 'm5_text_size', inputs: { SIZE: numberInput(2) } },
-            { type: 'm5_text', inputs: { TEXT: textInput('Hello!'), X: numberInput(8), Y: numberInput(8) } },
-            'm5_rotation', { type: 'm5_brightness', inputs: { VALUE: numberInput(128) } }, 'm5_dimension',
-            { type: 'm5_pixel', inputs: { X: numberInput(10), Y: numberInput(10), COLOR: numberInput(16711680) } },
-            { type: 'm5_line', inputs: { X1: numberInput(0), Y1: numberInput(0), X2: numberInput(40), Y2: numberInput(40), COLOR: numberInput(65280) } },
-            { type: 'm5_rectangle', inputs: { X: numberInput(8), Y: numberInput(40), WIDTH: numberInput(30), HEIGHT: numberInput(20), COLOR: numberInput(255) } },
-          ]),
-          category(t('buttons'), '#b83a36', faHandPointer, ['m5_button']),
-          category(t('sensors'), '#b83a36', faMicrochip, [
-            { kind: 'label', text: t('m5StickSensors') },
-            'm5_stick_accel', 'm5_stick_gyro', 'm5_stick_battery',
+            'matrixbit_neopixel',
           ]),
         ],
       },
@@ -344,7 +339,6 @@ export function createToolbox() {
         kind: 'iconCategoryGroup', name: 'SPIKE Prime', icon: faMicrochip, colour: '#b08a20',
         contents: [
           category(t('spikeProgram'), '#b08a20', faCode, [
-            { kind: 'label', text: t('spikeFirmware') },
             'spike_run',
             { type: 'spike_on_condition', inputs: { CONDITION: { shadow: { type: 'logic_boolean', fields: { BOOL: 'FALSE' } } } } },
             { type: 'spike_until', inputs: { CONDITION: { shadow: { type: 'logic_boolean', fields: { BOOL: 'TRUE' } } }, TIMEOUT: numberInput(0) } },

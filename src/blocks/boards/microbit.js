@@ -3,7 +3,7 @@ import { Order, pythonGenerator } from 'blockly/python';
 import { blockMessage } from '../../i18n/index.js';
 
 const colour = 20;
-const statement = { previousStatement: null, nextStatement: null };
+const statement = { previousStatement: null, nextStatement: null, colour };
 const value = name => ({ type: 'input_value', name, check: 'Number' });
 
 const pin = {
@@ -40,11 +40,13 @@ common.defineBlocksWithJsonArray([
   },
   {
     type: 'microbit_music_melody', message0: blockMessage('microbitMusicMelody'),
-    args0: [{ type: 'field_dropdown', name: 'MELODY', options: [
-      'BA_DING', 'BIRTHDAY', 'DADADADUM', 'ENTERTAINER', 'PRELUDE', 'ODE', 'NYAN',
-      'RINGTONE', 'FUNK', 'BLUES', 'WEDDING', 'FUNERAL', 'PUNCHLINE', 'PYTHON',
-      'BADDY', 'CHASE', 'WAWAWAWAA', 'JUMP_UP', 'JUMP_DOWN', 'POWER_UP', 'POWER_DOWN',
-    ].map(name => [name, name]) }],
+    args0: [{
+      type: 'field_dropdown', name: 'MELODY', options: [
+        'BA_DING', 'BIRTHDAY', 'DADADADUM', 'ENTERTAINER', 'PRELUDE', 'ODE', 'NYAN',
+        'RINGTONE', 'FUNK', 'BLUES', 'WEDDING', 'FUNERAL', 'PUNCHLINE', 'PYTHON',
+        'BADDY', 'CHASE', 'WAWAWAWAA', 'JUMP_UP', 'JUMP_DOWN', 'POWER_UP', 'POWER_DOWN',
+      ].map(name => [name, name])
+    }],
     output: 'Array', colour,
   },
   {
@@ -67,24 +69,28 @@ common.defineBlocksWithJsonArray([
   },
   {
     type: 'microbit_speaker_power', message0: blockMessage('microbitSpeakerPower'),
-    args0: [{ type: 'field_dropdown', name: 'POWER', options: [
-      [blockMessage('powerOn'), 'on'], [blockMessage('powerOff'), 'off'],
-    ] }], ...statement, colour,
+    args0: [{
+      type: 'field_dropdown', name: 'POWER', options: [
+        [blockMessage('powerOn'), 'on'], [blockMessage('powerOff'), 'off'],
+      ]
+    }], ...statement, colour,
   },
   {
     type: 'microbit_image_builtin',
     message0: blockMessage('microbitImageBuiltin'),
-    args0: [{ type: 'field_dropdown', name: 'IMAGE', options: [
-      'HEART', 'HEART_SMALL', 'HAPPY', 'SMILE', 'SAD', 'CONFUSED', 'ANGRY', 'ASLEEP',
-      'SURPRISED', 'YES', 'NO', 'DIAMOND', 'DIAMOND_SMALL', 'SQUARE', 'SQUARE_SMALL',
-      'ARROW_N', 'ARROW_NE', 'ARROW_E', 'ARROW_SE', 'ARROW_S', 'ARROW_SW', 'ARROW_W', 'ARROW_NW',
-    ].map(name => [name, name]) }],
+    args0: [{
+      type: 'field_dropdown', name: 'IMAGE', options: [
+        'HEART', 'HEART_SMALL', 'HAPPY', 'SMILE', 'SAD', 'CONFUSED', 'ANGRY', 'ASLEEP',
+        'SURPRISED', 'YES', 'NO', 'DIAMOND', 'DIAMOND_SMALL', 'SQUARE', 'SQUARE_SMALL',
+        'ARROW_N', 'ARROW_NE', 'ARROW_E', 'ARROW_SE', 'ARROW_S', 'ARROW_SW', 'ARROW_W', 'ARROW_NW',
+      ].map(name => [name, name])
+    }],
     output: 'MicrobitImage', colour,
   },
   {
     type: 'microbit_image_custom',
     ...Object.fromEntries(Array.from({ length: 5 }, (_, row) => [
-      [`message${row}`, blockMessage(row === 0 ? 'microbitImageRowFirst' : 'microbitImageRow')],
+      [`message${row}`, blockMessage('microbitImageRow')],
       [`args${row}`, [{ type: 'field_input', name: `ROW${row}`, text: ['09090', '99999', '99999', '09990', '00900'][row] }]],
     ]).flat()),
     tooltip: blockMessage('microbitImageCustomHint'),
@@ -93,18 +99,22 @@ common.defineBlocksWithJsonArray([
   {
     type: 'microbit_image_transform',
     message0: blockMessage('microbitImageTransform'),
-    args0: [imageInput, { type: 'field_dropdown', name: 'METHOD', options: [
-      [blockMessage('microbitImageCopy'), 'copy'], [blockMessage('microbitImageInvert'), 'invert'],
-    ] }],
+    args0: [imageInput, {
+      type: 'field_dropdown', name: 'METHOD', options: [
+        [blockMessage('microbitImageCopy'), 'copy'], [blockMessage('microbitImageInvert'), 'invert'],
+      ]
+    }],
     inputsInline: true, output: 'MicrobitImage', colour,
   },
   {
     type: 'microbit_image_shift',
     message0: blockMessage('microbitImageShift'),
-    args0: [imageInput, { type: 'field_dropdown', name: 'DIRECTION', options: [
-      [blockMessage('microbitLeft'), 'left'], [blockMessage('microbitRight'), 'right'],
-      [blockMessage('microbitUp'), 'up'], [blockMessage('microbitDown'), 'down'],
-    ] }, value('AMOUNT')],
+    args0: [imageInput, {
+      type: 'field_dropdown', name: 'DIRECTION', options: [
+        [blockMessage('microbitLeft'), 'left'], [blockMessage('microbitRight'), 'right'],
+        [blockMessage('microbitUp'), 'up'], [blockMessage('microbitDown'), 'down'],
+      ]
+    }, value('AMOUNT')],
     inputsInline: true, output: 'MicrobitImage', colour,
   },
   {
@@ -123,9 +133,11 @@ common.defineBlocksWithJsonArray([
   },
   {
     type: 'microbit_display_power', message0: blockMessage('microbitDisplayPower'),
-    args0: [{ type: 'field_dropdown', name: 'POWER', options: [
-      [blockMessage('powerOn'), 'on'], [blockMessage('powerOff'), 'off'],
-    ] }],
+    args0: [{
+      type: 'field_dropdown', name: 'POWER', options: [
+        [blockMessage('powerOn'), 'on'], [blockMessage('powerOff'), 'off'],
+      ]
+    }],
     tooltip: blockMessage('microbitDisplayPowerHint'), ...statement, colour,
   },
   {
@@ -306,7 +318,7 @@ function imageCode(block, generator) {
 function displayOptions(block, generator) {
   const [delay] = integers(block, generator, ['DELAY']);
   const flag = name => block.getFieldValue(name) === 'TRUE' ? 'True' : 'False';
-  return [ `delay=${delay}`, `wait=${flag('WAIT')}`, `loop=${flag('LOOP')}` ];
+  return [`delay=${delay}`, `wait=${flag('WAIT')}`, `loop=${flag('LOOP')}`];
 }
 
 Object.assign(pythonGenerator.forBlock, {
@@ -394,3 +406,81 @@ Object.assign(pythonGenerator.forBlock, {
   },
   microbit_clear_display: (_block, generator) => `${displayCall(generator, 'clear')}\n`,
 });
+
+const input = (name, check) => ({ type: 'input_value', name, ...(check ? { check } : {}) });
+common.defineBlocksWithJsonArray([
+  {
+    type: 'microbit_radio_power', message0: blockMessage('microbitRadioPower'),
+    args0: [{ type: 'field_dropdown', name: 'POWER', options: [[blockMessage('powerOn'), 'on'], [blockMessage('powerOff'), 'off']] }],
+    tooltip: blockMessage('microbitRadioHint'), ...statement,
+  },
+  {
+    type: 'microbit_radio_config', message0: blockMessage('microbitRadioConfig'),
+    args0: ['GROUP', 'CHANNEL', 'POWER'].map(name => input(name, 'Number')),
+    tooltip: blockMessage('microbitRadioConfigHint'), ...statement,
+  },
+  {
+    type: 'microbit_radio_buffers', message0: blockMessage('microbitRadioBuffers'),
+    args0: ['LENGTH', 'QUEUE'].map(name => input(name, 'Number')),
+    tooltip: blockMessage('microbitRadioBuffersHint'), ...statement,
+  },
+  { type: 'microbit_radio_reset', message0: blockMessage('microbitRadioReset'), ...statement },
+  { type: 'microbit_radio_send', message0: blockMessage('microbitRadioSend'), args0: [input('MESSAGE', 'String')], tooltip: blockMessage('microbitRadioTextHint'), ...statement },
+  { type: 'microbit_radio_receive', message0: blockMessage('microbitRadioReceive'), output: null, colour, tooltip: blockMessage('microbitRadioReceiveHint') },
+  { type: 'microbit_radio_send_bytes', message0: blockMessage('microbitRadioSendBytes'), args0: [input('MESSAGE', 'Bytes')], ...statement },
+  { type: 'microbit_radio_receive_bytes', message0: blockMessage('microbitRadioReceiveBytes'), output: null, colour, tooltip: blockMessage('microbitRadioReceiveHint') },
+  { type: 'microbit_radio_receive_full', message0: blockMessage('microbitRadioReceiveFull'), output: null, colour, tooltip: blockMessage('microbitRadioFullHint') },
+]);
+pythonGenerator.addReservedWords('_microbit_radio');
+function radio(generator) {
+  generator.definitions_.import_microbit_radio = 'import radio as _microbit_radio';
+  return '_microbit_radio';
+}
+const number = (block, generator, name, fallback) => `int(${generator.valueToCode(block, name, Order.NONE) || fallback})`;
+pythonGenerator.forBlock.microbit_radio_power = (block, generator) => `${radio(generator)}.${block.getFieldValue('POWER')}()\n`;
+pythonGenerator.forBlock.microbit_radio_config = (block, generator) => `${radio(generator)}.config(group=${number(block, generator, 'GROUP', '0')}, channel=${number(block, generator, 'CHANNEL', '7')}, power=${number(block, generator, 'POWER', '6')})\n`;
+pythonGenerator.forBlock.microbit_radio_buffers = (block, generator) => `${radio(generator)}.config(length=${number(block, generator, 'LENGTH', '32')}, queue=${number(block, generator, 'QUEUE', '3')})\n`;
+pythonGenerator.forBlock.microbit_radio_reset = (_block, generator) => `${radio(generator)}.reset()\n`;
+for (const method of ['send', 'send_bytes']) {
+  pythonGenerator.forBlock[`microbit_radio_${method}`] = (block, generator) =>
+    `${radio(generator)}.${method}(${generator.valueToCode(block, 'MESSAGE', Order.NONE) || (method === 'send' ? "''" : "b''")})\n`;
+}
+for (const method of ['receive', 'receive_bytes', 'receive_full']) {
+  pythonGenerator.forBlock[`microbit_radio_${method}`] = (_block, generator) => [`${radio(generator)}.${method}()`, Order.FUNCTION_CALL];
+}
+
+const eventField = () => ({
+  type: 'field_dropdown', name: 'EVENT', options: [
+    [blockMessage('microbitSoundLoud'), 'LOUD'], [blockMessage('microbitSoundQuiet'), 'QUIET'],
+  ]
+});
+common.defineBlocksWithJsonArray([
+  { type: 'microbit_microphone_level', message0: blockMessage('microbitMicrophoneLevel'), output: 'Number', colour, tooltip: blockMessage('microbitMicrophoneLevelHint') },
+  { type: 'microbit_sound_event', message0: blockMessage('microbitSoundEvent'), args0: [eventField()], output: 'MicrobitSoundEvent', colour, tooltip: blockMessage('microbitMicrophoneHint') },
+  { type: 'microbit_microphone_current_event', message0: blockMessage('microbitMicrophoneCurrent'), output: 'MicrobitSoundEvent', colour, tooltip: blockMessage('microbitMicrophoneHint') },
+  { type: 'microbit_microphone_is_event', message0: blockMessage('microbitMicrophoneIs'), args0: [eventField()], output: 'Boolean', colour, tooltip: blockMessage('microbitMicrophoneHint') },
+  { type: 'microbit_microphone_was_event', message0: blockMessage('microbitMicrophoneWas'), args0: [eventField()], output: 'Boolean', colour, tooltip: blockMessage('microbitMicrophoneHistoryHint') },
+  { type: 'microbit_microphone_events', message0: blockMessage('microbitMicrophoneEvents'), output: null, colour, tooltip: blockMessage('microbitMicrophoneHistoryHint') },
+  { type: 'microbit_microphone_threshold', message0: blockMessage('microbitMicrophoneThreshold'), args0: [eventField(), { type: 'input_value', name: 'VALUE', check: 'Number' }], previousStatement: null, nextStatement: null, colour, tooltip: blockMessage('microbitMicrophoneThresholdHint') },
+]);
+
+pythonGenerator.addReservedWords('_microbit');
+
+function board(generator) {
+  generator.definitions_.import_microbit = 'import microbit as _microbit';
+  return '_microbit';
+}
+
+const sound = (block, generator) => `${board(generator)}.SoundEvent.${block.getFieldValue('EVENT')}`;
+pythonGenerator.forBlock.microbit_sound_event = (block, generator) => [sound(block, generator), Order.MEMBER];
+
+for (const [type, method] of [['level', 'sound_level'], ['current_event', 'current_event'], ['events', 'get_events']]) {
+  pythonGenerator.forBlock[`microbit_microphone_${type}`] = (_block, generator) => [`${board(generator)}.microphone.${method}()`, Order.FUNCTION_CALL];
+}
+
+for (const method of ['is_event', 'was_event']) {
+  pythonGenerator.forBlock[`microbit_microphone_${method}`] = (block, generator) => [`${board(generator)}.microphone.${method}(${sound(block, generator)})`, Order.FUNCTION_CALL];
+}
+
+pythonGenerator.forBlock.microbit_microphone_threshold = (block, generator) =>
+  `${board(generator)}.microphone.set_threshold(${sound(block, generator)}, int(${generator.valueToCode(block, 'VALUE', Order.NONE) || '128'}))\n`;
