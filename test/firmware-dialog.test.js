@@ -4,7 +4,7 @@ import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import { setupFirmwareDialog } from '../src/editor/firmware-dialog.js';
 import { firmwareFamilies, matchFirmware } from '../src/firmware/catalog.js';
-import { applyLanguage } from '../src/i18n/index.js';
+import { applyLanguage, t } from '../src/i18n/index.js';
 const { JSDOM } = createRequire(import.meta.url)('jsdom');
 const html = readFileSync(new URL('../index.html',import.meta.url),'utf8');
 const images = JSON.parse(readFileSync(new URL('../src/firmware/images.json',import.meta.url)));
@@ -56,6 +56,14 @@ test('family/model catalog blocks unsupported recipes and does not trust capacit
   assert.equal(choose('m5stack','basic',serial('ESP32',null),'16MB').target.image,images.m5basic16);
   assert.equal(choose('m5stack','stickc',serial('ESP32','16MB')).supported,false);
   assert.equal(choose('m5stack','cores3',serial('ESP32-S3')).supported,false);
+  const xiaomiao=choose('esp32','xiaomiao',serial('ESP32','4MB'));
+  assert.equal(xiaomiao.supported,true);
+  assert.equal(xiaomiao.target.image,images.xiaomiao);
+  assert.equal(xiaomiao.target.address,0x1000);
+  assert.equal(xiaomiao.target.uiflow,false);
+  assert.equal(xiaomiao.capabilities,'firmwareCapabilitiesXiaomiao');
+  assert.equal(choose('esp32','xiaomiao',serial('ESP32','8MB')).supported,false);
+  assert.equal(choose('esp32','xiaomiao',serial('ESP32-S3','4MB')).supported,false);
   assert.equal(choose('raspberry','pico',serial()).supported,false);
   assert.equal(choose('microbit','V1',{transport:'microbit',version:'V2'}).reason.key,'firmwareVersionMismatch');
   assert.equal(choose('microbit','auto',{transport:'microbit',version:'V2'}).target.image,images.V2);
@@ -86,6 +94,24 @@ test('detection never installs; matching device requires a second explicit click
   assert.equal(p.$('firmware-review').hidden,true);
   assert.equal(p.$('firmware-select-step').hidden,false);
   assert.equal(p.$('firmware-connect').disabled,false);
+});
+
+test('ESP32 model labels start with the firmware image name',()=>{
+  applyLanguage('en');
+  assert.match(t('firmwareClassic'),/^ESP32_GENERIC \(/);
+  assert.match(t('firmwareXiaomiaoModel'),/^ESP32_GENERIC-SPIRAM \(/);
+  assert.match(t('firmwareS3Standard'),/^ESP32_GENERIC_S3 \(/);
+  assert.match(t('firmwareS3Octal'),/^ESP32_GENERIC_S3-SPIRAM_OCT \(/);
+});
+
+test('XiaoMiao model under ESP32 selects the 4 MB SPIRAM image',async t=>{
+  const p=setup(t,{device:serial('ESP32','4MB')});
+  p.model('xiaomiao');
+  assert.equal(p.$('firmware-model').value,'xiaomiao');
+  await p.connect();
+  assert.match(p.$('firmware-image').textContent,/ESP32_GENERIC-SPIRAM/);
+  assert.match(p.$('firmware-capabilities').textContent,/PSRAM/);
+  assert.equal(p.$('firmware-install').hidden,false);
 });
 
 test('detected S3 mismatch offers auto matching before explicit installation',async t=>{

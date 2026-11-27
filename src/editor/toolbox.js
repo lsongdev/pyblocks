@@ -123,6 +123,41 @@ export function createToolbox() {
         { type: 'asyncio_sleep', inputs: { DURATION: numberInput(100) } },
         'asyncio_wait_task', 'asyncio_await_task', 'asyncio_return', 'asyncio_cancel_task',
       ]),
+      category(t('display'), '#3a7ca5', faDisplay, [
+        { kind: 'label', text: t('displaySetup') },
+        {
+          type: 'display_setup', inputs: {
+            CONFIG: {
+              shadow: {
+                type: 'display_oled_config', inputs: {
+                  WIDTH: numberInput(128), HEIGHT: numberInput(64),
+                  I2C: numberInput(0), SCL: numberInput(22), SDA: numberInput(23), ADDRESS: numberInput(60),
+                }
+              }
+            },
+          }
+        },
+        { kind: 'label', text: t('displayConfigs') },
+        {
+          type: 'display_oled_config',
+          inputs: {
+            WIDTH: numberInput(128), HEIGHT: numberInput(64),
+            I2C: numberInput(0), SCL: numberInput(22), SDA: numberInput(23), ADDRESS: numberInput(60),
+          },
+        },
+        {
+          type: 'display_st7735_config', inputs: {
+            WIDTH: numberInput(160), HEIGHT: numberInput(128),
+            SPI: numberInput(2), BAUD: numberInput(20000000), SCK: numberInput(18), MOSI: numberInput(23),
+            CS: numberInput(5), DC: numberInput(4), RES: numberInput(19),
+          }
+        },
+        { kind: 'label', text: t('displayDrawing') },
+        { type: 'display_text', inputs: { TEXT: textInput('Hello!'), X: numberInput(0), Y: numberInput(0), COLOR: numberInput(65535) } },
+        { type: 'display_pixel', inputs: { X: numberInput(0), Y: numberInput(0), COLOR: numberInput(65535) } },
+        { type: 'display_clear', inputs: { COLOR: numberInput(0) } },
+        'display_refresh',
+      ]),
       category(t('pins'), '#29806c', faPlug, [
         { type: 'adc_read_pin', inputs: { PIN: numberInput(0) } },
         { type: 'gpio_read_digital', inputs: { PIN: numberInput(0) } },
@@ -133,7 +168,7 @@ export function createToolbox() {
         { type: 'touchpad_read', inputs: { PIN: numberInput(0) } },
         { type: 'touchpad_is_touched', inputs: { PIN: numberInput(0), THRESHOLD: numberInput(400) } },
       ]),
-      category('I2C', '#298477', faCodeBranch, [
+      category(t('i2c'), '#298477', faCodeBranch, [
         { type: 'i2c_create', inputs: { ID: numberInput(0), SCL: numberInput(22), SDA: numberInput(23), FREQ: numberInput(100000) } },
         'i2c_scan',
         { type: 'i2c_read', inputs: { ADDRESS: numberInput(60), COUNT: numberInput(1) } },
@@ -239,6 +274,14 @@ export function createToolbox() {
         { kind: 'label', text: t('sensors') },
         'pico_temperature',
       ]),
+
+      category(t('xiaomiaoBoard'), '#2f7f8f', faMicrochip, ['xiaomiao_display_config', 'xiaomiao_button_is_pressed']),
+      category('Matrix:bit', '#745ba5', faMicrochip, [
+        'matrixbit_display_config',
+        'matrixbit_pin_number',
+        'matrixbit_button_is_pressed',
+        'matrixbit_neopixel',
+      ]),
       {
         kind: 'iconCategoryGroup', name: 'M5Stack', icon: faMicrochip, colour: '#b83a36',
         contents: [
@@ -259,6 +302,7 @@ export function createToolbox() {
           ]),
         ],
       },
+
       {
         kind: 'iconCategoryGroup',
         icon: faMicrochip,
@@ -314,27 +358,7 @@ export function createToolbox() {
           ]),
         ],
       },
-      {
-        kind: 'iconCategoryGroup',
-        icon: faMicrochip,
-        name: 'Matrix:bit',
-        colour: '#745ba5',
-        contents: [
-          category(t('display'), '#745ba5', faDisplay, [
-            {
-              type: 'matrixbit_oled_text',
-              inputs: { TEXT: textInput('Hello'), X: numberInput(0), Y: numberInput(0) },
-            },
-            { type: 'matrixbit_oled_pixel', inputs: { X: numberInput(0), Y: numberInput(0) } },
-            'matrixbit_oled_clear', 'matrixbit_oled_flush',
-          ]),
-          category(t('pins'), '#745ba5', faPlug, [
-            'matrixbit_pin_number',
-            'matrixbit_button_is_pressed',
-            'matrixbit_neopixel',
-          ]),
-        ],
-      },
+
       {
         kind: 'iconCategoryGroup', name: 'SPIKE Prime', icon: faMicrochip, colour: '#b08a20',
         contents: [

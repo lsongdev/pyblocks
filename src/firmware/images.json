@@ -52,5 +52,11 @@
     "version": "1.29.0",
     "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S3-SPIRAM_OCT-20260824-v1.29.0.bin",
     "sha256": "ab24eadfe3ef0e6ee38834d730e648def7cd82f3fa51ee0bbc59c29a6e1bd176"
+  },
+  "xiaomiao": {
+    "file": "ESP32_GENERIC-SPIRAM-20260824-v1.29.0.bin",
+    "version": "1.29.0",
+    "url": "https://micropython.org/resources/firmware/ESP32_GENERIC-SPIRAM-20260824-v1.29.0.bin",
+    "sha256": "a8dc95b75cbbda9e5702a37166f94d08469f5b9046262be7187b1911ac07a358"
   }
 }

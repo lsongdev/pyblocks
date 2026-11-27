@@ -91,13 +91,13 @@ test('new Matrixbit controls generate in both languages', () => {
   applyLanguage('en');
 });
 
-test('Matrixbit Pins provides a preconfigured NeoPixel strip for generic pixel blocks', () => {
-  const pins = createToolbox().contents
-    .find(category => category.name === 'Matrix:bit').contents
-    .find(category => category.name === 'Pins');
-  assert.ok(pins.contents.some(block => block.type === 'matrixbit_pin_number'));
-  assert.ok(pins.contents.some(block => block.type === 'matrixbit_button_is_pressed'));
-  assert.ok(pins.contents.some(block => block.type === 'matrixbit_neopixel'));
+test('Matrixbit opens directly to its pin and NeoPixel blocks', () => {
+  const matrixbit = createToolbox().contents.find(category => category.name === 'Matrix:bit');
+  assert.equal(matrixbit.kind, 'iconCategory');
+  assert.ok(matrixbit.contents.some(block => block.type === 'matrixbit_display_config'));
+  assert.ok(matrixbit.contents.some(block => block.type === 'matrixbit_pin_number'));
+  assert.ok(matrixbit.contents.some(block => block.type === 'matrixbit_button_is_pressed'));
+  assert.ok(matrixbit.contents.some(block => block.type === 'matrixbit_neopixel'));
 
   const strip = () => ({block:{type:'matrixbit_neopixel'}});
   const code = generate(
@@ -113,21 +113,26 @@ test('Matrixbit Pins provides a preconfigured NeoPixel strip for generic pixel b
   assert.equal(code.match(/_matrixbit_leds = /g).length, 1);
 });
 
-test('Matrixbit no longer exposes the separate RGB light category', () => {
+test('Matrixbit flyout has no submenu categories or removed RGB blocks', () => {
   const matrixbit = createToolbox().contents.find(category => category.name === 'Matrix:bit');
-  assert.ok(!matrixbit.contents.some(category => category.name === 'RGB' || category.name === '彩灯'));
-  assert.ok(!matrixbit.contents.some(category =>
-    category.contents?.some(block => block.type === 'matrixbit_rgb_set')));
+  assert.ok(!matrixbit.contents.some(item => item.contents));
+  assert.deepEqual(matrixbit.contents.filter(block => block.type).map(block => block.type), [
+    'matrixbit_display_config', 'matrixbit_pin_number', 'matrixbit_button_is_pressed', 'matrixbit_neopixel',
+  ]);
+  assert.ok(!matrixbit.contents.some(block => block.type === 'matrixbit_rgb_set'));
   assert.equal(Blockly.Blocks.matrixbit_rgb_set, undefined);
 });
 
-test('Matrixbit A/B button lives in Pins without a separate Buttons group', () => {
-  const matrixbit = createToolbox().contents.find(category => category.name === 'Matrix:bit');
-  assert.ok(!matrixbit.contents.some(category => category.name === 'Buttons' || category.name === '按键'));
-  const pins = matrixbit.contents.find(category => category.name === 'Pins');
-  assert.deepEqual(pins.contents.filter(block => block.type).map(block => block.type), [
-    'matrixbit_pin_number', 'matrixbit_button_is_pressed', 'matrixbit_neopixel',
-  ]);
+test('Matrixbit preset display configuration targets the onboard OLED', () => {
+  const code = generate({type:'matrixbit_display_config'});
+  assert.match(code, /class _DisplayOLED/);
+  assert.match(code, /\{'type': 'oled', 'width': 128, 'height': 64, 'i2c': 0, 'scl': 22, 'sda': 23, 'address': 60\}/);
+});
+
+test('Matrixbit display blocks moved to the top-level Display category', () => {
+  for (const old of ['matrixbit_oled_text', 'matrixbit_oled_pixel', 'matrixbit_oled_clear', 'matrixbit_oled_flush']) {
+    assert.equal(Blockly.Blocks[old], undefined);
+  }
 });
 
 test('Matrixbit board pin numbers plug into generic GPIO, PWM and UART inputs', () => {

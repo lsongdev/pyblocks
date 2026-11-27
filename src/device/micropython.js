@@ -67,49 +67,89 @@ export async function monitorPort(port, onOutput) {
   }
 }
 
+async function resetSerialBoard(port) {
+  if (typeof port.setSignals !== 'function') return;
+  try {
+    await port.setSignals({ dataTerminalReady: false, requestToSend: true });
+    await new Promise(resolve => setTimeout(resolve, 100));
+    await port.setSignals({ dataTerminalReady: false, requestToSend: false });
+  } catch {
+    // Some USB bridges do not expose DTR/RTS; the raw-REPL retry still applies.
+  }
+}
+
 async function runOnBoard(port, onOutput, operation) {
-  await port.open({ baudRate: 115200 });
-  const decoder = new TextDecoder();
+  let decoder;
   let reader;
   let writer;
-  try {
+  let pending = '';
+
+  const write = text => writeSerialText(writer, text);
+
+  async function readUntil(marker) {
+    const timeout = setTimeout(() => void reader.cancel().catch(() => {}), 4000);
+    try {
+      while (!pending.includes(marker)) {
+        const { value, done } = await reader.read();
+        if (done) throw new MicroPythonError('serialTimeout', 'Board response timed out or the serial port disconnected');
+        pending += decoder.decode(value, { stream: true });
+      }
+      const end = pending.indexOf(marker);
+      const result = pending.slice(0, end);
+      pending = pending.slice(end + marker.length);
+      return result;
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  async function open() {
+    await port.open({ baudRate: 115200 });
+    decoder = new TextDecoder();
     reader = port.readable.getReader();
     writer = port.writable.getWriter();
-    let pending = '';
+    pending = '';
+  }
 
-    const write = text => writeSerialText(writer, text);
+  async function close() {
+    try { writer?.releaseLock(); } catch {}
+    try { reader?.releaseLock(); } catch {}
+    writer = reader = undefined;
+    await port.close().catch(() => {});
+  }
 
-    async function readUntil(marker) {
-      const timeout = setTimeout(() => void reader.cancel().catch(() => {}), 4000);
-      try {
-        while (!pending.includes(marker)) {
-          const { value, done } = await reader.read();
-          if (done) throw new MicroPythonError('serialTimeout', 'Board response timed out or the serial port disconnected');
-          pending += decoder.decode(value, { stream: true });
-        }
-        const end = pending.indexOf(marker);
-        const result = pending.slice(0, end);
-        pending = pending.slice(end + marker.length);
-        return result;
-      } finally {
-        clearTimeout(timeout);
-      }
-    }
-
-    async function execute(command) {
-      await write(command + '\x04');
-      const prefix = await readUntil('OK');
-      if (prefix) throw new MicroPythonError('unexpectedResponse', 'Unexpected response from MicroPython');
-      const output = await readUntil('\x04');
-      const error = await readUntil('\x04>');
-      if (error.trim()) throw new BoardCommandError(error.trim());
-      return output;
-    }
-
+  async function enterRawRepl() {
     await write('\r\x03\x03\x02');
     await readUntil('>>>');
     await write('\x01');
     await readUntil('raw REPL; CTRL-B to exit\r\n>');
+  }
+
+  async function execute(command) {
+    await write(command + '\x04');
+    const prefix = await readUntil('OK');
+    if (prefix) throw new MicroPythonError('unexpectedResponse', 'Unexpected response from MicroPython');
+    const output = await readUntil('\x04');
+    const error = await readUntil('\x04>');
+    if (error.trim()) throw new BoardCommandError(error.trim());
+    return output;
+  }
+
+  try {
+    await open();
+    try {
+      await enterRawRepl();
+    } catch (error) {
+      if (!(error instanceof MicroPythonError) || error.code !== 'serialTimeout') throw error;
+      // XiaoMiao's GD32 bridge and similar USB-UART adapters can be left in
+      // download mode after the previous session closes. Reopen, pulse reset,
+      // release the signals, and retry the raw-REPL handshake once.
+      await close();
+      await open();
+      await resetSerialBoard(port);
+      await new Promise(resolve => setTimeout(resolve, 200));
+      await enterRawRepl();
+    }
     const result = await operation(execute);
     await write('\x02');
     await readUntil('>>>');
@@ -117,11 +157,10 @@ async function runOnBoard(port, onOutput, operation) {
     await readUntil('MPY: soft reboot');
     writer.releaseLock();
     const session = streamOutput(port, reader, decoder, onOutput, 'MPY: soft reboot' + pending);
+    writer = reader = undefined;
     return { session, result };
   } catch (error) {
-    writer?.releaseLock();
-    reader?.releaseLock();
-    await port.close().catch(() => {});
+    await close();
     throw error;
   }
 }

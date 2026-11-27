@@ -1,8 +1,9 @@
-// Product identity is a user choice; chip/flash detection alone cannot identify an M5 product.
+// Product identity is a user choice; chip/flash detection alone cannot identify a board product.
 export const firmwareFamilies = [
   { id: 'esp32', label: 'ESP32', transport: 'serial', models: [
     { id: 'auto', key: 'firmwareAutoChip' },
     { id: 'classic', key: 'firmwareClassic', chip: 'ESP32', capacities: ['8MB'] },
+    { id: 'xiaomiao', key: 'firmwareXiaomiaoModel', chip: 'ESP32', capacities: ['4MB'] },
     { id: 'ESP32-S3', key: 'firmwareS3Standard', chip: 'ESP32-S3', capacities: ['4MB', '8MB', '16MB', '32MB'] },
     { id: 's3oct', key: 'firmwareS3Octal', chip: 'ESP32-S3', capacities: ['4MB', '8MB', '16MB', '32MB'] },
     ...['ESP32-S2', 'ESP32-C3'].map(chip => ({ id: chip, label: chip, chip, unavailable: true })),
@@ -45,9 +46,15 @@ export function matchFirmware(selection, device, images) {
     if (!model.capacities.includes(flashSize)) return no('firmwareCapacityMismatch', [flashSize, model.capacities.join(' / ')]);
     if (family.id === 'esp32') {
       const s3 = model.chip === 'ESP32-S3';
-      imageKey = s3 ? (model.id === 's3oct' ? 'esp32s3oct' : 'esp32s3') : 'esp32';
-      address = s3 ? 0 : 0x1000;
-      label = model.chip;
+      if (model.id === 'xiaomiao') {
+        imageKey = 'xiaomiao';
+        address = 0x1000;
+        label = 'XiaoMiao';
+      } else {
+        imageKey = s3 ? (model.id === 's3oct' ? 'esp32s3oct' : 'esp32s3') : 'esp32';
+        address = s3 ? 0 : 0x1000;
+        label = model.chip;
+      }
     }
     else {
       uiflow = true;
@@ -66,5 +73,5 @@ export function matchFirmware(selection, device, images) {
   const image = images[imageKey];
   if (!image) return no('firmwareTargetUnavailable');
   return { supported: true, model, target: { image, address, flashSize, label, uiflow },
-    capabilities: uiflow ? 'firmwareCapabilitiesM5' : family.id === 'microbit' ? 'firmwareCapabilitiesMicrobit' : 'firmwareCapabilitiesGeneric' };
+    capabilities: uiflow ? 'firmwareCapabilitiesM5' : family.id === 'microbit' ? 'firmwareCapabilitiesMicrobit' : model.id === 'xiaomiao' ? 'firmwareCapabilitiesXiaomiao' : 'firmwareCapabilitiesGeneric' };
 }

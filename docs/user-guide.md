@@ -127,7 +127,7 @@ Keep the idea of **show something → wait → change it → wait**, but choose 
 | Board | A version to try |
 | --- | --- |
 | **micro:bit V1 or V2** | Under **Micro:bit → Display**, show a HEART image, wait, then show HEART_SMALL and wait again. |
-| **Matrix:bit** | Under **Matrix:bit → Display**, draw a short message and flush the display, wait, then clear and flush it before waiting again. |
+| **Matrix:bit** | Under **Display**, add **initialize display from config** (its default OLED config matches Matrix:bit), draw a short message, refresh, wait, then clear, refresh and wait again. |
 
 Use only the branch for the board you have. The Pico LED blocks are not for a micro:bit or Matrix:bit.
 

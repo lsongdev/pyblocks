@@ -34,10 +34,17 @@ export function setupFirmwareDialog({ connectFirmware, acquireDevice, releaseDev
     model.value = remembered.get(descriptor.id) ?? descriptor.models[0].id;
     capacity.replaceChildren();
     capacity.dataset.choices = '';
-    $('firmware-model-hint').textContent = t(descriptor.id === 'raspberry' ? 'firmwarePicoHint' : descriptor.id === 'm5stack' ? 'firmwareM5Hint' : descriptor.id === 'microbit' ? 'firmwareMicrobitHint' : 'firmwareESP32Hint');
+    $('firmware-model-hint').textContent = t({
+      raspberry: 'firmwarePicoHint', m5stack: 'firmwareM5Hint', microbit: 'firmwareMicrobitHint',
+    }[descriptor.id] ?? 'firmwareESP32Hint');
     const more = $('firmware-more');
-    more.href = descriptor.id === 'm5stack' ? 'https://docs.m5stack.com/en/uiflow2/uiflow_web' : descriptor.id === 'microbit' ? 'https://python.microbit.org/' : 'https://micropython.org/download/';
-    more.querySelector('span').textContent = t(descriptor.id === 'm5stack' ? 'firmwareMoreM5' : descriptor.id === 'microbit' ? 'firmwareMoreMicrobit' : 'firmwareMore');
+    more.href = {
+      m5stack: 'https://docs.m5stack.com/en/uiflow2/uiflow_web',
+      microbit: 'https://python.microbit.org/',
+    }[descriptor.id] ?? 'https://micropython.org/download/';
+    more.querySelector('span').textContent = t({
+      m5stack: 'firmwareMoreM5', microbit: 'firmwareMoreMicrobit',
+    }[descriptor.id] ?? 'firmwareMore');
   }
   function render() {
     $('firmware-select-step').hidden = !!device;

@@ -92,3 +92,52 @@ test('executeProgram runs setup through raw REPL without replacing files and ret
   await session.close();
   assert.ok(device.port.closed);
 });
+
+test('raw REPL reopens and pulses reset signals after a first-handshake timeout', async () => {
+  const { executeProgram } = await import('../src/device/micropython.js');
+  let opens = 0;
+  let raw = false;
+  let controller;
+  let readable;
+  let writable;
+  let command = '';
+  const commands = [];
+  const signals = [];
+  const port = {
+    get readable() { return readable; },
+    get writable() { return writable; },
+    async open() {
+      opens++;
+      readable = new ReadableStream({ start(value) { controller = value; } });
+      writable = new WritableStream({
+        async write(chunk) {
+          const text = new TextDecoder().decode(chunk);
+          const respond = value => controller.enqueue(new TextEncoder().encode(value));
+          if (opens === 1 && text === '\r\x03\x03\x02') { controller.close(); return; }
+          if (text === '\r\x03\x03\x02') respond('>>>');
+          else if (text === '\x01') { raw = true; respond('raw REPL; CTRL-B to exit\r\n>'); }
+          else if (text === '\x02') { raw = false; respond('>>>'); }
+          else if (text === '\x04' && !raw) respond('MPY: soft reboot\r\n');
+          else {
+            command += text;
+            if (command.endsWith('\x04')) {
+              commands.push(command.slice(0, -1));
+              command = '';
+              respond('OKconfigured\r\n\x04\x04>');
+            }
+          }
+        },
+      });
+    },
+    async close() { readable = writable = undefined; },
+    async setSignals(value) { signals.push(value); },
+  };
+  const session = await executeProgram(port, 'print("retry")');
+  assert.equal(opens, 2);
+  assert.deepEqual(commands, ['print("retry")']);
+  assert.deepEqual(signals, [
+    { dataTerminalReady: false, requestToSend: true },
+    { dataTerminalReady: false, requestToSend: false },
+  ]);
+  await session.close();
+});

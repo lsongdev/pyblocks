@@ -26,7 +26,7 @@
 
 New to programming? Follow the illustrated **[Beginner’s Guide](docs/user-guide.md)** to say hello, blink an LED, and ask a question. Use **Save Project** to keep a portable backup of your work.
 
-The installer supports classic ESP32 Matrix:bit (8 MB), micro:bit V1/V2, and the original RP2040 Pico. Pico installation requires BOOTSEL mode and WebUSB. Networking blocks target the project's ESP32 firmware; available APIs depend on your board and firmware. Close other applications using the serial port before connecting.
+The installer supports classic ESP32 Matrix:bit (8 MB), XiaoMiao (4 MB + PSRAM), micro:bit V1/V2, and the original RP2040 Pico. Pico installation requires BOOTSEL mode and WebUSB. Networking blocks target the project's ESP32 firmware; available APIs depend on your board and firmware. Close other applications using the serial port before connecting.
 
 SPIKE Prime blocks target the official SPIKE App 3 firmware. They currently generate Python for use in the SPIKE App; direct USB/BLE upload from PyBlocks is not implemented yet. See the [SPIKE Prime guide](docs/spike-prime.md).
 
