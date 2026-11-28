@@ -4,8 +4,9 @@ import { pythonGenerator } from 'blockly/python';
 import { createToolbox, EditorToolbox } from './toolbox.js';
 import { applyLanguage, getSavedLanguage, normalizeLanguage, saveLanguage, t } from '../i18n/index.js';
 import { PythonBlockError } from '../python/errors.js';
-import { targetsSpikeApp } from '../python/targets.js';
-import { selectSpikeSerialPort, uploadSpikeProgram } from '../device/spike/index.js';
+import { portProtocol } from '../device/detect.js';
+import { connectSpike } from '../device/spike/index.js';
+import { createSpikeDialog, rememberSlot } from './spike-dialog.js';
 import { setupPanelResize } from './resize.js';
 import { setupDialogs } from './dialogs.js';
 import { createLibraryPanel } from './libraries.js';
@@ -116,7 +117,10 @@ const serialInput = setupSerialInput({
 });
 let generatedCode = null;
 let manuallyEdited = false;
-const SPIKE_SLOT = 0;
+const chooseSpike = createSpikeDialog();
+const changeDevice = document.querySelector('#change-device');
+const changeSlot = document.querySelector('#change-slot');
+const deviceName = document.querySelector('#deployment-device');
 let uploadMessage;
 let projectMessage;
 let autosaveTimer;
@@ -225,8 +229,8 @@ function appendSerialOutput(text) {
   serialClear.disabled = false;
 }
 
-function attachSerial(session) {
-  device.attachSerial(session);
+function attachSerial(session, protocol = 'micropython') {
+  device.attachSerial(session, protocol);
   setSerialStatus('serialConnected');
 }
 
@@ -279,6 +283,12 @@ function updateButtons() {
   document.querySelector('#open-firmware').disabled = device.busy;
   serialConnect.disabled = device.busy || !navigator.serial;
   serialConnect.textContent = t(device.serial || device.spike ? 'serialDisconnect' : 'serialConnect');
+  changeDevice.disabled = device.busy || !navigator.serial;
+  changeSlot.hidden = !device.spike;
+  changeSlot.disabled = device.busy;
+  deviceName.textContent = device.spike ? t('deploymentSpike', String(device.slot))
+    : device.serial ? t(device.protocol === 'micropython' ? 'deploymentMicroPython' : 'deploymentSerial')
+    : t('deploymentNone');
   codeSync.hidden = !manuallyEdited;
   useBlockCode.disabled = generatedCode === null;
   deviceFiles.render();
@@ -371,83 +381,133 @@ serialClear.addEventListener('click', () => {
   serialClear.disabled = true;
 });
 
-serialConnect.addEventListener('click', async () => {
+// The browser-selected port, never the source code, determines the protocol.
+async function selectPort() {
+  setUploadStatus('selectPort');
+  return navigator.serial.requestPort();
+}
+
+async function connectSelected(port, { uploading = false } = {}) {
+  const protocol = portProtocol(port);
+  if (protocol === 'unsupported-lego') {
+    setUploadStatus('spikeFirmwareUnsupported');
+    return false;
+  }
+  if (port === device.port) {
+    if (device.serial || (device.spike && !device.spike.closed)) return true;
+    await device.detach();
+  }
+  if (protocol === 'spike') {
+    setUploadStatus('spikeDetecting');
+    // Inspect and confirm the candidate before releasing the previous target.
+    const hub = await connectSpike(port, { onConsole: appendSerialOutput });
+    let attached = false;
+    try {
+      const slot = await chooseSpike(hub, { uploading });
+      if (slot === null || hub.closed) {
+        setUploadStatus(hub.closed ? 'spikeDisconnected' : 'portCanceled');
+        return false;
+      }
+      await device.detach();
+      if (hub.closed) throw new Error(t('spikeDisconnected'));
+      device.attachSpike(hub, port, slot);
+      attached = true;
+      rememberSlot(slot);
+      deviceFiles.clear();
+      setSerialStatus('serialConnected');
+      setUploadStatus('deploymentReady');
+      return true;
+    } finally {
+      if (!attached) await hub.close();
+    }
+  }
+  // Generic serial monitoring does not claim a verified MicroPython runtime.
+  // The upload path verifies Raw REPL before writing anything.
+  if (uploading) {
+    await device.detach();
+    deviceFiles.clear();
+    return true;
+  }
+  const session = await monitorPort(port, appendSerialOutput);
+  try {
+    await device.detach();
+    attachSerial(session, 'serial');
+  } catch (error) {
+    await session.close();
+    throw error;
+  }
+  deviceFiles.clear();
+  setUploadStatus('deploymentReady');
+  return true;
+}
+
+function reportDeviceError(error) {
+  if (!device.serial && !device.spike) setSerialStatus('serialDisconnected');
+  setUploadStatus(error.name === 'NotFoundError' ? 'portCanceled'
+    : error.code === 'unsupported' ? 'spikeFirmwareUnsupported' : 'flashFailed', error);
+}
+
+async function changeConnection(disconnect = false) {
   if (!device.begin('connection')) return;
   updateButtons();
   try {
-    if (device.serial || device.spike) {
-      const wasSpikeConnected = Boolean(device.spike);
+    if (disconnect && (device.serial || device.spike)) {
       await device.detach();
+      deviceFiles.clear();
       setSerialStatus('serialDisconnected');
-      if (wasSpikeConnected) setUploadStatus('spikeDisconnected');
+      setUploadStatus('deploymentNone');
     } else {
-      setSerialStatus('selectPort');
-      const port = await navigator.serial.requestPort();
-      attachSerial(await monitorPort(port, appendSerialOutput));
+      await connectSelected(await selectPort());
     }
   } catch (error) {
-    setSerialStatus(error.name === 'NotFoundError' ? 'portCanceled' : 'serialFailed', error);
-  } finally {
-    device.end();
-    updateButtons();
-  }
-});
-
-async function runSpikeUpload(source) {
-  if (!device.begin('upload')) return;
-  updateButtons();
-  try {
-    const onProgress = value => setUploadStatus('spikeWriting', `${Math.round(value * 100)}%`);
-    if (device.spike && !device.spike.closed) {
-      setUploadStatus('spikeWriting', '0%');
-      await device.spike.upload(source, SPIKE_SLOT, onProgress);
-      await device.spike.start(SPIKE_SLOT);
-      setUploadStatus('spikeRunning', String(SPIKE_SLOT));
-      return;
-    }
-    const port = await selectSpikeSerialPort(() => setUploadStatus('selectPort'));
-    await device.detach();
-    setSerialStatus('serialConnecting');
-    setUploadStatus('spikeDetecting');
-    const hub = await uploadSpikeProgram(port, source, {
-      slot: SPIKE_SLOT,
-      onProgress,
-      onConsole: appendSerialOutput,
-    });
-    if (hub.closed) {
-      await hub.close();
-      throw new Error(t('spikeDisconnected'));
-    }
-    device.attachSpike(hub);
-    setSerialStatus('serialConnected');
-    setUploadStatus('spikeRunning', String(SPIKE_SLOT));
-  } catch (error) {
-    if (error.name === 'NotFoundError') {
-      setUploadStatus('portCanceled');
-    } else {
-      if (!device.spike || device.spike.closed) setSerialStatus('serialDisconnected');
-      setUploadStatus(error.code === 'unsupported' ? 'spikeFirmwareUnsupported' : 'flashFailed', error);
-    }
+    reportDeviceError(error);
   } finally {
     device.end();
     updateButtons();
   }
 }
 
+serialConnect.addEventListener('click', () => void changeConnection(true));
+changeDevice.addEventListener('click', () => void changeConnection());
+changeSlot.addEventListener('click', async () => {
+  if (!device.spike || !device.begin('slot')) return;
+  updateButtons();
+  try {
+    const hub = device.spike;
+    const slot = await chooseSpike(hub, { initial: device.slot });
+    if (slot !== null && device.spike === hub && !hub.closed) {
+      device.setSlot(slot);
+      rememberSlot(slot);
+    }
+  } catch (error) {
+    reportDeviceError(error);
+  } finally {
+    device.end();
+    updateButtons();
+  }
+});
+
 upload.addEventListener('click', async () => {
   const source = code.value;
-  if (targetsSpikeApp(source)) {
-    await runSpikeUpload(source);
-    return;
-  }
   const projectLibraries = libraryPanel.files;
   if (!device.begin('upload')) return;
   updateButtons();
   try {
-    let port = device.serial?.port;
-    if (!port) {
-      setUploadStatus('selectPort');
-      port = await navigator.serial.requestPort();
+    const port = device.port ?? await selectPort();
+    if (!await connectSelected(port, { uploading: true })) return;
+    if (device.spike) {
+      const hub = device.spike;
+      const slot = device.slot;
+      if (projectLibraries.length) {
+        setUploadStatus('spikeLibrariesUnsupported');
+        return;
+      }
+      const onProgress = value => setUploadStatus('spikeWriting', `${Math.round(value * 100)}%`);
+      setUploadStatus('spikeWriting', '0%');
+      await hub.upload(source, slot, onProgress);
+      await hub.start(slot);
+      setUploadStatus('spikeRunning', String(slot));
+      return;
     }
     await device.detach();
     setSerialStatus('serialConnecting');
@@ -455,9 +515,7 @@ upload.addEventListener('click', async () => {
     attachSerial(await downloadProgram(port, source, appendSerialOutput, projectLibraries));
     setUploadStatus('flashComplete');
   } catch (error) {
-    if (!device.serial && !device.spike) setSerialStatus('serialDisconnected');
-    if (error.name === 'NotFoundError') setUploadStatus('portCanceled');
-    else setUploadStatus('flashFailed', error);
+    reportDeviceError(error);
   } finally {
     device.end();
     updateButtons();

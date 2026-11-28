@@ -19,7 +19,7 @@
 
 Compatibility diagnostics may be added later. They should inform rather than restrict editing. Device information may enrich the workspace but must not hide, disable, delete or rewrite other blocks.
 
-## Proposed upload experience (discussion; not implemented)
+## Upload experience
 
 1. Click **Upload and run**. Reuse the active device when available; otherwise ask the browser for a serial port.
 2. Inspect the selected physical port and establish the appropriate protocol using verified USB identity and protocol handshakes. Do not infer the device from Python source or block types.
@@ -29,7 +29,7 @@ Compatibility diagnostics may be added later. They should inform rather than res
 6. If a connection is lost, show the disconnected state. Reuse a permitted port only after revalidating its identity/protocol; never silently choose another physical device based on a matching VID/PID. Remember preferences locally as hints, not as proof of identity or authorization to write. A different hub must be confirmed independently where identity is uncertain.
 7. Unsupported or ambiguous devices receive an actionable message or an explicit protocol selection if safe. Do not fall back to sending REPL control characters to a recognized LEGO hub with unsupported firmware.
 
-A SPIKE confirmation should be a review of a detected device, not a general board-selection wizard. Cancellation must not overwrite a program or change the confirmed active target. The exact slot selector and persistence UI are open design decisions.
+A SPIKE confirmation should be a review of a detected device, not a general board-selection wizard. Cancellation must not overwrite a program or change the confirmed active target. Slots 0–19 are supported; the selector remembers the last chosen slot locally as a default, not as an identity. The active connection is retained until disconnect or explicit change.
 
 ### Firmware installation is different from uploading Python
 
@@ -37,6 +37,6 @@ A working MicroPython runtime already supplies a deployment protocol. Its exact 
 
 ## Current implementation and boundaries
 
-At the time of writing, the toolbox is universal and the project format has no required target. SPIKE upload still uses source-based detection and slot 0; the proposed flow above replaces that in a future implementation. The existing SPIKE driver has an information request that returns RPC and firmware versions and a product-group/device field, but a dedicated non-writing connection/probe and a user confirmation step are not yet implemented. Verify the available slot range and whether slot metadata and stable device identity can actually be obtained before designing those features.
+The toolbox remains universal and the project format has no required target. USB selection routes known SPIKE Prime devices to the HubOS information handshake and other non-LEGO ports to the existing Raw REPL deployment path. Other LEGO USB devices are rejected rather than sent REPL control bytes. Generic serial monitoring is not proof of MicroPython compatibility; upload validates the REPL before writing. Slot occupancy, attached peripheral detection, stable physical identity across reconnects, and automatic firmware installation are not implemented. SPIKE does not support project library uploads in this path. Browser and physical-device testing of the new selection flow remains necessary.
 
 See [SPIKE Prime](spike-prime.md) and [Firmware installation](firmware.md) for current behavior.

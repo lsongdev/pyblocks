@@ -260,3 +260,7 @@ dialog .board-card { display: flex; align-items: center; gap: 8px; margin: 0; pa
 :root[data-theme="dark"] .dialog-warning { background: #49391f; }
 :root[data-theme="dark"] .vertical-resize { background: #211f2c; }
 :root[data-theme="dark"] .resize-handle::after { background: #514d60; }
+
+.deployment-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; padding: 6px 12px; font-size: .8rem; }
+.deployment-bar span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.deployment-bar button { font-size: .8rem; }

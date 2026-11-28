@@ -1,3 +1,5 @@
+import { requireSpikeSlot } from '../device/spike/slots.js';
+
 // Own the active device and exclusive editor operation independently of the DOM.
 export class DeviceController {
   #connection = null;
@@ -11,6 +13,15 @@ export class DeviceController {
   get busy() { return this.#operation !== null; }
   get serial() { return this.#connection?.kind === 'serial' ? this.#connection.value : undefined; }
   get spike() { return this.#connection?.kind === 'spike' ? this.#connection.value : undefined; }
+  get port() { return this.#connection?.port; }
+  get slot() { return this.#connection?.slot; }
+  get protocol() { return this.#connection?.protocol; }
+
+  setSlot(slot) {
+    if (!this.spike) throw new Error('No SPIKE hub connected');
+    requireSpikeSlot(slot);
+    this.#connection.slot = slot;
+  }
 
   begin(operation) {
     if (this.busy) return false;
@@ -33,13 +44,19 @@ export class DeviceController {
     this.onDisconnect(connection.kind, error);
   }
 
-  attachSerial(session) {
+  attachSerial(session, protocol = 'serial') {
     const connection = this.#attach('serial', session);
+    connection.port = session.port;
+    connection.protocol = protocol;
     session.done.then(() => this.#ended(connection), error => this.#ended(connection, error));
   }
 
-  attachSpike(hub) {
+  attachSpike(hub, port, slot = 0) {
+    requireSpikeSlot(slot);
     const connection = this.#attach('spike', hub);
+    connection.port = port;
+    connection.protocol = 'spike';
+    this.setSlot(slot);
     hub.onClose(error => {
       if (this.#connection !== connection) return;
       // A SPIKE disconnect must finish releasing the transport before notifying UI.

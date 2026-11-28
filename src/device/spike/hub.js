@@ -1,4 +1,5 @@
 import { pack, unpack, crc32Aligned } from './codec.js';
+import { requireSpikeSlot } from './slots.js';
 import {
   MessageId,
   infoRequest,
@@ -48,6 +49,7 @@ export class SpikeHub {
   }
 
   async upload(source, slot, onProgress = () => {}) {
+    requireSpikeSlot(slot);
     if (!this.info) throw new SpikeError('uninitialized', 'The SPIKE hub is not initialized.');
     const data = new TextEncoder().encode(source);
     const fileCrc = crc32Aligned(data);
@@ -79,6 +81,7 @@ export class SpikeHub {
   }
 
   async start(slot) {
+    requireSpikeSlot(slot);
     const response = await this.request(
       programFlowRequest(slot, false),
       MessageId.programFlowResponse,
@@ -87,6 +90,7 @@ export class SpikeHub {
   }
 
   async stop(slot) {
+    requireSpikeSlot(slot);
     const response = await this.request(
       programFlowRequest(slot, true),
       MessageId.programFlowResponse,

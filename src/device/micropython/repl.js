@@ -1,5 +1,6 @@
 import { writeSerialText, streamOutput } from '../transport/serial.js';
 import { MicroPythonError, BoardCommandError } from './errors.js';
+import { requireReplCandidate } from '../detect.js';
 
 const handshakeTimeout = 4000;
 const commandTimeout = 15000;
@@ -17,6 +18,7 @@ async function resetSerialBoard(port) {
 }
 
 export async function runOnBoard(port, onOutput, operation) {
+  requireReplCandidate(port);
   let decoder;
   let reader;
   let writer;

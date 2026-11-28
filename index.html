@@ -69,6 +69,11 @@
             <button id="download" type="button" title="Save main.py" data-i18n-title="downloadHint" data-i18n="downloadButton">download</button>
           </div>
         </div>
+        <div class="deployment-bar">
+          <span id="deployment-device" role="status"></span>
+          <button id="change-slot" type="button" data-i18n="changeSlot" hidden>Change slot</button>
+          <button id="change-device" type="button" data-i18n="changeDevice">Change device</button>
+        </div>
         <p id="upload-status" role="status"></p>
         <p id="code-error" role="status"></p>
         <div class="code-sync" id="code-sync" hidden>
@@ -103,6 +108,18 @@
         </div>
       </section>
     </main>
+    <dialog id="spike-device-dialog" aria-labelledby="spike-device-title">
+      <h2 id="spike-device-title" data-i18n="spikeDeviceTitle">Detected LEGO SPIKE Prime</h2>
+      <p id="spike-device-version"></p>
+      <p data-i18n="spikeDeviceCapabilities">5×5 light matrix, buttons, orientation sensor and six ports for motors and external sensors.</p>
+      <label for="spike-device-slot" data-i18n="spikeSlotLabel">Program slot</label>
+      <select id="spike-device-slot"></select>
+      <p id="spike-device-warning" class="dialog-warning"></p>
+      <div class="dialog-actions">
+        <button id="spike-device-cancel" type="button" data-i18n="closeButton">Close</button>
+        <button id="spike-device-confirm" class="primary" type="button"></button>
+      </div>
+    </dialog>
     <dialog id="firmware-dialog" aria-labelledby="firmware-title">
       <h2 id="firmware-title" data-i18n="firmwareTitle">Install MicroPython firmware</h2>
       <p data-i18n="firmwareIntro">Choose a device family, then connect and detect its hardware.</p>

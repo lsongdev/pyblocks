@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { openSpikeSerial, selectSpikeSerialPort } from '../src/device/spike/serial.js';
-import { uploadSpikeProgram } from '../src/device/spike/index.js';
+import { uploadSpikeProgram, connectSpike } from '../src/device/spike/index.js';
 import { pack, unpack } from '../src/device/spike/codec.js';
 import { openSpikeBle } from '../src/device/spike/ble.js';
 
@@ -209,4 +209,24 @@ test('BLE transport writes to RX and forwards TX notifications', async () => {
   } finally {
     restore();
   }
+});
+
+test('SPIKE connection only requests info until a slot is confirmed', async () => {
+  const requests = [];
+  const { port } = serialMock((bytes, serial) => {
+    const message = unpack(bytes);
+    requests.push([...message]);
+    if (message[0] === 0) serial.push(pack(Buffer.from('0101002f00010895000002881300100000', 'hex')));
+    else serial.push(pack(Uint8Array.of(message[0] + 1, 0)));
+  });
+  const hub = await connectSpike(port);
+  try {
+    assert.deepEqual(requests, [[0]]);
+    await assert.rejects(hub.upload('print(1)', 20), RangeError);
+    assert.deepEqual(requests, [[0]]);
+    await hub.upload('print(1)', 7);
+    await hub.start(7);
+    assert.deepEqual(requests[1], [0x46, 7]);
+    assert.deepEqual(requests.at(-1), [0x1e, 0, 7]);
+  } finally { await hub.close(); }
 });

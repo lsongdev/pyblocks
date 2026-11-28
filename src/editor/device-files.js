@@ -1,4 +1,5 @@
 import { t } from '../i18n/index.js';
+import { requireReplCandidate } from '../device/detect.js';
 import { manageDeviceFiles, MicroPythonError } from '../device/micropython.js';
 
 export function createDeviceFilesPanel({ device, onChange, attachSerial, setSerialStatus, appendSerialOutput }) {
@@ -14,7 +15,7 @@ export function createDeviceFilesPanel({ device, onChange, attachSerial, setSeri
 
   function renderDeviceFiles() {
     const listing = deviceListing?.port === device.serial?.port ? deviceListing : undefined;
-    refreshFiles.disabled = device.busy || !navigator.serial;
+    refreshFiles.disabled = device.busy || !navigator.serial || Boolean(device.spike);
     refreshFiles.textContent = t(device.serial ? 'filesRefresh' : 'filesConnect');
     addFile.disabled = device.busy || !listing;
     filesParent.hidden = !listing || listing.path === '/';
@@ -22,6 +23,7 @@ export function createDeviceFilesPanel({ device, onChange, attachSerial, setSeri
     filesPath.textContent = listing?.path ?? '';
     filesStatus.textContent = device.operation === 'files' ? t('filesBusy')
       : filesMessage ? t(...filesMessage)
+      : device.spike ? t('spikeFilesUnsupported')
       : !navigator.serial ? t('filesUnsupported')
       : listing?.entries.length === 0 ? t('filesEmpty') : '';
     fileList.replaceChildren();
@@ -54,11 +56,12 @@ export function createDeviceFilesPanel({ device, onChange, attachSerial, setSeri
   }
 
   async function accessDeviceFiles(path, action) {
-    if (!navigator.serial || !device.begin('files')) return;
+    if (!navigator.serial || device.spike || !device.begin('files')) return;
     filesMessage = undefined;
     onChange();
     try {
       const port = device.serial?.port ?? await navigator.serial.requestPort();
+      requireReplCandidate(port);
       const command = action?.type === 'upload'
         ? { type: 'upload', name: action.file.name, bytes: new Uint8Array(await action.file.arrayBuffer()) }
         : action;

@@ -10,6 +10,7 @@ import { resetEsp32 } from './esp32.js';
 import { getFirmwareFamily, matchFirmware } from './catalog.js';
 import { uiflowBootSetup } from './uiflow.js';
 import { executeProgram } from '../device/micropython.js';
+import { requireReplCandidate } from '../device/detect.js';
 
 async function fetchImage({ file, sha256 }) {
   const response = await fetch(new URL(`firmware/${file}`, document.baseURI));
@@ -32,6 +33,7 @@ export async function connectFirmware(familyId, report = () => {}) {
   };
   if (family.transport === 'serial') {
     const port = await navigator.serial.requestPort();
+    requireReplCandidate(port);
     const transport = new Transport(port);
     const loader = new ESPLoader({ transport, baudrate: 115200 });
     let connected = true;

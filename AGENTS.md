@@ -10,7 +10,7 @@ The shortest learning path is: drag blocks, connect a device, upload and run. No
 - Detect the connected device and its protocol, not the user's intention. Program dependencies may inform optional diagnostics, but must not select the upload protocol.
 - Device selection is optional deployment context, not project identity. Switching devices must preserve the workspace and source code.
 
-See [Product and device design](docs/design.md) for the proposed connection and deployment experience. Do not implement unapproved proposals merely because they are documented.
+See [Product and device design](docs/design.md) for the connection and deployment experience. Do not implement unapproved proposals merely because they are documented.
 
 # Development preferences
 

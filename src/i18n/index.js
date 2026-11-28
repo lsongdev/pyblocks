@@ -9,6 +9,21 @@ const languages = {
 const storageKey = 'pyblocks.language';
 
 const messages = {
+  deploymentNone: ["No device connected","未连接设备"],
+  deploymentSerial: ["Serial device · runtime not verified","串口设备 · 运行时尚未验证"],
+  deploymentMicroPython: ["MicroPython · main.py","MicroPython · main.py"],
+  deploymentSpike: ["LEGO SPIKE Prime · Slot %1","LEGO SPIKE Prime · 槽位 %1"],
+  deploymentReady: ["Device selected.","已选择设备。"],
+  changeDevice: ["Change device","切换设备"],
+  changeSlot: ["Change slot","更改槽位"],
+  spikeDeviceTitle: ["Detected LEGO SPIKE Prime","已识别 LEGO SPIKE Prime"],
+  spikeDeviceCapabilities: ["5×5 light matrix, buttons, orientation sensor and six ports for motors and external sensors.","5×5 灯阵、按键、姿态传感器和六个用于电机及外接传感器的端口。"],
+  spikeSlotLabel: ["Program slot","程序槽位"],
+  spikeSlotWarning: ["Uploads overwrite any existing program in slot %1. Back it up first if needed.","上传会覆盖槽位 %1 中的原有程序，如有需要请先备份。"],
+  spikeConfirmUpload: ["Confirm and upload","确认并上传"],
+  spikeConfirmDevice: ["Use device","确认设备"],
+  spikeFilesUnsupported: ["SPIKE uses program slots instead of the MicroPython file browser.","SPIKE 使用程序槽位，不支持此 MicroPython 文件浏览器。"],
+  spikeLibrariesUnsupported: ["SPIKE deployment does not support project library uploads. Remove the libraries or include their code in the program.","SPIKE 部署不支持上传项目库，请移除库或将其代码包含在程序中。"],
   firmwareMoreMicrobit: ["Micro:bit official Python editor", "Micro:bit 官方 Python 编辑器"],
   firmwareMoreM5: ["M5Stack official firmware guide", "M5Stack 官方固件指南"],
   firmwareXiaomiaoModel: ["ESP32_GENERIC-SPIRAM (XiaoMiao, 4 MB + PSRAM)", "ESP32_GENERIC-SPIRAM（小喵掌机，4 MB + 8 MB PSRAM）"],
