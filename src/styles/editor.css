@@ -233,8 +233,7 @@ dialog .board-card { display: flex; align-items: center; gap: 8px; margin: 0; pa
 #deployment-device { display: flex; align-items: baseline; gap: 6px; overflow-wrap: anywhere; }
 #deployment-device::before { content: ""; display: inline-block; flex: 0 0 7px; height: 7px; border-radius: 50%; background: #9995a6; }
 #deployment-device[data-connected="true"]::before { background: #32875a; }
-.device-actions { display: flex; flex-wrap: wrap; gap: 6px; }
-.device-actions button, #serial-connect, #toggle-code, #download { padding: 6px 8px; background: #eee9ff; color: #473779; font-size: .8125rem; }
+#toggle-code, #download { padding: 6px 8px; background: #eee9ff; color: #473779; font-size: .8125rem; }
 #device-panel button { font-size: .8125rem; padding: 6px 9px; min-height: 32px; }
 #upload-status { margin: 0; font-size: .75rem; line-height: 1.4; overflow-wrap: anywhere; }
 #upload-status:empty { display: none; }
@@ -280,8 +279,11 @@ dialog .board-card { display: flex; align-items: center; gap: 8px; margin: 0; pa
 :root[data-theme="dark"] .resize-handle::after { background: #514d60; }
 
 
-:root[data-theme="dark"] .device-actions button, :root[data-theme="dark"] #serial-connect, :root[data-theme="dark"] #toggle-code, :root[data-theme="dark"] #download { background: #363144; color: #e7e1ff; }
+:root[data-theme="dark"] .device-heading-actions button:not(#upload), :root[data-theme="dark"] #toggle-code, :root[data-theme="dark"] #download { background: #363144; color: #e7e1ff; }
 
-.device-heading-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 6px; margin-left: auto; }
-.device-heading-actions button { white-space: nowrap; }
-.device-actions:not(:has(> button:not([hidden]))) { display: none; }
+.device-heading-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 4px; margin-left: auto; min-width: 0; }
+#device-panel .device-heading-actions button { display: inline-grid; place-items: center; flex: 0 0 30px; width: 30px; height: 30px; min-height: 30px; padding: 6px; border-radius: 6px; }
+.device-heading-actions button:not(#upload) { background: #eee9ff; color: #473779; }
+.device-heading-actions svg { display: block; width: 18px; height: 18px; }
+#serial-connect .disconnect-icon, #serial-connect[data-connected="true"] .connect-icon { display: none; }
+#serial-connect[data-connected="true"] .disconnect-icon { display: block; }

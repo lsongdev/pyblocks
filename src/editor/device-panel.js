@@ -90,10 +90,13 @@ export function createDevicePanel({ getSource, getLibraries }) {
     upload.title = !navigator.serial ? t('uploadSerialUnavailable')
       : device.busy ? t('uploadSerialBusy')
       : !hasSource ? t('uploadCodeRequired')
-      : '';
+      : t('flashButton');
     document.querySelector('#open-firmware').disabled = device.busy;
     serialConnect.disabled = device.busy || !navigator.serial;
-    serialConnect.textContent = t(device.serial || device.spike ? 'serialDisconnect' : 'serialConnect');
+    const connectLabel = t(device.serial || device.spike ? 'serialDisconnect' : 'serialConnect');
+    serialConnect.title = connectLabel;
+    serialConnect.setAttribute('aria-label', connectLabel);
+    serialConnect.dataset.connected = String(Boolean(device.serial || device.spike));
     changeDevice.disabled = device.busy || !navigator.serial;
     changeSlot.hidden = !device.spike;
     changeSlot.disabled = device.busy;
