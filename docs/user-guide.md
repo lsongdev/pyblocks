@@ -29,15 +29,15 @@ Ask a teacher or grown-up to help with the first USB connection. If your board n
 
 ![The PyBlocks editor showing a small print block and the matching Python code.](images/01-hello.webp)
 
-*This is the real editor before connecting a board. The console buttons become available after connecting.*
+*This screenshot shows the earlier layout. In the current editor, device controls and console output are above the Code panel.*
 
 Think of the screen as three work areas:
 
 | Where? | What happens there? |
 | --- | --- |
 | **Left: Block** | Pick a category, drag blocks out, and join them together. |
-| **Right: Code** | See the Python made by your blocks. You do not need to edit it yet. |
-| **Bottom right: Serial output** | Read messages from your board and send answers back. |
+| **Upper right: Device** | Connect, upload and run, stop, disconnect, and read console messages. |
+| **Lower right: Code** | See or edit the Python made by your blocks. You can collapse it when not needed. |
 
 A **program** is a set of instructions. Connected blocks run from top to bottom. A block that fits inside another block gives it a value, such as a message or a number.
 
@@ -63,10 +63,10 @@ Your blocks should look like the picture above. `print` sends a message to the c
 ### Send it to your board
 
 1. Connect the board with its USB cable.
-2. Click **Upload and run**.
+2. In the Device panel, click **Upload and run**.
 3. With your teacher, choose the board's USB serial device in the browser window.
 4. Keep the cable plugged in while the program is sent.
-5. Look in **Serial output** for your message:
+5. Look in **Console output** for your message:
 
 ```text
 Hello, PyBlocks!
@@ -155,7 +155,7 @@ Leave a space after the comma in `Hello, ` so your answer does not run into the 
 ### Have a conversation
 
 1. Upload the program.
-2. Wait for `What is your name?` in Serial output.
+2. Wait for `What is your name?` in Console output.
 3. Click the input box at the bottom of the console.
 4. Type a short name such as `Alex`, keep the line ending set to **CR**, and press **Enter** or **Send**.
 5. Look for the greeting:
@@ -177,15 +177,15 @@ Ask `What is your favorite animal? ` and make the reply start with `I like `.
 
 **Typing tip:** on the project's ESP32 firmware, the built-in line editor accepts ordinary ASCII characters. Use a name such as `Alex` for this activity; Chinese characters typed into native `input()` are filtered by that firmware. Programs can still display Unicode output.
 
-### Three helpful console buttons
+### Three helpful device controls
 
 | Button | What to expect |
 | --- | --- |
-| **Interrupt** | Ask the running program to stop. You may see `KeyboardInterrupt`; you have not broken the board. |
+| **Stop** | Ask the running program to stop. You may see `KeyboardInterrupt`; you have not broken the board. |
 | **Soft reset** | At the `>>>` prompt, restart the saved program so it can ask its question again. Interrupt a running program first. |
 | **Clear** | Clear messages from the screen. The program itself keeps running. |
 
-Press **↑ / ↓** in the input box to revisit recently sent text. Use **Connect** if the console is disconnected. Keep **CR** selected while following these activities.
+Press **↑ / ↓** in the input box to revisit recently sent text. Use **Connect** in the Device panel if the console is disconnected. Keep **CR** selected while following these activities.
 
 ## 4. Learn from a mistake
 
@@ -221,7 +221,7 @@ The example uses an **int** Python-call block to turn text into a whole number. 
 
 **Think about it:** why is it helpful for the program to ask again after a mistake?
 
-Click **Interrupt** when you want to stop the repeating questions.
+Click **Stop** when you want to stop the repeating questions.
 
 ## Make something of your own
 

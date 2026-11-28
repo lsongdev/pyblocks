@@ -26,7 +26,7 @@ Write programs first and choose hardware later. All supported hardware capabilit
 1. Open **[blocks.lsong.org](https://blocks.lsong.org/)** in desktop Chrome or Edge.
 2. Connect your board over USB. If needed, click **Install MicroPython firmware** and select your board. Installation replaces existing programs and files; back up first.
 3. Start with the default **Say hello** blocks or open an [example project](examples/).
-4. Click **Upload and run**, select the serial port, and read the output in the console.
+4. In the **Device** panel, click **Upload and run**, select the serial port, and read the console output. The **Code** panel below can be expanded or collapsed independently.
 
 New to programming? Follow the illustrated **[Beginner’s Guide](docs/user-guide.md)** to say hello, blink an LED, and ask a question. Use **Save Project** to keep a portable backup of your work.
 

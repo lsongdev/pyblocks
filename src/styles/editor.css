@@ -6,6 +6,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body { margin: 0; padding: 12px; height: 100dvh; display: flex; flex-direction: column; }
 .panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 64px; padding: 10px 12px; border-bottom: 1px solid #dcd9ed; }
 h1, h2 { font-size: 1rem; margin: 0; }
@@ -40,7 +41,7 @@ button:disabled { opacity: .45; cursor: default; }
 
 .serial-panel {
   display: flex;
-  flex: 0 1 35%;
+  flex: 1;
   flex-direction: column;
   min-height: 100px;
   border-top: 1px solid #dcd9ed;
@@ -72,7 +73,6 @@ button:disabled { opacity: .45; cursor: default; }
   body { height: auto; min-height: 100dvh; }
   main { grid-template-columns: minmax(0, 1fr); }
   .panel { height: 58dvh; }
-  .panel[aria-labelledby="code-label"] { min-height: 360px; }
 }
 
 #workspace .blocklyToolbox {
@@ -220,10 +220,17 @@ dialog .board-card { display: flex; align-items: center; gap: 8px; margin: 0; pa
 
 #editor-panels { display: flex; gap: 0; }
 #blocks-panel { flex: 1; }
-#code-panel { flex: 0 0 340px; }
-#output-panels { display: flex; flex-direction: column; flex: 1; min-height: 0; }
-#output-panels #python { flex: none; width: 100%; height: 65%; min-height: 0; }
-#output-panels .serial-panel { flex: 1; min-height: 0; border-top: 0; }
+#right-panels { display: flex; flex-direction: column; flex: 0 0 340px; min-width: 0; min-height: 0; }
+#device-panel { flex: none; height: 60%; min-height: 0; overflow: auto; }
+#device-panel .panel-heading { flex-wrap: wrap; min-height: 50px; }
+#device-panel .serial-panel { flex: 1 0 100px; min-height: 100px; }
+#code-panel { flex: 1; height: auto; }
+#code-panel .panel-heading { min-height: 48px; }
+#code-body { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+#code-panel.collapsed { flex: 0 0 auto !important; height: auto !important; }
+#right-panels:has(#code-panel.collapsed) #device-panel { flex: 1 !important; height: auto !important; }
+.device-actions { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 12px 8px; }
+.device-actions button, .deployment-bar button, #toggle-code, #download { padding: 6px 8px; background: #eee9ff; color: #473779; font-size: .8125rem; }
 .resize-handle { position: relative; touch-action: none; user-select: none; }
 .horizontal-resize { cursor: col-resize; flex: 0 0 12px; }
 .vertical-resize { cursor: row-resize; flex: 0 0 12px; background: #fff; }
@@ -234,7 +241,9 @@ dialog .board-card { display: flex; align-items: center; gap: 8px; margin: 0; pa
 .resize-handle:focus-visible { outline: 2px solid #8979d1; outline-offset: -2px; }
 @media (max-width: 760px) {
   #editor-panels { flex-direction: column; gap: 12px; }
-  #blocks-panel, #code-panel { flex: none; }
+  #blocks-panel, #right-panels { flex: none; }
+  #right-panels { height: 90dvh; min-height: 500px; }
+  #right-panels:has(#code-panel.collapsed) { height: 58dvh; min-height: 320px; }
   .horizontal-resize { display: none; }
 }
 
@@ -264,3 +273,5 @@ dialog .board-card { display: flex; align-items: center; gap: 8px; margin: 0; pa
 .deployment-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; padding: 6px 12px; font-size: .8rem; }
 .deployment-bar span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .deployment-bar button { font-size: .8rem; }
+
+:root[data-theme="dark"] .device-actions button, :root[data-theme="dark"] .deployment-bar button, :root[data-theme="dark"] #toggle-code, :root[data-theme="dark"] #download { background: #363144; color: #e7e1ff; }

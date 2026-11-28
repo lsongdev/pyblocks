@@ -16,6 +16,18 @@ export class DeviceController {
   get port() { return this.#connection?.port; }
   get slot() { return this.#connection?.slot; }
   get protocol() { return this.#connection?.protocol; }
+  get runningSlot() { return this.#connection?.runningSlot; }
+
+  // The last successfully started slot is independent of the next upload slot.
+  markStarted(slot) {
+    if (!this.spike) throw new Error('No SPIKE hub connected');
+    requireSpikeSlot(slot);
+    this.#connection.runningSlot = slot;
+  }
+
+  markStopped() {
+    if (this.spike) this.#connection.runningSlot = undefined;
+  }
 
   setSlot(slot) {
     if (!this.spike) throw new Error('No SPIKE hub connected');

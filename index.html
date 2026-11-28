@@ -60,53 +60,62 @@
           </section>
         </div>
       </section>
-      <div id="panel-resizer" class="resize-handle horizontal-resize" role="separator" tabindex="0" aria-orientation="vertical" aria-controls="blocks-panel code-panel" data-i18n-aria="resizePanels" aria-label="Resize block and code panels"></div>
-      <section id="code-panel" class="panel" aria-labelledby="code-label">
-        <div class="panel-heading">
-          <h2 id="code-label" data-i18n="codeHeading">Code</h2>
-          <div class="code-actions">
-            <button id="upload" type="button" title="Write to the board and run" data-i18n-title="flashHint" data-i18n="flashButton">flash</button>
-            <button id="download" type="button" title="Save main.py" data-i18n-title="downloadHint" data-i18n="downloadButton">download</button>
+      <div id="panel-resizer" class="resize-handle horizontal-resize" role="separator" tabindex="0" aria-orientation="vertical" aria-controls="blocks-panel right-panels" data-i18n-aria="resizePanels" aria-label="Resize workspace and right panels"></div>
+      <div id="right-panels">
+        <section id="device-panel" class="panel" aria-labelledby="device-label">
+          <div class="panel-heading">
+            <h2 id="device-label" data-i18n="deviceHeading">Device</h2>
+            <button id="upload" type="button" data-i18n-title="flashHint" data-i18n="flashButton">Upload and run</button>
           </div>
-        </div>
-        <div class="deployment-bar">
-          <span id="deployment-device" role="status"></span>
-          <button id="change-slot" type="button" data-i18n="changeSlot" hidden>Change slot</button>
-          <button id="change-device" type="button" data-i18n="changeDevice">Change device</button>
-        </div>
-        <p id="upload-status" role="status"></p>
-        <p id="code-error" role="status"></p>
-        <div class="code-sync" id="code-sync" hidden>
-          <button id="use-block-code" type="button" data-i18n="useGeneratedCode">Use generated code</button>
-        </div>
-        <div id="output-panels">
-        <textarea id="python" aria-labelledby="code-label" spellcheck="false"
-          autocapitalize="off" autocomplete="off" wrap="off"></textarea>
-        <div id="output-resizer" class="resize-handle vertical-resize" role="separator" tabindex="0" aria-orientation="horizontal" aria-controls="python serial-panel" data-i18n-aria="resizeOutput" aria-label="Resize code and serial output"></div>
-        <section id="serial-panel" class="serial-panel" aria-labelledby="serial-label">
-          <div class="serial-heading">
-            <h3 id="serial-label" data-i18n="serialOutput">Serial output</h3>
-            <div class="code-actions">
-              <button id="serial-connect" type="button" disabled>Connect</button>
-              <button id="serial-interrupt" type="button" data-i18n="serialInterrupt" data-i18n-title="serialInterruptHint" disabled>Interrupt</button>
-              <button id="serial-reset" type="button" data-i18n="serialReset" data-i18n-title="serialResetHint" disabled>Soft reset</button>
+          <div class="deployment-bar">
+            <span id="deployment-device" role="status"></span>
+            <button id="change-slot" type="button" data-i18n="changeSlot" hidden>Change slot</button>
+          </div>
+          <div class="device-actions">
+            <button id="serial-connect" type="button" disabled>Connect</button>
+            <button id="change-device" type="button" data-i18n="changeDevice" hidden>Change device</button>
+            <button id="serial-interrupt" type="button" data-i18n="serialInterrupt" data-i18n-title="serialInterruptHint" hidden disabled>Stop</button>
+            <button id="serial-reset" type="button" data-i18n="serialReset" data-i18n-title="serialResetHint" hidden disabled>Soft reset</button>
+            <button id="spike-stop" type="button" data-i18n="serialInterrupt" hidden disabled>Stop</button>
+          </div>
+          <p id="upload-status" role="status"></p>
+          <p id="serial-status" role="status"></p>
+          <section id="serial-panel" class="serial-panel" aria-labelledby="serial-label">
+            <div class="serial-heading">
+              <h3 id="serial-label" data-i18n="serialOutput">Console output</h3>
               <button id="serial-clear" type="button" data-i18n="serialClear" disabled>Clear</button>
             </div>
-          </div>
-          <p id="serial-status" role="status"></p>
-          <pre id="serial-output" aria-labelledby="serial-label" tabindex="0"></pre>
-          <form id="serial-input-form" class="serial-input-form">
-            <input id="serial-input" type="text" data-i18n-aria="serialInput" aria-label="Serial input"
-              autocomplete="off" autocapitalize="off" spellcheck="false" disabled>
-            <select id="serial-line-ending" data-i18n-aria="serialLineEnding" aria-label="Line ending" disabled>
-              <option value="CR">CR</option><option value="LF">LF</option><option value="CRLF">CRLF</option>
-              <option value="NONE" data-i18n="serialNoEnding">None</option>
-            </select>
-            <button id="serial-send" type="submit" data-i18n="serialSend" disabled>Send</button>
-          </form>
+            <pre id="serial-output" aria-labelledby="serial-label" tabindex="0"></pre>
+            <form id="serial-input-form" class="serial-input-form" hidden>
+              <input id="serial-input" type="text" data-i18n-aria="serialInput" aria-label="Serial input"
+                autocomplete="off" autocapitalize="off" spellcheck="false" disabled>
+              <select id="serial-line-ending" data-i18n-aria="serialLineEnding" aria-label="Line ending" disabled>
+                <option value="CR">CR</option><option value="LF">LF</option><option value="CRLF">CRLF</option>
+                <option value="NONE" data-i18n="serialNoEnding">None</option>
+              </select>
+              <button id="serial-send" type="submit" data-i18n="serialSend" disabled>Send</button>
+            </form>
+          </section>
         </section>
-        </div>
-      </section>
+        <div id="output-resizer" class="resize-handle vertical-resize" role="separator" tabindex="0" aria-orientation="horizontal" aria-controls="device-panel code-panel" data-i18n-aria="resizeOutput" aria-label="Resize device and code panels"></div>
+        <section id="code-panel" class="panel" aria-labelledby="code-label">
+          <div class="panel-heading">
+            <h2 id="code-label" data-i18n="codeHeading">Code</h2>
+            <div class="code-actions">
+              <button id="download" type="button" data-i18n-title="downloadHint" data-i18n="downloadButton">Download</button>
+              <button id="toggle-code" type="button" aria-expanded="true" aria-controls="code-body">Collapse</button>
+            </div>
+          </div>
+          <div id="code-body">
+            <p id="code-error" role="status"></p>
+            <div class="code-sync" id="code-sync" hidden>
+              <button id="use-block-code" type="button" data-i18n="useGeneratedCode">Use generated code</button>
+            </div>
+            <textarea id="python" aria-labelledby="code-label" spellcheck="false"
+              autocapitalize="off" autocomplete="off" wrap="off"></textarea>
+          </div>
+        </section>
+      </div>
     </main>
     <dialog id="spike-device-dialog" aria-labelledby="spike-device-title">
       <h2 id="spike-device-title" data-i18n="spikeDeviceTitle">Detected LEGO SPIKE Prime</h2>

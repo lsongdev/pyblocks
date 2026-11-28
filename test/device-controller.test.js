@@ -52,3 +52,19 @@ test('serial and SPIKE cannot be attached simultaneously; SPIKE closure releases
   assert.equal(device.spike, undefined);
   assert.deepEqual(events, [['spike', error]]);
 });
+
+test('SPIKE stop refers to the last started slot, not a new deployment choice', async () => {
+  const device = new DeviceController();
+  const hub = { onClose() {}, async close() {} };
+  device.attachSpike(hub, {}, 3);
+  assert.equal(device.runningSlot, undefined);
+  device.markStarted(3);
+  device.setSlot(7);
+  assert.equal(device.slot, 7);
+  assert.equal(device.runningSlot, 3);
+  device.markStopped();
+  assert.equal(device.runningSlot, undefined);
+  device.markStarted(7);
+  await device.detach();
+  assert.equal(device.runningSlot, undefined);
+});

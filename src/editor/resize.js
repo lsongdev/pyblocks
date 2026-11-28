@@ -8,10 +8,10 @@ export async function setupPanelResize() {
   });
   const disposeOutput = bindSplitter(document.querySelector('#output-resizer'), {
     axis: 'vertical',
-    minBefore: 80,
-    minAfter: 100,
-    initialRatio: .65,
-    storageKey: 'pyblocks.code-height',
+    minBefore: 240,
+    minAfter: 110,
+    initialRatio: .60,
+    storageKey: 'pyblocks.device-height',
   });
   return () => { disposePanels(); disposeOutput(); };
 }
