@@ -10,9 +10,11 @@ import { setupPanelResize } from './resize.js';
 import { setupDialogs } from './dialogs.js';
 import { createLibraryPanel } from './libraries.js';
 import { setupSerialInput } from './serial-input.js';
+import { DeviceController } from './device-controller.js';
+import { createDeviceFilesPanel } from './device-files.js';
 import { example } from './example.js';
 import { createProject, parseProject, ProjectError, readAutosave, writeAutosave } from '../project/storage.js';
-import { downloadProgram, manageDeviceFiles, MicroPythonError, monitorPort } from '../device/micropython.js';
+import { downloadProgram, MicroPythonError, monitorPort } from '../device/micropython.js';
 
 let language = getSavedLanguage();
 applyLanguage(language);
@@ -64,17 +66,6 @@ applyTheme();
 const filesPanel = document.querySelector('#files-panel');
 const librariesPanel = document.querySelector('#libraries-panel');
 const libraryPanel = createLibraryPanel({ onChange: saveLocally });
-const localDeviceFile = document.querySelector('#local-device-file');
-const refreshFiles = document.querySelector('#refresh-files');
-const addFile = document.querySelector('#add-file');
-const filesParent = document.querySelector('#files-parent');
-const filesPath = document.querySelector('#files-path');
-const fileList = document.querySelector('#device-file-list');
-const filesStatus = document.querySelector('#device-files-status');
-let deviceListing;
-let filesMessage;
-let filesBusy = false;
-
 function syncToolboxPanels() {
   const toolbox = workspace.getToolbox();
   const selected = toolbox.getSelectedItem()?.getId();
@@ -110,17 +101,21 @@ const serialClear = document.querySelector('#serial-clear');
 const serialStatus = document.querySelector('#serial-status');
 const serialOutput = document.querySelector('#serial-output');
 const serialOutputLimit = 32_768;
-let serialBusy = false;
-let serialSession;
+const device = new DeviceController({
+  onDisconnect(kind, error) {
+    setSerialStatus(error ? 'serialFailed' : 'serialDisconnected', error);
+    if (kind === 'spike') setUploadStatus('spikeDisconnected');
+    updateButtons();
+  },
+});
 let serialMessage = ['serialDisconnected'];
 const serialInput = setupSerialInput({
-  getSession: () => serialSession,
-  isBusy: () => serialBusy,
+  getSession: () => device.serial,
+  isBusy: () => device.busy,
   onError: error => setSerialStatus('serialSendFailed', error),
 });
 let generatedCode = null;
 let manuallyEdited = false;
-let spikeHub;
 const SPIKE_SLOT = 0;
 let uploadMessage;
 let projectMessage;
@@ -231,115 +226,12 @@ function appendSerialOutput(text) {
 }
 
 function attachSerial(session) {
-  serialSession = session;
+  device.attachSerial(session);
   setSerialStatus('serialConnected');
-  const ended = (error) => {
-    if (serialSession !== session) return;
-    serialSession = undefined;
-    setSerialStatus(error ? 'serialFailed' : 'serialDisconnected', error);
-    updateButtons();
-  };
-  session.done.then(() => ended(), ended);
 }
 
-async function detachSerial() {
-  const session = serialSession;
-  serialSession = undefined;
-  const hub = spikeHub;
-  spikeHub = undefined;
-  await session?.close();
-  await hub?.close();
-}
-
-function renderDeviceFiles() {
-  const listing = deviceListing?.port === serialSession?.port ? deviceListing : undefined;
-  refreshFiles.disabled = serialBusy || !navigator.serial;
-  refreshFiles.textContent = t(serialSession ? 'filesRefresh' : 'filesConnect');
-  addFile.disabled = serialBusy || !listing;
-  filesParent.hidden = !listing || listing.path === '/';
-  filesParent.disabled = serialBusy;
-  filesPath.textContent = listing?.path ?? '';
-  filesStatus.textContent = filesBusy ? t('filesBusy')
-    : filesMessage ? t(...filesMessage)
-    : !navigator.serial ? t('filesUnsupported')
-    : listing?.entries.length === 0 ? t('filesEmpty') : '';
-  fileList.replaceChildren();
-
-  for (const entry of listing?.entries ?? []) {
-    const row = document.createElement('li');
-    const path = `${listing.path.replace(/\/$/, '')}/${entry.name}`;
-    const name = document.createElement(entry.directory ? 'button' : 'span');
-    name.textContent = entry.directory ? `${entry.name}/` : entry.name;
-    row.append(name);
-    if (entry.directory) {
-      name.type = 'button';
-      name.disabled = serialBusy;
-      name.addEventListener('click', () => accessDeviceFiles(path));
-    } else {
-      const remove = document.createElement('button');
-      remove.type = 'button';
-      remove.disabled = serialBusy;
-      remove.textContent = t('filesDelete');
-      remove.setAttribute('aria-label', t('filesDeleteConfirm', path));
-      remove.addEventListener('click', () => {
-        if (window.confirm(t('filesDeleteConfirm', path))) {
-          void accessDeviceFiles(listing.path, { type: 'delete', path });
-        }
-      });
-      row.append(remove);
-    }
-    fileList.append(row);
-  }
-}
-
-async function accessDeviceFiles(path, action) {
-  if (serialBusy || !navigator.serial) return;
-  filesBusy = serialBusy = true;
-  filesMessage = undefined;
-  updateButtons();
-  try {
-    const port = serialSession?.port ?? await navigator.serial.requestPort();
-    const command = action?.type === 'upload'
-      ? { type: 'upload', name: action.file.name, bytes: new Uint8Array(await action.file.arrayBuffer()) }
-      : action;
-    await detachSerial();
-    setSerialStatus('serialConnecting');
-    const { session, result } = await manageDeviceFiles(port, path, command, appendSerialOutput);
-    attachSerial(session);
-    if (result.error) throw result.error;
-    deviceListing = {
-      port, path,
-      entries: result.entries.sort((a, b) => Number(b.directory) - Number(a.directory) || a.name.localeCompare(b.name)),
-    };
-  } catch (error) {
-    if (!serialSession) {
-      deviceListing = undefined;
-      setSerialStatus('serialDisconnected');
-    }
-    if (error.name === 'NotFoundError') filesMessage = ['portCanceled'];
-    else filesMessage = ['filesFailed', error instanceof MicroPythonError ? t(error.code) : error.message];
-  } finally {
-    filesBusy = serialBusy = false;
-    updateButtons();
-  }
-}
-
-refreshFiles.addEventListener('click', () => {
-  const path = deviceListing?.port === serialSession?.port ? deviceListing?.path : undefined;
-  void accessDeviceFiles(path ?? '/');
-});
-filesParent.addEventListener('click', () => {
-  if (!deviceListing) return;
-  const parent = deviceListing.path.slice(0, deviceListing.path.lastIndexOf('/')) || '/';
-  void accessDeviceFiles(parent);
-});
-addFile.addEventListener('click', () => localDeviceFile.click());
-localDeviceFile.addEventListener('change', () => {
-  const file = localDeviceFile.files[0];
-  localDeviceFile.value = '';
-  if (file && deviceListing && deviceListing.port === serialSession?.port) {
-    void accessDeviceFiles(deviceListing.path, { type: 'upload', file });
-  }
+const deviceFiles = createDeviceFilesPanel({
+  device, onChange: updateButtons, attachSerial, setSerialStatus, appendSerialOutput,
 });
 
 function renderLanguage() {
@@ -359,7 +251,7 @@ function renderLanguage() {
   renderStatus(serialStatus, serialMessage);
   setProjectStatus(projectMessage);
   libraryPanel.render();
-  renderDeviceFiles();
+  deviceFiles.render();
 }
 
 window.setLanguage = (requested, { persist = true } = {}) => {
@@ -383,13 +275,13 @@ window.setLanguage = (requested, { persist = true } = {}) => {
 function updateButtons() {
   serialInput.update();
   download.disabled = !code.value.trim();
-  upload.disabled = download.disabled || serialBusy || !navigator.serial;
-  document.querySelector('#open-firmware').disabled = serialBusy;
-  serialConnect.disabled = serialBusy || !navigator.serial;
-  serialConnect.textContent = t(serialSession || spikeHub ? 'serialDisconnect' : 'serialConnect');
+  upload.disabled = download.disabled || device.busy || !navigator.serial;
+  document.querySelector('#open-firmware').disabled = device.busy;
+  serialConnect.disabled = device.busy || !navigator.serial;
+  serialConnect.textContent = t(device.serial || device.spike ? 'serialDisconnect' : 'serialConnect');
   codeSync.hidden = !manuallyEdited;
   useBlockCode.disabled = generatedCode === null;
-  renderDeviceFiles();
+  deviceFiles.render();
 }
 
 function updateCode() {
@@ -433,7 +325,7 @@ workspace.addChangeListener(event => {
 });
 window.addEventListener('pagehide', () => {
   if (autosaveTimer !== undefined) saveLocally();
-  void spikeHub?.close();
+  void device.spike?.close();
 });
 new ResizeObserver(() => {
   Blockly.svgResize(workspace);
@@ -480,12 +372,12 @@ serialClear.addEventListener('click', () => {
 });
 
 serialConnect.addEventListener('click', async () => {
-  serialBusy = true;
+  if (!device.begin('connection')) return;
   updateButtons();
   try {
-    if (serialSession || spikeHub) {
-      const wasSpikeConnected = Boolean(spikeHub);
-      await detachSerial();
+    if (device.serial || device.spike) {
+      const wasSpikeConnected = Boolean(device.spike);
+      await device.detach();
       setSerialStatus('serialDisconnected');
       if (wasSpikeConnected) setUploadStatus('spikeDisconnected');
     } else {
@@ -496,25 +388,25 @@ serialConnect.addEventListener('click', async () => {
   } catch (error) {
     setSerialStatus(error.name === 'NotFoundError' ? 'portCanceled' : 'serialFailed', error);
   } finally {
-    serialBusy = false;
+    device.end();
     updateButtons();
   }
 });
 
 async function runSpikeUpload(source) {
-  serialBusy = true;
+  if (!device.begin('upload')) return;
   updateButtons();
   try {
     const onProgress = value => setUploadStatus('spikeWriting', `${Math.round(value * 100)}%`);
-    if (spikeHub && !spikeHub.closed) {
+    if (device.spike && !device.spike.closed) {
       setUploadStatus('spikeWriting', '0%');
-      await spikeHub.upload(source, SPIKE_SLOT, onProgress);
-      await spikeHub.start(SPIKE_SLOT);
+      await device.spike.upload(source, SPIKE_SLOT, onProgress);
+      await device.spike.start(SPIKE_SLOT);
       setUploadStatus('spikeRunning', String(SPIKE_SLOT));
       return;
     }
     const port = await selectSpikeSerialPort(() => setUploadStatus('selectPort'));
-    await detachSerial();
+    await device.detach();
     setSerialStatus('serialConnecting');
     setUploadStatus('spikeDetecting');
     const hub = await uploadSpikeProgram(port, source, {
@@ -526,28 +418,18 @@ async function runSpikeUpload(source) {
       await hub.close();
       throw new Error(t('spikeDisconnected'));
     }
-    spikeHub = hub;
+    device.attachSpike(hub);
     setSerialStatus('serialConnected');
     setUploadStatus('spikeRunning', String(SPIKE_SLOT));
-    hub.onClose(error => {
-      if (spikeHub !== hub) return;
-      void hub.close().finally(() => {
-        if (spikeHub !== hub) return;
-        spikeHub = undefined;
-        setSerialStatus(error ? 'serialFailed' : 'serialDisconnected', error);
-        setUploadStatus('spikeDisconnected');
-        updateButtons();
-      });
-    });
   } catch (error) {
     if (error.name === 'NotFoundError') {
       setUploadStatus('portCanceled');
     } else {
-      if (!spikeHub || spikeHub.closed) setSerialStatus('serialDisconnected');
+      if (!device.spike || device.spike.closed) setSerialStatus('serialDisconnected');
       setUploadStatus(error.code === 'unsupported' ? 'spikeFirmwareUnsupported' : 'flashFailed', error);
     }
   } finally {
-    serialBusy = false;
+    device.end();
     updateButtons();
   }
 }
@@ -559,25 +441,25 @@ upload.addEventListener('click', async () => {
     return;
   }
   const projectLibraries = libraryPanel.files;
-  serialBusy = true;
+  if (!device.begin('upload')) return;
   updateButtons();
   try {
-    let port = serialSession?.port;
+    let port = device.serial?.port;
     if (!port) {
       setUploadStatus('selectPort');
       port = await navigator.serial.requestPort();
     }
-    await detachSerial();
+    await device.detach();
     setSerialStatus('serialConnecting');
     setUploadStatus('writingCode');
     attachSerial(await downloadProgram(port, source, appendSerialOutput, projectLibraries));
     setUploadStatus('flashComplete');
   } catch (error) {
-    setSerialStatus('serialDisconnected');
+    if (!device.serial && !device.spike) setSerialStatus('serialDisconnected');
     if (error.name === 'NotFoundError') setUploadStatus('portCanceled');
     else setUploadStatus('flashFailed', error);
   } finally {
-    serialBusy = false;
+    device.end();
     updateButtons();
   }
 });
@@ -586,21 +468,20 @@ setupDialogs({
   getLanguage: () => language,
   setLanguage: value => window.setLanguage(value),
   async acquireDevice() {
-    if (serialBusy) throw new Error(t('filesBusy'));
-    serialBusy = true;
+    if (!device.begin('firmware')) throw new Error(t('filesBusy'));
     updateButtons();
     try {
-      await detachSerial();
-      deviceListing = undefined;
+      await device.detach();
+      deviceFiles.clear();
       setSerialStatus('serialDisconnected');
       updateButtons();
     } catch (error) {
-      serialBusy = false;
+      device.end();
       updateButtons();
       throw error;
     }
   },
-  releaseDevice() { serialBusy = false; updateButtons(); },
+  releaseDevice() { device.end(); updateButtons(); },
 });
 
 setupPanelResize().catch(error => console.warn('Panel resize unavailable:', error));

@@ -141,3 +141,36 @@ test('raw REPL reopens and pulses reset signals after a first-handshake timeout'
   ]);
   await session.close();
 });
+
+test('raw REPL handles fragmented acknowledgements and frame boundaries', async () => {
+  const { executeProgram } = await import('../src/device/micropython.js');
+  let device;
+  let raw = false;
+  device = mockPort(async chunk => {
+    const text = new TextDecoder().decode(chunk);
+    const respond = (...parts) => parts.forEach(part => device.controller.enqueue(new TextEncoder().encode(part)));
+    if (text === '\r\x03\x03\x02') respond('>', '>>');
+    else if (text === '\x01') { raw = true; respond('raw REPL; CTRL-B to exit\r\n', '>'); }
+    else if (text === '\x02') { raw = false; respond('>>>'); }
+    else if (text === '\x04' && !raw) respond('MPY: soft reboot', '\r\n');
+    else if (text.endsWith('\x04')) respond('O', 'Koutput', '\x04', '\x04', '>');
+  });
+  const session = await executeProgram(device.port, 'print(1)');
+  await session.close();
+  assert.ok(device.port.closed);
+});
+
+test('raw REPL rejects malformed acknowledgement and closes the port', async () => {
+  const { executeProgram, MicroPythonError } = await import('../src/device/micropython.js');
+  let device;
+  device = mockPort(async chunk => {
+    const text = new TextDecoder().decode(chunk);
+    const respond = value => device.controller.enqueue(new TextEncoder().encode(value));
+    if (text === '\r\x03\x03\x02') respond('>>>');
+    else if (text === '\x01') respond('raw REPL; CTRL-B to exit\r\n>');
+    else if (text.endsWith('\x04')) respond('NO');
+  });
+  await assert.rejects(executeProgram(device.port, 'print(1)'), error =>
+    error instanceof MicroPythonError && error.code === 'unexpectedResponse');
+  assert.ok(device.port.closed);
+});
