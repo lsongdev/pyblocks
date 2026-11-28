@@ -1,4 +1,5 @@
 import { t } from '../i18n/index.js';
+import { inlineDeviceResult } from './device-status.js';
 import { portProtocol } from '../device/detect.js';
 import { SerialOpenError } from '../device/transport/serial.js';
 import { connectSpike } from '../device/spike/index.js';
@@ -30,6 +31,7 @@ export function createDevicePanel({ getSource, getLibraries }) {
   const changeDevice = document.querySelector('#change-device');
   const changeSlot = document.querySelector('#change-slot');
   const deviceName = document.querySelector('#deployment-device');
+  const deviceResult = document.querySelector('#deployment-result');
   let statusMessage;
 
   const serialInterrupt = document.querySelector('#serial-interrupt');
@@ -37,10 +39,13 @@ export function createDevicePanel({ getSource, getLibraries }) {
   const serialForm = document.querySelector('#serial-input-form');
   const spikeStop = document.querySelector('#spike-stop');
 
-  // Connection identity is rendered separately; there is only one transient
-  // operation/error message, so older success text cannot compete with it.
+  // Successful deployment acknowledgments fit beside the matching device.
+  // Progress, failures and messages about other slots keep the full status row.
   function renderStatus() {
-    if (!statusMessage) {
+    const inline = inlineDeviceResult(device, statusMessage);
+    deviceResult.textContent = inline ? t(inline) : '';
+    deviceResult.hidden = !inline;
+    if (!statusMessage || inline) {
       uploadStatus.textContent = '';
       uploadStatus.classList.remove('error');
       return;
@@ -106,6 +111,7 @@ export function createDevicePanel({ getSource, getLibraries }) {
     deviceName.textContent = device.spike ? t('deploymentSpike', String(device.slot))
       : device.serial ? t(device.protocol === 'micropython' ? 'deploymentMicroPython' : 'deploymentSerial')
       : t('deploymentNone');
+    renderStatus();
     changeDevice.hidden = !device.serial && !device.spike;
     serialInterrupt.hidden = !device.serial;
     serialReset.hidden = !device.serial;

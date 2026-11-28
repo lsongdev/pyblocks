@@ -19,6 +19,7 @@ test('device panel keeps device actions and identity in its header, clear in con
   assert.equal(panel.split('id="serial-clear"').length, 2);
   assert.match(panel, /class="panel-heading"[\s\S]*?id="deployment-device"[\s\S]*?<p id="upload-status"/);
   assert.doesNotMatch(panel, /class="device-details"/);
+  assert.match(panel, /class="device-identity"[\s\S]*?id="deployment-device"[\s\S]*?id="deployment-result"[\s\S]*?<\/div>/);
   assert.match(panel, /id="upload-status"/);
   assert.doesNotMatch(panel, /id="serial-status"/);
   assert.ok(panel.indexOf('id="upload-status"') < panel.indexOf('id="serial-panel"'));
@@ -28,4 +29,10 @@ test('SPIKE program slot uses a labelled native radio grid, not a dropdown', () 
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
   assert.match(html, /<fieldset id="spike-slot-fieldset">[\s\S]*?<legend[^>]*>Program slot<\/legend>[\s\S]*?id="spike-device-slot" class="spike-slot-grid"/);
   assert.doesNotMatch(html, /<select id="spike-device-slot"/);
+});
+
+test('vertical splitter stays transparent in both themes', () => {
+  const css = readFileSync(new URL('../src/styles/editor.css', import.meta.url), 'utf8');
+  assert.match(css, /\.vertical-resize\s*\{[^}]*background:\s*transparent/);
+  assert.doesNotMatch(css, /data-theme="dark"\]\s+\.vertical-resize\s*\{/);
 });
