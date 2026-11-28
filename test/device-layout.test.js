@@ -60,3 +60,13 @@ test('all code actions live in the code header without an extra synchronization 
   assert.equal(panel.split('id="use-block-code"').length, 2);
   assert.doesNotMatch(panel, /code-sync/);
 });
+
+test('project feedback is a subtitle in the blocks header, not a separate row', () => {
+  const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  const panel = html.slice(html.indexOf('id="blocks-panel"'), html.indexOf('id="panel-resizer"'));
+  assert.match(panel, /class="panel-heading"[\s\S]*?class="project-meta"[\s\S]*?id="workspace-label"[\s\S]*?id="project-status"[\s\S]*?<\/div>[\s\S]*?class="code-actions project-actions"/);
+  assert.equal(panel.split('id="project-status"').length, 2);
+  const css = readFileSync(new URL('../src/styles/editor.css', import.meta.url), 'utf8');
+  assert.match(css, /\.project-meta, \.device-meta\s*\{[^}]*justify-content:\s*center/);
+  assert.match(css, /\.device-identity, #project-status\s*\{[^}]*font-size:\s*\.6875rem/);
+});

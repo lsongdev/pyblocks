@@ -26,7 +26,10 @@
     <main id="editor-panels">
       <section id="blocks-panel" class="panel" aria-labelledby="workspace-label">
         <div class="panel-heading">
-          <h1 id="workspace-label" data-i18n="blockHeading">Block</h1>
+          <div class="project-meta">
+            <h1 id="workspace-label" data-i18n="blockHeading">Block</h1>
+            <p id="project-status" role="status"></p>
+          </div>
           <div class="code-actions project-actions">
             <button id="open-project" type="button" data-i18n="projectOpen">Open Project</button>
             <button id="save-project" type="button" data-i18n="projectSave">Save Project</button>
@@ -34,7 +37,6 @@
 
         </div>
         <input id="project-file" type="file" accept=".json,application/json" hidden>
-        <p id="project-status" role="status"></p>
         <div id="workspace">
           <section id="files-panel" class="toolbox-panel" aria-label="Files" hidden>
             <div class="device-files-actions">
