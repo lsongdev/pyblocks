@@ -1,3 +1,5 @@
+import { planStm32Dfu } from '../device/stm32.js';
+
 // Product identity is a user choice; chip/flash detection alone cannot identify a board product.
 export const firmwareFamilies = [
   { id: 'esp32', label: 'ESP32', transport: 'serial', models: [
@@ -19,6 +21,13 @@ export const firmwareFamilies = [
     { id: 'auto', key: 'firmwareAutoVersion' },
     { id: 'V1', label: 'Micro:bit V1' }, { id: 'V2', label: 'Micro:bit V2' },
   ] },
+  { id: 'stm32', label: 'STM32', transport: 'stm32-dfu', models: [
+    { id: 'custom', key: 'firmwareSTM32Custom', download: 'https://micropython.org/download/?port=stm32' },
+    { id: 'blackpill25', label: 'WeAct F411 Black Pill (v3.1, 25 MHz)', bytes: 512*1024, download: 'https://micropython.org/download/WEACT_F411_BLACKPILL/' },
+    { id: 'blackpill8', label: 'WeAct F411 Black Pill (v3.1, 8 MHz)', bytes: 512*1024, download: 'https://micropython.org/download/WEACT_F411_BLACKPILL/' },
+    { id: 'f407ve', label: 'VCC-GND STM32F407VE', bytes: 512*1024, download: 'https://micropython.org/download/VCC_GND_F407VE/' },
+    { id: 'pybv11', label: 'Pyboard v1.1 (STM32F405)', bytes: 1024*1024, download: 'https://micropython.org/download/PYBV11/' },
+  ] },
   { id: 'raspberry', label: 'Raspberry Pi', transport: 'rp2040', models: [
     { id: 'pico', key: 'firmwareOriginalPico' },
     { id: 'picow', label: 'Pico W', unavailable: true },
@@ -32,6 +41,14 @@ export function matchFirmware(selection, device, images) {
   const no = (key, args = [], suggestion) => ({ supported: false, model, reason: { key, args }, suggestion });
   if (!model || device.transport !== family.transport) return no('firmwareNoTarget');
   if (model.unavailable) return no('firmwareTargetUnavailable');
+  if (device.transport === 'stm32-dfu') {
+    if (model.bytes && model.bytes !== device.flash.capacity) return no('firmwareSTM32GeometryMismatch');
+    if (!selection.dfu) return no('firmwareSTM32ChooseFile');
+    try { planStm32Dfu(selection.dfu.elements, device.flash); }
+    catch { return no('firmwareSTM32ImageMismatch'); }
+    if (!selection.confirmed) return no('firmwareSTM32ConfirmRequired');
+    return { supported: true, model, target: { image: { file: selection.dfu.name }, elements: selection.dfu.elements, label: model.label }, capabilities: 'firmwareCapabilitiesGeneric' };
+  }
   let imageKey, address = 0, label, flashSize = device.flashSize, uiflow = false;
   if (device.transport === 'serial') {
     if (family.id === 'esp32' && model.id === 'auto') {

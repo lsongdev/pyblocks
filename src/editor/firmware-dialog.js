@@ -1,6 +1,7 @@
 import { t } from '../i18n/index.js';
 import { getFirmwareFamily } from '../firmware/catalog.js';
 import { updateProgress } from './progress.js';
+import { decodeStm32Dfu } from '../device/stm32.js';
 
 export function setupFirmwareDialog({ connectFirmware, acquireDevice, releaseDevice, document = globalThis.document, navigator = globalThis.navigator }) {
   const $ = id => document.getElementById(id);
@@ -15,11 +16,14 @@ export function setupFirmwareDialog({ connectFirmware, acquireDevice, releaseDev
   const close = $('firmware-close');
   const reselect = $('firmware-reselect');
   const suggestion = $('firmware-suggestion');
+  const dfuInput = $('firmware-dfu-image');
+  const dfuConfirm = $('firmware-dfu-confirm');
+  let dfu, fileEpoch = 0;
   let session, device, result;
   let busy = false, leased = false, complete = false;
   const remembered = new Map();
   const familyId = () => family.querySelector('input:checked').value;
-  const selection = () => ({family:familyId(),model:model.value,capacity:capacity.value || undefined});
+  const selection = () => ({family:familyId(),model:model.value,capacity:capacity.value || undefined, ...(familyId() === 'stm32' ? { dfu, confirmed: dfuConfirm.checked } : {})});
   const modelName = m => m ? (m.key ? t(m.key) : m.label) : t('firmwareUnknownModel');
 
   function renderModels() {
@@ -35,15 +39,19 @@ export function setupFirmwareDialog({ connectFirmware, acquireDevice, releaseDev
     capacity.replaceChildren();
     capacity.dataset.choices = '';
     $('firmware-model-hint').textContent = t({
-      raspberry: 'firmwarePicoHint', m5stack: 'firmwareM5Hint', microbit: 'firmwareMicrobitHint',
+      stm32: 'firmwareSTM32Hint', raspberry: 'firmwarePicoHint', m5stack: 'firmwareM5Hint', microbit: 'firmwareMicrobitHint',
     }[descriptor.id] ?? 'firmwareESP32Hint');
+    renderMore();
+  }
+  function renderMore() {
+    const descriptor = getFirmwareFamily(familyId());
     const more = $('firmware-more');
-    more.href = {
+    more.href = descriptor.models.find(m => m.id === model.value)?.download ?? ({
       m5stack: 'https://docs.m5stack.com/en/uiflow2/uiflow_web',
       microbit: 'https://python.microbit.org/',
-    }[descriptor.id] ?? 'https://micropython.org/download/';
+    }[descriptor.id] ?? 'https://micropython.org/download/');
     more.querySelector('span').textContent = t({
-      m5stack: 'firmwareMoreM5', microbit: 'firmwareMoreMicrobit',
+      stm32: 'firmwareMoreSTM32', m5stack: 'firmwareMoreM5', microbit: 'firmwareMoreMicrobit',
     }[descriptor.id] ?? 'firmwareMore');
   }
   function render() {
@@ -54,6 +62,8 @@ export function setupFirmwareDialog({ connectFirmware, acquireDevice, releaseDev
     family.disabled = model.disabled = busy || !!session;
     connect.disabled = close.disabled = reselect.disabled = capacity.disabled = suggestion.disabled = busy;
     dialog.setAttribute('aria-busy', String(busy));
+    $('firmware-stm32-file').hidden = device?.transport !== 'stm32-dfu' || complete;
+    dfuInput.disabled = dfuConfirm.disabled = busy || !session;
     if (session) result = session.match(selection());
     install.hidden = $('firmware-warning').hidden = !session || !result?.supported || complete;
     install.disabled = busy || !result?.supported;
@@ -74,8 +84,8 @@ export function setupFirmwareDialog({ connectFirmware, acquireDevice, releaseDev
       capacity.dataset.choices = capacities.join(',');
     }
     const target = result?.target;
-    $('firmware-image').textContent = target ? `${target.uiflow ? 'UIFlow2' : 'MicroPython'} v${target.image.version}\n${target.image.file}` : t('firmwareNoImage');
-    $('firmware-match').textContent = result?.supported ? t('firmwareMatched') : `${t('firmwareNoMatch')} ${result?.reason ? t(result.reason.key, ...result.reason.args) : ''}`;
+    $('firmware-image').textContent = device.transport === 'stm32-dfu' ? (dfu?.name ?? t('firmwareNoImage')) : target ? `${target.uiflow ? 'UIFlow2' : 'MicroPython'} v${target.image.version}\n${target.image.file}` : t('firmwareNoImage');
+    $('firmware-match').textContent = result?.supported ? t(device.transport === 'stm32-dfu' ? 'firmwareSTM32Matched' : 'firmwareMatched') : `${t('firmwareNoMatch')} ${result?.reason ? t(result.reason.key, ...result.reason.args) : ''}`;
     $('firmware-match').className = result?.supported ? 'firmware-match-ok' : 'dialog-warning';
     $('firmware-capabilities').textContent = result?.supported ? t(result.capabilities) : '';
     suggestion.hidden = !result?.suggestion || !session;
@@ -90,6 +100,7 @@ export function setupFirmwareDialog({ connectFirmware, acquireDevice, releaseDev
   }
   function clearDetection() {
     device = result = undefined;
+    fileEpoch++; dfu = undefined; dfuInput.value = ''; dfuConfirm.checked = false;
     complete = false;
     status.textContent = '';
     progress.hidden = true;
@@ -97,8 +108,25 @@ export function setupFirmwareDialog({ connectFirmware, acquireDevice, releaseDev
     capacity.replaceChildren();
   }
   family.addEventListener('change', () => { renderModels(); clearDetection(); render(); });
-  model.addEventListener('change', () => { remembered.set(familyId(), model.value); status.textContent = ''; render(); });
+  model.addEventListener('change', () => { remembered.set(familyId(), model.value); dfuConfirm.checked = false; renderMore(); status.textContent = ''; render(); });
   capacity.addEventListener('change', render);
+  dfuConfirm.addEventListener('change', render);
+  dfuInput.addEventListener('change', async () => {
+    const epoch = ++fileEpoch;
+    dfu = undefined; dfuConfirm.checked = false; status.textContent = ''; render();
+    const file = dfuInput.files[0];
+    if (!file) return;
+    try {
+      if (file.size > 17 * 1024 * 1024) throw new Error('DFU file too large.');
+      const elements = decodeStm32Dfu(await file.arrayBuffer());
+      if (epoch !== fileEpoch) return;
+      dfu = {name:file.name,elements};
+    } catch(error) {
+      if (epoch !== fileEpoch) return;
+      status.textContent = t('firmwareSTM32InvalidFile', error.message);
+    }
+    render();
+  });
   $('open-firmware').addEventListener('click', () => {
     if (dialog.open || busy) return;
     clearDetection(); renderModels(); render(); dialog.showModal();
@@ -147,7 +175,7 @@ export function setupFirmwareDialog({ connectFirmware, acquireDevice, releaseDev
     try {
       await session.install(selection(), value => updateProgress(progress, value));
       updateProgress(progress, 1);
-      status.textContent = t('firmwareComplete');
+      status.textContent = t(device.transport === 'stm32-dfu' ? 'firmwareSTM32Complete' : 'firmwareComplete');
       complete = true;
     } catch (error) {
       progress.hidden = true;

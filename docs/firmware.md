@@ -14,6 +14,7 @@ Open **Install MicroPython firmware** and choose:
 | M5Stack | Core/Basic (4 or 16 MB), original M5Stick-C (4 MB) |
 | Micro:bit | Automatic V1/V2 detection, or an explicit version |
 | Raspberry Pi | Original RP2040 Pico |
+| STM32 | USB DFU: board-specific local DfuSe file; official download links for F411 Black Pill, VCC-GND F407VE, Pyboard v1.1 and other STM32 boards |
 
 Model choices without integrated images are shown as **Not yet supported** and disabled. The ESP32 automatic option can still identify a supported-by-the-loader chip even when no matching firmware is bundled. Firmware is not yet integrated for ESP32-S2/C3, Core2/CoreS3, Pico W or Pico 2.
 
@@ -62,3 +63,9 @@ Selection cancellation, connection/detection errors, unsupported matches and act
 ## Validation
 
 Automated tests exercise exact model/capacity/image selection, offsets, unsupported chips, manual-capacity boundaries, chip/version mismatch suggestions, detection without installation, the explicit install action, cancellation, errors and connection cleanup. The selection UI was checked in Chrome. The M5Stick-C FTDI detection path was checked on a physical ESP32-PICO-D4 / 4 MB board using the browser loader, including RAM stub startup, flash-capacity reading, reset and port release. Browser detection succeeded once, but repeat attempts still failed intermittently. No flash was erased or written during that check. ESP32-S3 image matching, offsets and hashes are checked in software; S3 physical flashing has not been verified. XiaoMiao firmware selection and generated ST7735/button helpers are covered by automated checks; physical flashing and display behavior have not been verified here. The previous M5Stick-C full installation verification is documented separately.
+
+## STM32 USB DFU (experimental)
+
+There is no single STM32 firmware for every MCU and board. Select the actual board and download its `.dfu` file from the official [STM32 firmware catalog](https://micropython.org/download/?port=stm32). For Black Pill, confirm crystal frequency, revision and external flash variant. Enter the ROM bootloader with BOOT0 high during reset, using the MCU's native USB port. Chrome/Edge with WebUSB is required; Windows may need a WinUSB driver for the bootloader. Some STM32 chips (including common F103 Blue Pill ROM bootloaders) do not support USB DFU and require another programmer. The generic selection does not imply their support.
+
+Connect, choose the local file and explicitly confirm the physical board and firmware variant. The USB identity 0483:df11 is not a model identifier. The installer validates DfuSe structure/CRC, VID/PID, internal flash descriptor and accessible sectors before any erase, erases only intersecting sectors, writes and reads back every byte. Option bytes, external flash targets, mass erase and read-unprotect are not supported. CRC is not an authenticity check: obtain the image from the official site. No bundled STM32 image is supplied yet because pinned SHA-256 values have not been independently verified. On success release BOOT0 and reset manually. Software validation does not establish physical DFU compatibility; back up files and firmware first. See [ST AN3156](https://www.st.com/resource/en/application_note/an3156-how-to-use-usb-dfu-protocol-in-bootloader-on-stm32-mcus-stmicroelectronics.pdf).

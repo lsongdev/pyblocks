@@ -5,6 +5,7 @@ import { ProgressStage } from '@microbit/microbit-connection';
 
 import images from './images.json';
 import { connectPicoBoot } from '../device/rp2040.js';
+import { connectStm32Dfu } from '../device/stm32.js';
 
 import { resetEsp32 } from './esp32.js';
 import { getFirmwareFamily, matchFirmware } from './catalog.js';
@@ -78,6 +79,17 @@ export async function connectFirmware(familyId, report = () => {}) {
         }
       } };
     } catch (error) { await close(); throw error; }
+  }
+  if (family.transport === 'stm32-dfu') {
+    report('firmwareDetecting');
+    const dfu = await connectStm32Dfu();
+    const device = { transport: 'stm32-dfu', chip: 'STM32 USB DFU', flash: dfu.flash, flashSize: `${dfu.flash.capacity / 1024}KB` };
+    return { device, match: selection => resolve(selection, device), close: dfu.close,
+      async install(selection, progress) {
+        const target = requireTarget(selection, device);
+        await dfu.install(target.elements, report, progress);
+      },
+    };
   }
   if (family.transport === 'rp2040') {
     report('firmwareDetecting');

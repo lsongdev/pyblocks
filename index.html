@@ -156,6 +156,7 @@
           <label class="board-card"><input type="radio" name="firmware-family" value="esp32" checked><strong>ESP32</strong></label>
           <label class="board-card"><input type="radio" name="firmware-family" value="m5stack"><strong>M5Stack</strong></label>
           <label class="board-card"><input type="radio" name="firmware-family" value="microbit"><strong>Micro:bit</strong></label>
+          <label class="board-card"><input type="radio" name="firmware-family" value="stm32"><strong>STM32</strong></label>
           <label class="board-card"><input type="radio" name="firmware-family" value="raspberry"><strong>Raspberry Pi</strong></label>
         </fieldset>
         <label for="firmware-model" data-i18n="firmwareModel">Model</label>
@@ -174,6 +175,12 @@
           <label for="firmware-capacity-choice" data-i18n="firmwareManualCapacity">Flash capacity (manual confirmation)</label>
           <select id="firmware-capacity-choice"></select>
           <p class="firmware-hint" data-i18n="firmwareManualHint">Could not detect capacity. Select it only from your hardware specifications.</p>
+        </div>
+        <div id="firmware-stm32-file" hidden>
+          <label for="firmware-dfu-image" data-i18n="firmwareSTM32FileLabel">Official board-specific .dfu file</label>
+          <input id="firmware-dfu-image" type="file" accept=".dfu">
+          <label><input id="firmware-dfu-confirm" type="checkbox"> <span data-i18n="firmwareSTM32Confirm">I have verified the exact board, crystal and flash variant and selected its firmware.</span></label>
+          <p class="firmware-hint" data-i18n="firmwareSTM32ReviewHint">USB DFU does not identify the exact board. File CRC and flash geometry checks cannot prove board compatibility.</p>
         </div>
         <p id="firmware-match" role="status"></p>
         <button id="firmware-suggestion" type="button" hidden></button>

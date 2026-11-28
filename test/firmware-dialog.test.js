@@ -41,7 +41,7 @@ function setup(t,{device=serial(),failDetect,failInstall,gate,language='en'}={})
 
 test('family/model catalog blocks unsupported recipes and does not trust capacity overrides over detection',()=>{
   const choose = (family,model,device,capacity)=>matchFirmware({family,model,capacity},device,images);
-  assert.equal(firmwareFamilies.length,4);
+  assert.equal(firmwareFamilies.length,5);
   for(const chip of ['ESP32-S2','ESP32-C3','ESP32-C6']) {
     const result=choose('esp32','auto',serial(chip));
     assert.equal(result.supported,false);
@@ -220,4 +220,21 @@ test('S3 standard and Octal images use address zero with capacity and chip guard
   assert.equal(matchFirmware({family:'esp32',model:'s3oct'},serial('ESP32','8MB'),images).supported,false);
   assert.equal(matchFirmware({family:'esp32',model:'auto'},serial('ESP32-S3','2MB'),images).supported,false);
   assert.equal(matchFirmware({family:'esp32',model:'ESP32-S3'},serial('ESP32-S3',null),images).reason.key,'firmwareCapacityRequired');
+});
+
+test('STM32 DFU never infers board identity or installs without a confirmed image',async t=>{
+  const device={transport:'stm32-dfu',chip:'STM32 USB DFU',flashSize:'512KB',flash:{capacity:512*1024,sectors:[{address:0x08000000,size:512*1024,writable:true}]}};
+  const p=setup(t,{device});
+  p.family('stm32');p.model('blackpill25');
+  assert.match(p.$('firmware-more').href,/WEACT_F411_BLACKPILL/);
+  await p.connect();
+  assert.equal(p.$('firmware-stm32-file').hidden,false);
+  assert.equal(p.$('firmware-install').hidden,true);
+  p.$('firmware-install').click();await flush();
+  assert.equal(p.calls.install.length,0);
+  const selection={family:'stm32',model:'blackpill25',dfu:{name:'test.dfu',elements:[{address:0x08000000,data:new Uint8Array(8)}]}};
+  assert.equal(matchFirmware(selection,device,images).reason.key,'firmwareSTM32ConfirmRequired');
+  assert.equal(matchFirmware({...selection,confirmed:true},device,images).supported,true);
+  assert.equal(matchFirmware({...selection,model:'pybv11',confirmed:true},device,images).reason.key,'firmwareSTM32GeometryMismatch');
+  p.$('firmware-close').click();await flush();
 });
