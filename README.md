@@ -9,6 +9,10 @@
 
 [![PyBlocks showing the Say hello program](docs/images/01-hello.webp)](docs/user-guide.md)
 
+## Design philosophy
+
+Write programs first and choose hardware later. All supported hardware capabilities remain discoverable in one toolbox, without requiring a board selection before editing. See [Product and device design](docs/design.md) for the design principles and proposed deployment experience.
+
 ## Features
 
 - Visual blocks with editable Python, project import/export, and local autosave.

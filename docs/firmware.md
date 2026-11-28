@@ -1,5 +1,7 @@
 # Firmware installation
 
+Firmware installation is separate from normal Python upload. A compatible running MicroPython REPL does not require identifying the exact retail board model before uploading a program. See the [product and device design](design.md) for the proposed automatic device workflow.
+
 The installer has two steps: **choose and connect**, then **review and install**. Detection and firmware matching are separate; an unsupported configuration is a detection result, not a failed installation.
 
 ## 1. Choose a family and model

@@ -9,7 +9,7 @@ The **SPIKE Prime** toolbox group targets the six-port hub with a 5×5 light mat
 3. Put **scroll text** inside it and enter a short message.
 4. Click **Upload and run**.
 
-Choose the SPIKE Prime in the USB serial dialog. PyBlocks reads the hub's protocol version, uploads the Python program to slot **0**, starts it, and streams `print()` output over the same port. The upload overwrites the previous program in slot 0.
+Choose the SPIKE Prime in the USB serial dialog. PyBlocks reads the hub's protocol version, uploads the Python program to slot **0**, starts it, and streams `print()` output over the same port. The upload overwrites the previous program in slot 0. A future device-confirmation and slot-selection flow is described in [Product and device design](design.md); it is not implemented yet.
 
 Use desktop Chrome or Edge and disconnect the LEGO SPIKE App before uploading. Use **Disconnect** to release the USB port after reading the console.
 

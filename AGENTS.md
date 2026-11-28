@@ -1,3 +1,17 @@
+# Product design
+
+## Program first, hardware later
+
+The shortest learning path is: drag blocks, connect a device, upload and run. No board selection, project creation, or hardware knowledge is required before editing. A program is independent of the physical device used to run it.
+
+- Keep the complete toolbox discoverable, including board-specific capabilities. A connected or preferred device must not hide, disable, delete, or rewrite other platforms' blocks.
+- Organize complexity rather than concealing it. Hardware categories are also a way to discover unfamiliar boards, peripherals, and programming possibilities.
+- Unify the editor and interaction flow, not the hardware APIs. Generate faithful native Python and preserve real platform differences.
+- Detect the connected device and its protocol, not the user's intention. Program dependencies may inform optional diagnostics, but must not select the upload protocol.
+- Device selection is optional deployment context, not project identity. Switching devices must preserve the workspace and source code.
+
+See [Product and device design](docs/design.md) for the proposed connection and deployment experience. Do not implement unapproved proposals merely because they are documented.
+
 # Development preferences
 
 When redesigning a shared library, prefer the clearest context-aware public API over compatibility wrappers for old call shapes. Update dependent projects together when needed, and keep vendor-specific protocol details outside reusable transport/parsing packages. The user explicitly approved breaking old APIs in this situation.
