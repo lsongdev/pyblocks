@@ -1,5 +1,5 @@
 import { t } from '../i18n/index.js';
-import { inlineDeviceResult } from './device-status.js';
+import { createDeviceToast } from './device-status.js';
 import { portProtocol } from '../device/detect.js';
 import { SerialOpenError } from '../device/transport/serial.js';
 import { connectSpike } from '../device/spike/index.js';
@@ -11,7 +11,6 @@ import { downloadProgram, MicroPythonError, monitorPort } from '../device/microp
 
 export function createDevicePanel({ getSource, getLibraries }) {
   const upload = document.querySelector('#upload');
-  const uploadStatus = document.querySelector('#upload-status');
   const serialConnect = document.querySelector('#serial-connect');
   const serialClear = document.querySelector('#serial-clear');
   const serialOutput = document.querySelector('#serial-output');
@@ -31,43 +30,22 @@ export function createDevicePanel({ getSource, getLibraries }) {
   const changeDevice = document.querySelector('#change-device');
   const changeSlot = document.querySelector('#change-slot');
   const deviceName = document.querySelector('#deployment-device');
-  const deviceResult = document.querySelector('#deployment-result');
-  let statusMessage;
+  const toast = createDeviceToast({
+    element: document.querySelector('#device-toast'),
+    message: document.querySelector('#device-toast-message'),
+    dismiss: document.querySelector('#device-toast-dismiss'),
+    translate: (key, detail) => t(key, detail instanceof MicroPythonError ? t(detail.code) : typeof detail === 'string' ? detail : detail?.message),
+  });
 
   const serialInterrupt = document.querySelector('#serial-interrupt');
   const serialReset = document.querySelector('#serial-reset');
   const serialForm = document.querySelector('#serial-input-form');
   const spikeStop = document.querySelector('#spike-stop');
 
-  // Successful deployment acknowledgments fit beside the matching device.
-  // Progress, failures and messages about other slots keep the full status row.
-  function renderStatus() {
-    const inline = inlineDeviceResult(device, statusMessage);
-    deviceResult.textContent = inline ? t(inline) : '';
-    deviceResult.hidden = !inline;
-    if (!statusMessage || inline) {
-      uploadStatus.textContent = '';
-      uploadStatus.classList.remove('error');
-      return;
-    }
-    const [key, detail] = statusMessage;
-    const text = detail instanceof MicroPythonError ? t(detail.code)
-      : typeof detail === 'string' ? detail
-      : detail?.message;
-    uploadStatus.textContent = t(key, text);
-    uploadStatus.classList.toggle('error', [
-      'serialFailed', 'serialSendFailed', 'serialOpenFailed', 'serialConnectionFailed',
-      'flashFailed', 'spikeFirmwareUnsupported', 'spikeLibrariesUnsupported', 'spikeDisconnected',
-    ].includes(key));
-  }
-
   function setStatus(key, detail) {
-    statusMessage = key ? [key, detail] : undefined;
-    renderStatus();
+    toast.show(key, detail);
   }
 
-  // File operations use the same progress area; stable connection state
-  // belongs to the device identity, not a second status message.
   function setSerialStatus(key, detail) {
     setStatus(key === 'serialConnected' || key === 'serialDisconnected' ? undefined : key, detail);
   }
@@ -107,11 +85,10 @@ export function createDevicePanel({ getSource, getLibraries }) {
     changeSlot.disabled = device.busy;
     const connected = Boolean(device.serial || (device.spike && !device.spike.closed));
     deviceName.dataset.connected = String(connected);
-    deviceName.title = connected ? t('serialConnected') : t('serialDisconnected');
     deviceName.textContent = device.spike ? t('deploymentSpike', String(device.slot))
       : device.serial ? t(device.protocol === 'micropython' ? 'deploymentMicroPython' : 'deploymentSerial')
       : t('deploymentNone');
-    renderStatus();
+    deviceName.title = deviceName.textContent;
     changeDevice.hidden = !device.serial && !device.spike;
     serialInterrupt.hidden = !device.serial;
     serialReset.hidden = !device.serial;
@@ -290,7 +267,7 @@ export function createDevicePanel({ getSource, getLibraries }) {
 
   function renderLanguage() {
     document.querySelector('#serial-input').placeholder = t('serialInputPlaceholder');
-    renderStatus();
+    toast.render();
     render();
   }
 

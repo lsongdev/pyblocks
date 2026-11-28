@@ -9,9 +9,6 @@ const languages = {
 const storageKey = 'pyblocks.language';
 
 const messages = {
-  deploymentStarted: ["Started", "已启动"],
-  deploymentStopRequested: ["Stop requested", "已请求停止"],
-  deploymentRestarted: ["Uploaded", "已上传"],
   pyNativeIndexHint: ["Native Python indexing: zero-based for sequences; dictionary keys are used as-is. Negative indexes count from the end.","原生 Python 索引：序列从 0 开始，字典直接使用键；负索引从末尾计算。"],
   py_index: ["%1 [ %2 ]","%1 [ %2 ]"],
   py_index_set: ["set %1 [ %2 ] to %3","设置 %1 [ %2 ] 为 %3"],

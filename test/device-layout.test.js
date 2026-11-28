@@ -15,14 +15,12 @@ test('device panel keeps device actions and identity in its header, clear in con
   assert.equal((header.match(/aria-label=/g) || []).length, 7);
   assert.equal((header.match(/<svg/g) || []).length, 8);
   assert.doesNotMatch(header, /id="serial-clear"/);
-  assert.match(panel, /class="serial-heading"[\s\S]*?id="serial-clear"/);
+  assert.match(panel, /class="device-meta"[\s\S]*?id="device-label"[\s\S]*?id="deployment-device"/);
+  assert.match(panel, /class="console-body"[\s\S]*?id="serial-clear"[\s\S]*?id="serial-output"/);
   assert.equal(panel.split('id="serial-clear"').length, 2);
-  assert.match(panel, /class="panel-heading"[\s\S]*?id="deployment-device"[\s\S]*?<p id="upload-status"/);
-  assert.doesNotMatch(panel, /class="device-details"/);
-  assert.match(panel, /class="device-identity"[\s\S]*?id="deployment-device"[\s\S]*?id="deployment-result"[\s\S]*?<\/div>/);
-  assert.match(panel, /id="upload-status"/);
-  assert.doesNotMatch(panel, /id="serial-status"/);
-  assert.ok(panel.indexOf('id="upload-status"') < panel.indexOf('id="serial-panel"'));
+  assert.doesNotMatch(panel, /serial-heading|serial-label|device-details|deployment-result|upload-status|serial-status|device-toast/);
+  assert.match(html, /id="device-toast"[^>]*hidden/);
+  assert.ok(html.indexOf('id="device-toast"') > html.indexOf('</main>'));
 });
 
 test('SPIKE program slot uses a labelled native radio grid, not a dropdown', () => {

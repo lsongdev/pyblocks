@@ -46,20 +46,15 @@ button:disabled { opacity: .45; cursor: default; }
   min-height: 100px;
   border-top: 1px solid #dcd9ed;
 }
-.serial-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 6px 12px;
-}
-.serial-heading h3 { margin: 0; font-size: .875rem; }
-.serial-heading button { padding: 5px 8px; background: #eee9ff; color: #473779; font-size: .8125rem; }
+.console-body { position: relative; display: flex; flex: 1; min-height: 0; min-width: 0; }
+#serial-clear { position: absolute; top: 6px; right: 8px; z-index: 1; background: #eee9ff; color: #473779; }
+#serial-clear:disabled { opacity: 0.45; }
 #serial-output {
   flex: 1;
   min-height: 0;
+  min-width: 0;
   margin: 0;
-  padding: 8px 12px;
+  padding: 10px 46px 10px 12px;
   overflow: auto;
   background: #f5f3fa;
   font: .8125rem/1.5 "IBM Plex Mono", ui-monospace, monospace;
@@ -221,28 +216,22 @@ dialog .board-card { display: flex; align-items: center; gap: 8px; margin: 0; pa
 #blocks-panel { flex: 1; }
 #right-panels { display: flex; flex-direction: column; flex: 0 0 340px; min-width: 0; min-height: 0; }
 #device-panel { flex: none; height: 60%; min-height: 0; overflow: auto; }
-#device-panel .panel-heading { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0 8px; min-height: 0; padding: 5px 10px 6px; }
-#device-panel .panel-heading h2 { align-self: end; line-height: 1.2; }
+#device-panel .panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 0; padding: 6px 10px; }
+.device-meta { display: flex; flex: 1; flex-direction: column; justify-content: center; gap: 1px; min-width: 0; }
+.device-meta h2 { margin: 0; line-height: 1.1; }
 #device-panel .serial-panel { flex: 1 0 100px; min-height: 100px; border-top: 0; }
-#device-panel #upload-status:not(:empty) { border-bottom: 1px solid #dcd9ed; }
-:root[data-theme="dark"] #device-panel #upload-status:not(:empty) { border-color: #3c394b; }
 #code-panel { flex: 1; height: auto; }
 #code-panel .panel-heading { min-height: 48px; }
 #code-body { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 #code-panel.collapsed { flex: 0 0 auto !important; height: auto !important; }
 #right-panels:has(#code-panel.collapsed) #device-panel { flex: 1 !important; height: auto !important; }
-.device-identity { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 0 4px; min-width: 0; font-size: .75rem; line-height: 1.3; font-weight: 400; color: #716b84; }
-#deployment-result::before { content: '·'; margin-right: 4px; }
+.device-identity { min-width: 0; font-size: .6875rem; line-height: 1.2; font-weight: 400; color: #716b84; }
 :root[data-theme="dark"] .device-identity { color: #b5afc9; }
-#deployment-device { display: flex; align-items: center; gap: 6px; overflow-wrap: anywhere; }
-#deployment-device::before { content: ""; display: inline-block; flex: 0 0 7px; height: 7px; border-radius: 50%; background: #9995a6; }
+#deployment-device { display: block; overflow-wrap: anywhere; }
+#deployment-device::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 4px; vertical-align: middle; border-radius: 50%; background: #9995a6; }
 #deployment-device[data-connected="true"]::before { background: #32875a; }
 #toggle-code, #download { padding: 6px 8px; background: #eee9ff; color: #473779; font-size: .8125rem; }
 #device-panel button { font-size: .8125rem; padding: 6px 9px; min-height: 32px; }
-#upload-status { margin: 0; padding: 5px 10px; font-size: .75rem; line-height: 1.4; overflow-wrap: anywhere; }
-#upload-status:empty { display: none; }
-#upload-status.error { color: #9c2938; }
-:root[data-theme="dark"] #upload-status.error { color: #ff9ca8; }
 .resize-handle { position: relative; touch-action: none; user-select: none; }
 .horizontal-resize { cursor: col-resize; flex: 0 0 12px; }
 .vertical-resize { cursor: row-resize; flex: 0 0 12px; background: transparent; }
@@ -264,8 +253,6 @@ dialog .board-card { display: flex; align-items: center; gap: 8px; margin: 0; pa
 .serial-input-form input, .serial-input-form select { border: 1px solid #c9c2da; border-radius: 6px; padding: 6px; background: white; color: #29213e; }
 .serial-input-form button { padding: 6px 8px; font-size: .8125rem; }
 .serial-input-form :disabled { opacity: .5; cursor: default; }
-.serial-heading { flex-wrap: wrap; }
-.serial-heading .code-actions { flex-wrap: wrap; }
 
 :root[data-theme="dark"] { color-scheme: dark; color: #e7e5f2; background: #171622; }
 :root[data-theme="dark"] .panel { background: #211f2c; border-color: #3c394b; }
@@ -273,7 +260,7 @@ dialog .board-card { display: flex; align-items: center; gap: 8px; margin: 0; pa
 :root[data-theme="dark"] .serial-panel, 
 :root[data-theme="dark"] .serial-input-form { border-color: #3c394b; }
 :root[data-theme="dark"] #python, :root[data-theme="dark"] #serial-output { background: #191822; color: #e7e5f2; }
-:root[data-theme="dark"] .app-menu button, :root[data-theme="dark"] .project-actions button, :root[data-theme="dark"] .serial-heading button, :root[data-theme="dark"] .code-sync button, :root[data-theme="dark"] .toolbox-panel button, :root[data-theme="dark"] .dialog-actions button, :root[data-theme="dark"] #firmware-suggestion { background: #363144; color: #e7e1ff; }
+:root[data-theme="dark"] .app-menu button, :root[data-theme="dark"] .project-actions button, :root[data-theme="dark"] #serial-clear, :root[data-theme="dark"] .code-sync button, :root[data-theme="dark"] .toolbox-panel button, :root[data-theme="dark"] .dialog-actions button, :root[data-theme="dark"] #firmware-suggestion { background: #363144; color: #e7e1ff; }
 :root[data-theme="dark"] .serial-input-form input, :root[data-theme="dark"] .serial-input-form select, :root[data-theme="dark"] dialog select { background: #211f2c; color: #e7e5f2; border-color: #514d60; }
 :root[data-theme="dark"] dialog { background: #211f2c; border-color: #3c394b; }
 :root[data-theme="dark"] .firmware-details, :root[data-theme="dark"] .board-card:has(input:checked) { background: #2b2838; }
@@ -284,7 +271,7 @@ dialog .board-card { display: flex; align-items: center; gap: 8px; margin: 0; pa
 
 :root[data-theme="dark"] .device-heading-actions button:not(#upload), :root[data-theme="dark"] #toggle-code, :root[data-theme="dark"] #download { background: #363144; color: #e7e1ff; }
 
-.device-heading-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 4px; margin-left: auto; min-width: 0; }
+.device-heading-actions { display: flex; flex: 0 0 auto; flex-wrap: wrap; max-width: 72%; align-items: center; justify-content: flex-end; gap: 4px; }
 #device-panel .device-heading-actions button, #device-panel #serial-clear { display: inline-grid; place-items: center; flex: 0 0 30px; width: 30px; height: 30px; min-height: 30px; padding: 6px; border-radius: 6px; }
 .device-heading-actions button:not(#upload) { background: #eee9ff; color: #473779; }
 .device-heading-actions svg, #serial-clear svg { display: block; width: 18px; height: 18px; }
@@ -303,3 +290,10 @@ dialog .spike-slot-grid label { position: relative; display: grid; place-items: 
 .spike-slot-grid input:focus-visible + span { outline: 2px solid #8979d1; outline-offset: 2px; }
 :root[data-theme="dark"] .spike-slot-grid span { color: #e7e1ff; background: #302c40; border-color: #514d60; }
 :root[data-theme="dark"] .spike-slot-grid input:checked + span { color: white; background: #55448c; border-color: #b9a9ff; }
+
+.device-toast { position: fixed; z-index: 1000; bottom: 18px; right: 18px; max-width: min(420px, calc(100vw - 36px)); display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; background: #24213d; color: white; box-shadow: 0 4px 18px #24213d33; font-size: .8125rem; line-height: 1.4; }
+.device-toast span { min-width: 0; overflow-wrap: anywhere; }
+.device-toast.error { background: #842c3b; }
+.device-toast button { padding: 2px 6px; background: transparent; color: inherit; font-size: 1.2rem; line-height: 1; }
+:root[data-theme="dark"] .device-toast { background: #363144; }
+:root[data-theme="dark"] .device-toast.error { background: #842c3b; }
