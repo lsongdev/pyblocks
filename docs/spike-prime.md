@@ -7,9 +7,19 @@ The **SPIKE Prime** toolbox group targets the six-port hub with a 5×5 light mat
 1. Open [PyBlocks](https://blocks.lsong.org/) and import [the SPIKE hello project](../examples/spike-hello.blockly.json).
 2. In **SPIKE Prime → Program (runloop)**, **runloop run** automatically wraps its actions in an async function.
 3. Put **scroll text** inside it and enter a short message.
-4. Use **download** to export Python, then copy the code into a Python project in the SPIKE App and run it there.
+4. Click **Upload and run**.
 
-PyBlocks does **not yet connect to or upload programs to SPIKE hubs**. Its existing **Upload and run**, serial connection and firmware installer are for the other supported boards. Keep the LEGO official firmware for this example.
+Choose the SPIKE Prime in the USB serial dialog. PyBlocks reads the hub's protocol version, uploads the Python program to slot **0**, starts it, and streams `print()` output over the same port. The upload overwrites the previous program in slot 0.
+
+Use desktop Chrome or Edge and disconnect the LEGO SPIKE App before uploading. Use **Disconnect** to release the USB port after reading the console.
+
+On Linux, export the Python file and run the command below from the repository to upload directly over USB.
+
+```sh
+node tools/upload-spike.js --slot 0 program.py
+```
+
+The command overwrites the specified slot, starts the program, and streams its console output. It detects a single SPIKE Prime under `/dev/serial/by-id`. Use `--port /dev/ttyACM1` to select a device explicitly. Your account needs read and write access to that serial port. USB upload and execution were verified on a SPIKE Prime reporting firmware 1.8.149 and RPC 1.0.47.
 
 The generated program calls the official API directly:
 
@@ -18,7 +28,7 @@ from hub import light_matrix as _spike_light_matrix
 import runloop as _spike_runloop
 
 async def _spike_task():
-    await _spike_light_matrix.write('Hello!', intensity=100, time_per_character=500)
+    await _spike_light_matrix.write('Hello!', 100, 500)
 
 _spike_runloop.run(
     _spike_task(),
@@ -77,4 +87,4 @@ Inputs are passed to the native APIs. Keep values within the documented ranges; 
 
 API definitions and semantics were checked against the [LEGO SPIKE App Python help](https://spike.legoeducation.com/prime/help/lls-help-python) and its [English documentation data](https://spike.legoeducation.com/content/en-us/documents.json). The official [Python lessons](https://education.lego.com/en-us/lessons/spike-python-u3-sensor-control/spike-python-u3l1-start-sensing/) demonstrate these firmware APIs.
 
-Automated checks cover both toolbox languages, Python compilation, async scope checks, and simulated call order, arguments and sensor values. These checks do not verify physical motors, sensors or hub firmware; physical-board validation is pending.
+Automated checks cover both toolbox languages, Python compilation, async scope checks, and simulated call order, arguments and sensor values. The upload path also has simulated tests for COBS framing, CRC-32, message layouts and the clear/upload/start sequence, matching the [LEGO protocol documentation](https://github.com/LEGO/spike-prime-docs). Physical motor, sensor and Bluetooth upload validation is pending.

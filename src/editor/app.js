@@ -4,6 +4,8 @@ import { pythonGenerator } from 'blockly/python';
 import { createToolbox, EditorToolbox } from './toolbox.js';
 import { applyLanguage, getSavedLanguage, normalizeLanguage, saveLanguage, t } from '../i18n/index.js';
 import { PythonBlockError } from '../python/errors.js';
+import { targetsSpikeApp } from '../python/targets.js';
+import { selectSpikeSerialPort, uploadSpikeProgram } from '../device/spike/index.js';
 import { setupPanelResize } from './resize.js';
 import { setupDialogs } from './dialogs.js';
 import { createLibraryPanel } from './libraries.js';
@@ -118,15 +120,19 @@ const serialInput = setupSerialInput({
 });
 let generatedCode = null;
 let manuallyEdited = false;
+let spikeHub;
+const SPIKE_SLOT = 0;
 let uploadMessage;
 let projectMessage;
 let autosaveTimer;
 
 function renderStatus(element, message) {
   if (!message) return;
-  const [key, error] = message;
-  const detail = error instanceof MicroPythonError ? t(error.code) : error?.message;
-  element.textContent = t(key, detail);
+  const [key, detail] = message;
+  const text = detail instanceof MicroPythonError ? t(detail.code)
+    : typeof detail === 'string' ? detail
+    : detail?.message;
+  element.textContent = t(key, text);
 }
 
 function setProjectStatus(key) {
@@ -239,7 +245,10 @@ function attachSerial(session) {
 async function detachSerial() {
   const session = serialSession;
   serialSession = undefined;
+  const hub = spikeHub;
+  spikeHub = undefined;
   await session?.close();
+  await hub?.close();
 }
 
 function renderDeviceFiles() {
@@ -377,7 +386,7 @@ function updateButtons() {
   upload.disabled = download.disabled || serialBusy || !navigator.serial;
   document.querySelector('#open-firmware').disabled = serialBusy;
   serialConnect.disabled = serialBusy || !navigator.serial;
-  serialConnect.textContent = t(serialSession ? 'serialDisconnect' : 'serialConnect');
+  serialConnect.textContent = t(serialSession || spikeHub ? 'serialDisconnect' : 'serialConnect');
   codeSync.hidden = !manuallyEdited;
   useBlockCode.disabled = generatedCode === null;
   renderDeviceFiles();
@@ -424,6 +433,7 @@ workspace.addChangeListener(event => {
 });
 window.addEventListener('pagehide', () => {
   if (autosaveTimer !== undefined) saveLocally();
+  void spikeHub?.close();
 });
 new ResizeObserver(() => {
   Blockly.svgResize(workspace);
@@ -473,9 +483,11 @@ serialConnect.addEventListener('click', async () => {
   serialBusy = true;
   updateButtons();
   try {
-    if (serialSession) {
+    if (serialSession || spikeHub) {
+      const wasSpikeConnected = Boolean(spikeHub);
       await detachSerial();
       setSerialStatus('serialDisconnected');
+      if (wasSpikeConnected) setUploadStatus('spikeDisconnected');
     } else {
       setSerialStatus('selectPort');
       const port = await navigator.serial.requestPort();
@@ -489,19 +501,66 @@ serialConnect.addEventListener('click', async () => {
   }
 });
 
+async function runSpikeUpload(source) {
+  serialBusy = true;
+  updateButtons();
+  try {
+    setUploadStatus('selectPort');
+    const port = await selectSpikeSerialPort();
+    await detachSerial();
+    setSerialStatus('serialConnecting');
+    setUploadStatus('spikeDetecting');
+    const hub = await uploadSpikeProgram(port, source, {
+      slot: SPIKE_SLOT,
+      onProgress: value => setUploadStatus('spikeWriting', `${Math.round(value * 100)}%`),
+      onConsole: appendSerialOutput,
+    });
+    if (hub.closed) {
+      await hub.close();
+      throw new Error(t('spikeDisconnected'));
+    }
+    spikeHub = hub;
+    setSerialStatus('serialConnected');
+    setUploadStatus('spikeRunning', String(SPIKE_SLOT));
+    hub.onClose(error => {
+      if (spikeHub !== hub) return;
+      void hub.close().finally(() => {
+        if (spikeHub !== hub) return;
+        spikeHub = undefined;
+        setSerialStatus(error ? 'serialFailed' : 'serialDisconnected', error);
+        setUploadStatus('spikeDisconnected');
+        updateButtons();
+      });
+    });
+  } catch (error) {
+    if (error.name === 'NotFoundError') {
+      setUploadStatus('portCanceled');
+    } else {
+      setSerialStatus('serialDisconnected');
+      setUploadStatus(error.code === 'unsupported' ? 'spikeFirmwareUnsupported' : 'flashFailed', error);
+    }
+  } finally {
+    serialBusy = false;
+    updateButtons();
+  }
+}
+
 upload.addEventListener('click', async () => {
   const source = code.value;
+  if (targetsSpikeApp(source)) {
+    await runSpikeUpload(source);
+    return;
+  }
   const projectLibraries = libraryPanel.files;
   serialBusy = true;
   updateButtons();
   try {
     let port = serialSession?.port;
-    if (port) {
-      await detachSerial();
-    } else {
+    if (!port) {
       setUploadStatus('selectPort');
       port = await navigator.serial.requestPort();
     }
+    await detachSerial();
     setSerialStatus('serialConnecting');
     setUploadStatus('writingCode');
     attachSerial(await downloadProgram(port, source, appendSerialOutput, projectLibraries));

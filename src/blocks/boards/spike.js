@@ -131,7 +131,11 @@ pythonGenerator.forBlock.spike_on_condition = (b, g) => {
   return conditionEvent(b, g, conditionCode(b, g));
 };
 call('sleep', 'runloop', 'sleep_ms', (b, g) => value(b, g, 'DURATION'), { awaited: true });
-call('write', 'light_matrix', 'write', (b, g) => `${value(b, g, 'TEXT', "''")}, intensity=${value(b, g, 'BRIGHTNESS', '100')}, time_per_character=${value(b, g, 'DURATION', '500')}`, { awaited: true });
+call('write', 'light_matrix', 'write', (b, g) => [
+  value(b, g, 'TEXT', "''"),
+  value(b, g, 'BRIGHTNESS', '100'),
+  value(b, g, 'DURATION', '500'),
+].join(', '), { awaited: true });
 call('clear', 'light_matrix', 'clear', () => '');
 call('pixel', 'light_matrix', 'set_pixel', (b, g) => ['X', 'Y', 'BRIGHTNESS'].map(n => value(b, g, n)).join(', '));
 call('button', 'button', 'pressed', (b, g) => `${module(g, 'button')}.${b.getFieldValue('BUTTON')}`, { output: true });

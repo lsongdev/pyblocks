@@ -102,7 +102,10 @@ def awaited(name):
     return call
 hub = types.ModuleType('hub')
 hub.port = types.SimpleNamespace(**{c: i for i, c in enumerate('ABCDEF')})
-hub.light_matrix = types.SimpleNamespace(write=awaited('write'), set_pixel=record('pixel'))
+async def write(text, intensity, time_per_character, /):
+    await asyncio.sleep(0)
+    calls.append(('write', (text, intensity, time_per_character), {}))
+hub.light_matrix = types.SimpleNamespace(write=write, set_pixel=record('pixel'))
 hub.button = types.SimpleNamespace(LEFT=1, RIGHT=2, pressed=lambda button: 123 if button == 2 else 0)
 hub.motion_sensor = types.SimpleNamespace(tilt_angles=lambda: (900, -450, 0))
 sys.modules['hub'] = hub
@@ -115,7 +118,7 @@ sys.modules['color_sensor'] = types.SimpleNamespace(reflection=lambda port: 70, 
 sys.modules['color'] = types.SimpleNamespace(RED=9)
 `;
   const output = python(`${setup}\n${code}\nassert calls == [
-('write', ('Hi',), {'intensity': 80, 'time_per_character': 200}),
+('write', ('Hi', 80, 200), {}),
 ('pixel', (1, 4, 60), {}), ('degrees', (5, 180, -360), {'stop': 2}),
 ('time', (1, 500, 200), {'stop': 0}), ('sleep', (10,), {}),
 ('pair', (1, 0, 4), {}), ('tank', (1, 100, -100), {}),
@@ -127,7 +130,7 @@ sys.modules['color'] = types.SimpleNamespace(RED=9)
 test('SPIKE hello example generates native runloop code', () => {
   const project = JSON.parse(readFileSync(new URL('../examples/spike-hello.blockly.json', import.meta.url), 'utf8'));
   const code = generate(project.workspace.blocks.blocks);
-  assert.match(code, /await _spike_light_matrix.write\('Hello!', intensity=100, time_per_character=500\)/);
+  assert.match(code, /await _spike_light_matrix.write\('Hello!', 100, 500\)/);
   assert.match(code, /_spike_runloop.run\(\s*_spike_task\(\),\s*\)/);
   assert.doesNotMatch(code, /asyncio|machine|pybricks/);
 });
