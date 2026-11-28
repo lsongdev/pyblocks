@@ -34,3 +34,13 @@ test('vertical splitter stays transparent in both themes', () => {
   assert.match(css, /\.vertical-resize\s*\{[^}]*background:\s*transparent/);
   assert.doesNotMatch(css, /data-theme="dark"\]\s+\.vertical-resize\s*\{/);
 });
+
+test('all editor panels share the same header height and padding', () => {
+  const css = readFileSync(new URL('../src/styles/editor.css', import.meta.url), 'utf8');
+  const heading = css.match(/^\.panel-heading\s*\{([^}]+)\}/m)[1];
+  assert.match(heading, /min-height:\s*64px/);
+  assert.match(heading, /padding:\s*10px 12px/);
+  assert.match(heading, /flex:\s*0 0 auto/);
+  assert.match(heading, /align-items:\s*center/);
+  assert.doesNotMatch(css, /#(?:device|code|blocks)-panel\s+\.panel-heading\s*\{/);
+});
