@@ -71,20 +71,18 @@
               <button id="serial-interrupt" type="button" data-i18n-title="serialInterruptHint" data-i18n-aria="serialInterrupt" title="Stop" aria-label="Stop" hidden disabled><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="1"/></svg></button>
               <button id="spike-stop" type="button" data-i18n-title="serialInterrupt" data-i18n-aria="serialInterrupt" title="Stop" aria-label="Stop" hidden disabled><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="1"/></svg></button>
               <button id="serial-reset" type="button" data-i18n-title="serialResetHint" data-i18n-aria="serialReset" title="Soft reset" aria-label="Soft reset" hidden disabled><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11a9 9 0 1 1 3 7M3 4v7h7"/></svg></button>
-              <button id="serial-clear" type="button" data-i18n-title="serialClear" data-i18n-aria="serialClear" title="Clear" aria-label="Clear" disabled><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v5m4-5v5"/></svg></button>
               <button id="serial-connect" type="button" title="Connect" aria-label="Connect" disabled><svg class="connect-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v5m6-5v5M7 8h10v3a5 5 0 0 1-10 0V8Zm5 8v5"/></svg><svg class="disconnect-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v5m6-5v5M7 8h10v3a5 5 0 0 1-10 0V8Zm5 8v5M3 3l18 18"/></svg></button>
               <button id="upload" type="button" data-i18n-title="flashButton" data-i18n-aria="flashButton" title="Upload and run" aria-label="Upload and run"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 5 11 7-11 7V5Z"/></svg></button>
             </div>
-          </div>
-          <div class="device-details">
             <div class="device-identity">
               <span id="deployment-device" role="status"></span>
             </div>
-            <p id="upload-status" role="status"></p>
           </div>
+          <p id="upload-status" role="status"></p>
           <section id="serial-panel" class="serial-panel" aria-labelledby="serial-label">
             <div class="serial-heading">
               <h3 id="serial-label" data-i18n="serialOutput">Console output</h3>
+              <button id="serial-clear" type="button" data-i18n-title="serialClear" data-i18n-aria="serialClear" title="Clear" aria-label="Clear" disabled><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v5m4-5v5"/></svg></button>
             </div>
             <pre id="serial-output" aria-labelledby="serial-label" tabindex="0"></pre>
             <form id="serial-input-form" class="serial-input-form" hidden>
@@ -122,8 +120,10 @@
       <h2 id="spike-device-title" data-i18n="spikeDeviceTitle">Detected LEGO SPIKE Prime</h2>
       <p id="spike-device-version"></p>
       <p data-i18n="spikeDeviceCapabilities">5×5 light matrix, buttons, orientation sensor and six ports for motors and external sensors.</p>
-      <label for="spike-device-slot" data-i18n="spikeSlotLabel">Program slot</label>
-      <select id="spike-device-slot"></select>
+      <fieldset id="spike-slot-fieldset">
+        <legend data-i18n="spikeSlotLabel">Program slot</legend>
+        <div id="spike-device-slot" class="spike-slot-grid"></div>
+      </fieldset>
       <p id="spike-device-warning" class="dialog-warning"></p>
       <div class="dialog-actions">
         <button id="spike-device-cancel" type="button" data-i18n="closeButton">Close</button>

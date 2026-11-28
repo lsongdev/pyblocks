@@ -16,26 +16,37 @@ export function rememberSlot(slot, storage) {
 
 export function createSpikeDialog(document = globalThis.document) {
   const dialog = document.querySelector('#spike-device-dialog');
-  const slot = document.querySelector('#spike-device-slot');
+  const grid = document.querySelector('#spike-device-slot');
   const version = document.querySelector('#spike-device-version');
   const confirm = document.querySelector('#spike-device-confirm');
   const cancel = document.querySelector('#spike-device-cancel');
   const warning = document.querySelector('#spike-device-warning');
-  for (let i = 0; i < SPIKE_SLOT_COUNT; i++) {
-    const option = document.createElement('option');
-    option.value = String(i);
-    option.textContent = String(i);
-    slot.append(option);
+  const radios = [];
+  let selected = 0;
+  function select(value) {
+    selected = value;
+    for (const [index, radio] of radios.entries()) radio.checked = index === value;
+    warning.textContent = t('spikeSlotWarning', String(value));
   }
-  const update = () => { warning.textContent = t('spikeSlotWarning', slot.value); };
-  slot.addEventListener('change', update);
+  for (let i = 0; i < SPIKE_SLOT_COUNT; i++) {
+    const label = document.createElement('label');
+    const radio = document.createElement('input');
+    const number = document.createElement('span');
+    radio.type = 'radio';
+    radio.name = 'spike-program-slot';
+    radio.value = String(i);
+    number.textContent = String(i);
+    radio.addEventListener('change', () => { if (radio.checked) select(i); });
+    radios.push(radio);
+    label.append(radio, number);
+    grid.append(label);
+  }
   return function choose(hub, { initial = readPreferredSlot(), uploading = false } = {}) {
     if (hub.closed) return Promise.resolve(null);
-    slot.value = String(isSpikeSlot(initial) ? initial : 0);
+    select(isSpikeSlot(initial) ? initial : 0);
     const { firmware, rpcMajor, rpcMinor, rpcBuild } = hub.info;
     version.textContent = `HubOS ${firmware} · RPC ${rpcMajor}.${rpcMinor}.${rpcBuild}`;
     confirm.textContent = t(uploading ? 'spikeConfirmUpload' : 'spikeConfirmDevice');
-    update();
     return new Promise((resolve, reject) => {
       let choice = null;
       let unsubscribe;
@@ -47,8 +58,7 @@ export function createSpikeDialog(document = globalThis.document) {
       };
       const closed = () => { cleanup(); resolve(choice); };
       const accept = () => {
-        const value = Number(slot.value);
-        if (!hub.closed && isSpikeSlot(value)) choice = value;
+        if (!hub.closed && isSpikeSlot(selected)) choice = selected;
         dialog.close();
       };
       const dismiss = () => dialog.close();

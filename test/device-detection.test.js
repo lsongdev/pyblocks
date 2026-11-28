@@ -31,7 +31,8 @@ class Element extends EventTarget {
   value = '';
   children = [];
   open = false;
-  append(child) { this.children.push(child); }
+  checked = false;
+  append(...children) { this.children.push(...children); }
   showModal() { this.open = true; }
   close() { this.open = false; this.dispatchEvent(new Event('close')); }
   click() { this.dispatchEvent(new Event('click')); }
@@ -51,13 +52,20 @@ test('SPIKE dialog confirms a selected slot, cancels without a selection and han
   const choose = createSpikeDialog(document);
   const slot = document.querySelector('#spike-device-slot');
   assert.equal(slot.children.length, 20);
+  const radios = slot.children.map(label => label.children[0]);
+  assert.deepEqual(radios.map(radio => radio.value), Array.from({length: 20}, (_, i) => String(i)));
+  assert.ok(radios.every(radio => radio.type === 'radio' && radio.name === 'spike-program-slot'));
   let result = choose(hub, { initial: 3, uploading: true });
-  assert.equal(slot.value, '3');
-  slot.value = '7';
+  assert.deepEqual(radios.filter(radio => radio.checked).map(radio => radio.value), ['3']);
+  radios[7].checked = true;
+  radios[7].dispatchEvent(new Event('change'));
+  assert.deepEqual(radios.filter(radio => radio.checked).map(radio => radio.value), ['7']);
+  assert.match(document.querySelector('#spike-device-warning').textContent, /7/);
   document.querySelector('#spike-device-confirm').click();
   assert.equal(await result, 7);
   assert.equal(listeners.size, 0);
-  result = choose(hub, { initial: 7 });
+  result = choose(hub, { initial: 19 });
+  assert.deepEqual(radios.filter(radio => radio.checked).map(radio => radio.value), ['19']);
   document.querySelector('#spike-device-cancel').click();
   assert.equal(await result, null);
   result = choose(hub, { initial: 7 });
