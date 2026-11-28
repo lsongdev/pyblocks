@@ -18,9 +18,9 @@ button:focus-visible { outline: 3px solid #8979d1; outline-offset: 3px; }
 #upload { color: white; background: #55448c; }
 .code-actions { display: flex; gap: 6px; }
 .project-actions button { background: #eee9ff; color: #473779; font-size: .875rem; }
-#upload-status, #code-error, #project-status { margin: 0; padding: 8px 12px; font-size: .875rem; overflow-wrap: anywhere; }
+#code-error, #project-status { margin: 0; padding: 8px 12px; font-size: .875rem; overflow-wrap: anywhere; }
 #code-error { color: #9c2938; }
-#upload-status:empty, #code-error:empty, #project-status:empty { display: none; }
+#code-error:empty, #project-status:empty { display: none; }
 #download { background: #eee9ff; color: #473779; }
 button:disabled { opacity: .45; cursor: default; }
 .code-sync { padding: 4px 12px 8px; text-align: right; }
@@ -55,7 +55,6 @@ button:disabled { opacity: .45; cursor: default; }
 }
 .serial-heading h3 { margin: 0; font-size: .875rem; }
 .serial-heading button { padding: 5px 8px; background: #eee9ff; color: #473779; font-size: .8125rem; }
-#serial-status { margin: 0; padding: 0 12px 6px; font-size: .75rem; overflow-wrap: anywhere; }
 #serial-output {
   flex: 1;
   min-height: 0;
@@ -222,15 +221,25 @@ dialog .board-card { display: flex; align-items: center; gap: 8px; margin: 0; pa
 #blocks-panel { flex: 1; }
 #right-panels { display: flex; flex-direction: column; flex: 0 0 340px; min-width: 0; min-height: 0; }
 #device-panel { flex: none; height: 60%; min-height: 0; overflow: auto; }
-#device-panel .panel-heading { flex-wrap: wrap; min-height: 50px; }
+#device-panel .panel-heading { flex-wrap: wrap; min-height: 48px; padding: 8px 10px; }
 #device-panel .serial-panel { flex: 1 0 100px; min-height: 100px; }
 #code-panel { flex: 1; height: auto; }
 #code-panel .panel-heading { min-height: 48px; }
 #code-body { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 #code-panel.collapsed { flex: 0 0 auto !important; height: auto !important; }
 #right-panels:has(#code-panel.collapsed) #device-panel { flex: 1 !important; height: auto !important; }
-.device-actions { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 12px 8px; }
-.device-actions button, .deployment-bar button, #serial-connect, #toggle-code, #download { padding: 6px 8px; background: #eee9ff; color: #473779; font-size: .8125rem; }
+.device-details { display: flex; flex-direction: column; gap: 6px; padding: 8px 10px; }
+.device-identity { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: .8125rem; }
+#deployment-device { display: flex; align-items: baseline; gap: 6px; overflow-wrap: anywhere; }
+#deployment-device::before { content: ""; display: inline-block; flex: 0 0 7px; height: 7px; border-radius: 50%; background: #9995a6; }
+#deployment-device[data-connected="true"]::before { background: #32875a; }
+.device-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.device-actions button, #serial-connect, #toggle-code, #download { padding: 6px 8px; background: #eee9ff; color: #473779; font-size: .8125rem; }
+#device-panel button { font-size: .8125rem; padding: 6px 9px; min-height: 32px; }
+#upload-status { margin: 0; font-size: .75rem; line-height: 1.4; overflow-wrap: anywhere; }
+#upload-status:empty { display: none; }
+#upload-status.error { color: #9c2938; }
+:root[data-theme="dark"] #upload-status.error { color: #ff9ca8; }
 .resize-handle { position: relative; touch-action: none; user-select: none; }
 .horizontal-resize { cursor: col-resize; flex: 0 0 12px; }
 .vertical-resize { cursor: row-resize; flex: 0 0 12px; background: #fff; }
@@ -270,12 +279,9 @@ dialog .board-card { display: flex; align-items: center; gap: 8px; margin: 0; pa
 :root[data-theme="dark"] .vertical-resize { background: #211f2c; }
 :root[data-theme="dark"] .resize-handle::after { background: #514d60; }
 
-.deployment-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; padding: 6px 12px; font-size: .8rem; }
-.deployment-bar span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
-.deployment-bar button { font-size: .8rem; }
 
-:root[data-theme="dark"] .device-actions button, :root[data-theme="dark"] .deployment-bar button, :root[data-theme="dark"] #serial-connect, :root[data-theme="dark"] #toggle-code, :root[data-theme="dark"] #download { background: #363144; color: #e7e1ff; }
+:root[data-theme="dark"] .device-actions button, :root[data-theme="dark"] #serial-connect, :root[data-theme="dark"] #toggle-code, :root[data-theme="dark"] #download { background: #363144; color: #e7e1ff; }
 
-.device-heading-actions { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+.device-heading-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 6px; margin-left: auto; }
 .device-heading-actions button { white-space: nowrap; }
 .device-actions:not(:has(> button:not([hidden]))) { display: none; }

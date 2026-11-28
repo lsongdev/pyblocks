@@ -13,50 +13,58 @@ export function createDevicePanel({ getSource, getLibraries }) {
   const uploadStatus = document.querySelector('#upload-status');
   const serialConnect = document.querySelector('#serial-connect');
   const serialClear = document.querySelector('#serial-clear');
-  const serialStatus = document.querySelector('#serial-status');
   const serialOutput = document.querySelector('#serial-output');
   const serialOutputLimit = 32_768;
   const device = new DeviceController({
-    onDisconnect(kind, error) {
-      setSerialStatus(error ? 'serialFailed' : 'serialDisconnected', error);
-      if (kind === 'spike') setUploadStatus('spikeDisconnected');
+    onDisconnect(_kind, error) {
+      setStatus(error ? 'serialFailed' : undefined, error);
       render();
     },
   });
-  let serialMessage = ['serialDisconnected'];
   const serialInput = setupSerialInput({
     getSession: () => device.serial,
     isBusy: () => device.busy,
-    onError: error => setSerialStatus('serialSendFailed', error),
+    onError: error => setStatus('serialSendFailed', error),
   });
   const chooseSpike = createSpikeDialog();
   const changeDevice = document.querySelector('#change-device');
   const changeSlot = document.querySelector('#change-slot');
   const deviceName = document.querySelector('#deployment-device');
-  let uploadMessage;
+  let statusMessage;
 
   const serialInterrupt = document.querySelector('#serial-interrupt');
   const serialReset = document.querySelector('#serial-reset');
   const serialForm = document.querySelector('#serial-input-form');
   const spikeStop = document.querySelector('#spike-stop');
 
-  function renderStatus(element, message) {
-    if (!message) return;
-    const [key, detail] = message;
+  // Connection identity is rendered separately; there is only one transient
+  // operation/error message, so older success text cannot compete with it.
+  function renderStatus() {
+    if (!statusMessage) {
+      uploadStatus.textContent = '';
+      uploadStatus.classList.remove('error');
+      return;
+    }
+    const [key, detail] = statusMessage;
     const text = detail instanceof MicroPythonError ? t(detail.code)
       : typeof detail === 'string' ? detail
       : detail?.message;
-    element.textContent = t(key, text);
+    uploadStatus.textContent = t(key, text);
+    uploadStatus.classList.toggle('error', [
+      'serialFailed', 'serialSendFailed', 'serialOpenFailed', 'serialConnectionFailed',
+      'flashFailed', 'spikeFirmwareUnsupported', 'spikeLibrariesUnsupported', 'spikeDisconnected',
+    ].includes(key));
   }
 
-  function setUploadStatus(key, error) {
-    uploadMessage = [key, error];
-    renderStatus(uploadStatus, uploadMessage);
+  function setStatus(key, detail) {
+    statusMessage = key ? [key, detail] : undefined;
+    renderStatus();
   }
 
-  function setSerialStatus(key, error) {
-    serialMessage = [key, error];
-    renderStatus(serialStatus, serialMessage);
+  // File operations use the same progress area; stable connection state
+  // belongs to the device identity, not a second status message.
+  function setSerialStatus(key, detail) {
+    setStatus(key === 'serialConnected' || key === 'serialDisconnected' ? undefined : key, detail);
   }
 
   function appendSerialOutput(text) {
@@ -89,6 +97,9 @@ export function createDevicePanel({ getSource, getLibraries }) {
     changeDevice.disabled = device.busy || !navigator.serial;
     changeSlot.hidden = !device.spike;
     changeSlot.disabled = device.busy;
+    const connected = Boolean(device.serial || (device.spike && !device.spike.closed));
+    deviceName.dataset.connected = String(connected);
+    deviceName.title = connected ? t('serialConnected') : t('serialDisconnected');
     deviceName.textContent = device.spike ? t('deploymentSpike', String(device.slot))
       : device.serial ? t(device.protocol === 'micropython' ? 'deploymentMicroPython' : 'deploymentSerial')
       : t('deploymentNone');
@@ -108,29 +119,32 @@ export function createDevicePanel({ getSource, getLibraries }) {
 
   // The browser-selected port, never the source code, determines the protocol.
   async function selectPort() {
-    setUploadStatus('selectPort');
+    setStatus('selectPort');
     return navigator.serial.requestPort();
   }
 
   async function connectSelected(port, { uploading = false } = {}) {
     const protocol = portProtocol(port);
     if (protocol === 'unsupported-lego') {
-      setUploadStatus('spikeFirmwareUnsupported');
+      setStatus('spikeFirmwareUnsupported');
       return false;
     }
     if (port === device.port) {
-      if (device.serial || (device.spike && !device.spike.closed)) return true;
+      if (device.serial || (device.spike && !device.spike.closed)) {
+        if (!uploading) setStatus();
+        return true;
+      }
       await device.detach();
     }
     if (protocol === 'spike') {
-      setUploadStatus('spikeDetecting');
+      setStatus('spikeDetecting');
       // Inspect and confirm the candidate before releasing the previous target.
       const hub = await connectSpike(port, { onConsole: appendSerialOutput });
       let attached = false;
       try {
         const slot = await chooseSpike(hub, { uploading });
         if (slot === null || hub.closed) {
-          setUploadStatus(hub.closed ? 'spikeDisconnected' : 'portCanceled');
+          setStatus(hub.closed ? 'spikeDisconnected' : 'portCanceled');
           return false;
         }
         await device.detach();
@@ -140,7 +154,6 @@ export function createDevicePanel({ getSource, getLibraries }) {
         rememberSlot(slot);
         deviceFiles.clear();
         setSerialStatus('serialConnected');
-        setUploadStatus('deploymentReady');
         return true;
       } finally {
         if (!attached) await hub.close();
@@ -163,13 +176,11 @@ export function createDevicePanel({ getSource, getLibraries }) {
       throw error;
     }
     deviceFiles.clear();
-    setUploadStatus('deploymentReady');
     return true;
   }
 
   function reportDeviceError(error, action = 'upload') {
-    if (!device.serial && !device.spike) setSerialStatus('serialDisconnected');
-    setUploadStatus(error.name === 'NotFoundError' ? 'portCanceled'
+    setStatus(error.name === 'NotFoundError' ? 'portCanceled'
       : error.code === 'unsupported' ? 'spikeFirmwareUnsupported'
       : error instanceof SerialOpenError ? 'serialOpenFailed'
       : action === 'connection' ? 'serialConnectionFailed' : 'flashFailed', error);
@@ -183,7 +194,6 @@ export function createDevicePanel({ getSource, getLibraries }) {
         await device.detach();
         deviceFiles.clear();
         setSerialStatus('serialDisconnected');
-        setUploadStatus('deploymentNone');
       } else {
         await connectSelected(await selectPort());
       }
@@ -206,9 +216,10 @@ export function createDevicePanel({ getSource, getLibraries }) {
       if (slot !== null && device.spike === hub && !hub.closed) {
         device.setSlot(slot);
         rememberSlot(slot);
+        setStatus();
       }
     } catch (error) {
-      reportDeviceError(error);
+      reportDeviceError(error, 'connection');
     } finally {
       device.end();
       render();
@@ -227,22 +238,22 @@ export function createDevicePanel({ getSource, getLibraries }) {
         const hub = device.spike;
         const slot = device.slot;
         if (projectLibraries.length) {
-          setUploadStatus('spikeLibrariesUnsupported');
+          setStatus('spikeLibrariesUnsupported');
           return;
         }
-        const onProgress = value => setUploadStatus('spikeWriting', `${Math.round(value * 100)}%`);
-        setUploadStatus('spikeWriting', '0%');
+        const onProgress = value => setStatus('spikeWriting', `${Math.round(value * 100)}%`);
+        setStatus('spikeWriting', '0%');
         await hub.upload(source, slot, onProgress);
         await hub.start(slot);
         if (device.spike === hub && !hub.closed) device.markStarted(slot);
-        setUploadStatus('spikeRunning', String(slot));
+        setStatus('spikeRunning', String(slot));
         return;
       }
       await device.detach();
       setSerialStatus('serialConnecting');
-      setUploadStatus('writingCode');
+      setStatus('writingCode');
       attachSerial(await downloadProgram(port, source, appendSerialOutput, projectLibraries));
-      setUploadStatus('flashComplete');
+      setStatus('flashComplete');
     } catch (error) {
       reportDeviceError(error);
     } finally {
@@ -259,7 +270,7 @@ export function createDevicePanel({ getSource, getLibraries }) {
     try {
       await hub.stop(slot);
       if (device.spike === hub) device.markStopped();
-      setUploadStatus('spikeStopped', String(slot));
+      setStatus('spikeStopped', String(slot));
     } catch (error) {
       reportDeviceError(error);
     } finally {
@@ -270,14 +281,13 @@ export function createDevicePanel({ getSource, getLibraries }) {
 
   function renderLanguage() {
     document.querySelector('#serial-input').placeholder = t('serialInputPlaceholder');
-    renderStatus(uploadStatus, uploadMessage);
-    renderStatus(serialStatus, serialMessage);
+    renderStatus();
     render();
   }
 
   return {
     render, renderLanguage,
-    close() { return device.detach(); },
+    close() { return device.detach().finally(render); },
     async acquireDevice() {
       if (!device.begin('firmware')) throw new Error(t('filesBusy'));
       render();

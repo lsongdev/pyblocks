@@ -70,18 +70,19 @@
               <button id="upload" type="button" data-i18n-title="flashHint" data-i18n="flashButton">Upload and run</button>
             </div>
           </div>
-          <div class="deployment-bar">
-            <span id="deployment-device" role="status"></span>
-            <button id="change-slot" type="button" data-i18n="changeSlot" hidden>Change slot</button>
+          <div class="device-details">
+            <div class="device-identity">
+              <span id="deployment-device" role="status"></span>
+            </div>
+            <div class="device-actions">
+              <button id="change-device" type="button" data-i18n="changeDevice" hidden>Change device</button>
+              <button id="change-slot" type="button" data-i18n="changeSlot" hidden>Change slot</button>
+              <button id="serial-interrupt" type="button" data-i18n="serialInterrupt" data-i18n-title="serialInterruptHint" hidden disabled>Stop</button>
+              <button id="serial-reset" type="button" data-i18n="serialReset" data-i18n-title="serialResetHint" hidden disabled>Soft reset</button>
+              <button id="spike-stop" type="button" data-i18n="serialInterrupt" hidden disabled>Stop</button>
+            </div>
+            <p id="upload-status" role="status"></p>
           </div>
-          <div class="device-actions">
-            <button id="change-device" type="button" data-i18n="changeDevice" hidden>Change device</button>
-            <button id="serial-interrupt" type="button" data-i18n="serialInterrupt" data-i18n-title="serialInterruptHint" hidden disabled>Stop</button>
-            <button id="serial-reset" type="button" data-i18n="serialReset" data-i18n-title="serialResetHint" hidden disabled>Soft reset</button>
-            <button id="spike-stop" type="button" data-i18n="serialInterrupt" hidden disabled>Stop</button>
-          </div>
-          <p id="upload-status" role="status"></p>
-          <p id="serial-status" role="status"></p>
           <section id="serial-panel" class="serial-panel" aria-labelledby="serial-label">
             <div class="serial-heading">
               <h3 id="serial-label" data-i18n="serialOutput">Console output</h3>
