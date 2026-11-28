@@ -1,4 +1,4 @@
-import { writeSerialText, streamOutput } from '../transport/serial.js';
+import { writeSerialText, streamOutput, openSerialPort } from '../transport/serial.js';
 import { MicroPythonError, BoardCommandError } from './errors.js';
 import { requireReplCandidate } from '../detect.js';
 
@@ -23,6 +23,7 @@ export async function runOnBoard(port, onOutput, operation) {
   let reader;
   let writer;
   let pending = '';
+  let opened = false;
 
   const write = text => writeSerialText(writer, text);
 
@@ -60,7 +61,8 @@ export async function runOnBoard(port, onOutput, operation) {
   }
 
   async function open() {
-    await port.open({ baudRate: 115200 });
+    await openSerialPort(port);
+    opened = true;
     decoder = new TextDecoder();
     reader = port.readable.getReader();
     writer = port.writable.getWriter();
@@ -71,7 +73,10 @@ export async function runOnBoard(port, onOutput, operation) {
     try { writer?.releaseLock(); } catch {}
     try { reader?.releaseLock(); } catch {}
     writer = reader = undefined;
-    await port.close().catch(() => {});
+    if (opened) {
+      await port.close();
+      opened = false;
+    }
   }
 
   async function enterRawRepl() {
@@ -114,9 +119,11 @@ export async function runOnBoard(port, onOutput, operation) {
     writer.releaseLock();
     const session = streamOutput(port, reader, decoder, onOutput, 'MPY: soft reboot' + pending);
     writer = reader = undefined;
+    opened = false; // ownership transferred to monitor
     return { session, result };
   } catch (error) {
-    await close();
+    try { await close(); }
+    catch (cleanupError) { throw new AggregateError([error, cleanupError], error.message + '; ' + cleanupError.message); }
     throw error;
   }
 }

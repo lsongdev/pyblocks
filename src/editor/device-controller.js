@@ -4,6 +4,7 @@ import { requireSpikeSlot } from '../device/spike/slots.js';
 export class DeviceController {
   #connection = null;
   #operation = null;
+  #detaching = null;
 
   constructor({ onDisconnect = () => {} } = {}) {
     this.onDisconnect = onDisconnect;
@@ -51,7 +52,7 @@ export class DeviceController {
   }
 
   #ended(connection, error) {
-    if (this.#connection !== connection) return;
+    if (this.#connection !== connection || this.#detaching) return;
     this.#connection = null;
     this.onDisconnect(connection.kind, error);
   }
@@ -70,7 +71,7 @@ export class DeviceController {
     connection.protocol = 'spike';
     this.setSlot(slot);
     hub.onClose(error => {
-      if (this.#connection !== connection) return;
+      if (this.#connection !== connection || this.#detaching) return;
       // A SPIKE disconnect must finish releasing the transport before notifying UI.
       void Promise.resolve().then(() => hub.close()).then(
         () => this.#ended(connection, error),
@@ -80,8 +81,12 @@ export class DeviceController {
   }
 
   async detach() {
+    if (this.#detaching) return this.#detaching;
     const connection = this.#connection;
-    this.#connection = null; // Ignore late events from the previous connection.
-    await connection?.value.close();
+    if (!connection) return;
+    this.#detaching = Promise.resolve().then(() => connection.value.close()).then(() => {
+      if (this.#connection === connection) this.#connection = null;
+    }).finally(() => { this.#detaching = null; });
+    return this.#detaching;
   }
 }

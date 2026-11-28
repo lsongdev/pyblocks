@@ -68,3 +68,16 @@ test('SPIKE stop refers to the last started slot, not a new deployment choice', 
   await device.detach();
   assert.equal(device.runningSlot, undefined);
 });
+
+test('detach retains ownership on failure, then allows a safe retry', async () => {
+  const device=new DeviceController();
+  let closes=0;
+  const first={...session(),async close(){if(++closes===1)throw new Error('busy');}};
+  device.attachSerial(first);
+  await assert.rejects(device.detach(),/busy/);
+  assert.equal(device.serial,first);
+  assert.throws(()=>device.attachSerial(session()),/Detach/);
+  await device.detach();
+  assert.equal(device.serial,undefined);
+  assert.equal(closes,2);
+});

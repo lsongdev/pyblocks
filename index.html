@@ -65,14 +65,16 @@
         <section id="device-panel" class="panel" aria-labelledby="device-label">
           <div class="panel-heading">
             <h2 id="device-label" data-i18n="deviceHeading">Device</h2>
-            <button id="upload" type="button" data-i18n-title="flashHint" data-i18n="flashButton">Upload and run</button>
+            <div class="device-heading-actions">
+              <button id="serial-connect" type="button" disabled>Connect</button>
+              <button id="upload" type="button" data-i18n-title="flashHint" data-i18n="flashButton">Upload and run</button>
+            </div>
           </div>
           <div class="deployment-bar">
             <span id="deployment-device" role="status"></span>
             <button id="change-slot" type="button" data-i18n="changeSlot" hidden>Change slot</button>
           </div>
           <div class="device-actions">
-            <button id="serial-connect" type="button" disabled>Connect</button>
             <button id="change-device" type="button" data-i18n="changeDevice" hidden>Change device</button>
             <button id="serial-interrupt" type="button" data-i18n="serialInterrupt" data-i18n-title="serialInterruptHint" hidden disabled>Stop</button>
             <button id="serial-reset" type="button" data-i18n="serialReset" data-i18n-title="serialResetHint" hidden disabled>Soft reset</button>

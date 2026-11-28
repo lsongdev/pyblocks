@@ -4,7 +4,7 @@
 
 const LEGO_VENDOR_ID = 0x0694;
 const SPIKE_PRIME_PRODUCT_ID = 0x0009;
-const BAUD_RATE = 115200;
+import { openSerialPort } from '../transport/serial.js';
 const STARTUP_DELAY = 250;
 
 export async function selectSpikeSerialPort(onSelect) {
@@ -20,10 +20,17 @@ export async function selectSpikeSerialPort(onSelect) {
 }
 
 export async function openSpikeSerial(port, { onData, onClose }) {
-  await port.open({ baudRate: BAUD_RATE });
-
-  const reader = port.readable.getReader();
-  const writer = port.writable.getWriter();
+  await openSerialPort(port);
+  let reader, writer;
+  try {
+    reader = port.readable.getReader();
+    writer = port.writable.getWriter();
+  } catch (error) {
+    reader?.releaseLock();
+    writer?.releaseLock();
+    await port.close();
+    throw error;
+  }
   let active = true;
   let closing;
   const reading = (async () => {

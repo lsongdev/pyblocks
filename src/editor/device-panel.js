@@ -1,5 +1,6 @@
 import { t } from '../i18n/index.js';
 import { portProtocol } from '../device/detect.js';
+import { SerialOpenError } from '../device/transport/serial.js';
 import { connectSpike } from '../device/spike/index.js';
 import { createSpikeDialog, rememberSlot } from './spike-dialog.js';
 import { setupSerialInput } from './serial-input.js';
@@ -152,6 +153,7 @@ export function createDevicePanel({ getSource, getLibraries }) {
       deviceFiles.clear();
       return true;
     }
+    setSerialStatus('serialConnecting');
     const session = await monitorPort(port, appendSerialOutput);
     try {
       await device.detach();
@@ -165,10 +167,12 @@ export function createDevicePanel({ getSource, getLibraries }) {
     return true;
   }
 
-  function reportDeviceError(error) {
+  function reportDeviceError(error, action = 'upload') {
     if (!device.serial && !device.spike) setSerialStatus('serialDisconnected');
     setUploadStatus(error.name === 'NotFoundError' ? 'portCanceled'
-      : error.code === 'unsupported' ? 'spikeFirmwareUnsupported' : 'flashFailed', error);
+      : error.code === 'unsupported' ? 'spikeFirmwareUnsupported'
+      : error instanceof SerialOpenError ? 'serialOpenFailed'
+      : action === 'connection' ? 'serialConnectionFailed' : 'flashFailed', error);
   }
 
   async function changeConnection(disconnect = false) {
@@ -184,7 +188,7 @@ export function createDevicePanel({ getSource, getLibraries }) {
         await connectSelected(await selectPort());
       }
     } catch (error) {
-      reportDeviceError(error);
+      reportDeviceError(error, 'connection');
     } finally {
       device.end();
       render();

@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { monitorPort } from '../src/device/micropython.js';
+import { openSerialPort, SerialOpenError } from '../src/device/transport/serial.js';
 
 function mockPort(write = async () => {}) {
   let controller;
@@ -173,4 +174,35 @@ test('raw REPL rejects malformed acknowledgement and closes the port', async () 
   await assert.rejects(executeProgram(device.port, 'print(1)'), error =>
     error instanceof MicroPythonError && error.code === 'unexpectedResponse');
   assert.ok(device.port.closed);
+});
+
+test('transient serial open failures retry the same port; permission errors do not retry', async () => {
+  let opens=0;
+  const port={async open(options) {
+    assert.deepEqual(options,{baudRate:115200});
+    if (++opens===1) throw new DOMException('temporarily busy','NetworkError');
+  }};
+  await openSerialPort(port,{retryDelays:[0]});
+  assert.equal(opens,2);
+  opens=0;
+  port.open=async()=>{opens++;throw new DOMException('denied','SecurityError');};
+  await assert.rejects(openSerialPort(port,{retryDelays:[0]}),SerialOpenError);
+  assert.equal(opens,1);
+});
+test('failed REPL open does not close an unowned port', async () => {
+  const { executeProgram }=await import('../src/device/micropython.js');
+  let closed=0;
+  const port={async open(){throw new DOMException('already open','InvalidStateError');},async close(){closed++;}};
+  await assert.rejects(executeProgram(port,'print(1)'),SerialOpenError);
+  assert.equal(closed,0);
+});
+test('explicit disconnect retries a failed monitor close', async () => {
+  const {port}=mockPort();
+  let closes=0;
+  port.close=async()=>{if(++closes===1)throw new Error('still closing');};
+  const session=await monitorPort(port,()=>{});
+  const ended=assert.rejects(session.done,/still closing/);
+  await session.close();
+  await ended;
+  assert.equal(closes,2);
 });

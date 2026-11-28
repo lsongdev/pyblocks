@@ -1,3 +1,26 @@
+// Shared opening policy for REPL, monitoring and SPIKE.
+export class SerialOpenError extends Error {
+  constructor(cause) {
+    super(cause.message, { cause });
+    this.name = 'SerialOpenError';
+  }
+}
+
+// Retry transient driver failures on the same selected port only.
+export async function openSerialPort(port, { retryDelays = [150, 400] } = {}) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      await port.open({ baudRate: 115200 });
+      return;
+    } catch (error) {
+      if (error.name !== 'NetworkError' || attempt >= retryDelays.length) {
+        throw new SerialOpenError(error);
+      }
+      await new Promise(resolve => setTimeout(resolve, retryDelays[attempt]));
+    }
+  }
+}
+
 const encoder = new TextEncoder();
 
 export async function writeSerialText(writer, text) {
@@ -11,6 +34,8 @@ export async function writeSerialText(writer, text) {
 export function streamOutput(port, reader, decoder, onOutput, pending = '') {
   let closing = false;
   let writes = Promise.resolve();
+  let closeError;
+  let closeRetry;
   const done = (async () => {
     try {
       if (pending) onOutput(pending);
@@ -26,7 +51,8 @@ export function streamOutput(port, reader, decoder, onOutput, pending = '') {
       closing = true;
       reader.releaseLock();
       await writes.catch(() => {});
-      await port.close();
+      try { await port.close(); }
+      catch (error) { closeError = error; throw error; }
     }
   })();
 
@@ -46,12 +72,16 @@ export function streamOutput(port, reader, decoder, onOutput, pending = '') {
       closing = true;
       await reader.cancel().catch(() => {});
       await done.catch(() => {});
+      if (closeError) {
+        closeRetry ??= port.close().then(() => { closeError = undefined; }).finally(() => { closeRetry = undefined; });
+        await closeRetry;
+      }
     },
   };
 }
 
 export async function monitorPort(port, onOutput) {
-  await port.open({ baudRate: 115200 });
+  await openSerialPort(port);
   try {
     return streamOutput(port, port.readable.getReader(), new TextDecoder(), onOutput);
   } catch (error) {
