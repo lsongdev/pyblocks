@@ -76,7 +76,12 @@ export function createDevicePanel({ getSource, getLibraries }) {
 
   function render() {
     serialInput.update();
-    upload.disabled = !getSource().trim() || device.busy || !navigator.serial;
+    const hasSource = Boolean(getSource().trim());
+    upload.disabled = !hasSource || device.busy || !navigator.serial;
+    upload.title = !navigator.serial ? t('uploadSerialUnavailable')
+      : device.busy ? t('uploadSerialBusy')
+      : !hasSource ? t('uploadCodeRequired')
+      : '';
     document.querySelector('#open-firmware').disabled = device.busy;
     serialConnect.disabled = device.busy || !navigator.serial;
     serialConnect.textContent = t(device.serial || device.spike ? 'serialDisconnect' : 'serialConnect');

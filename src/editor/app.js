@@ -212,7 +212,7 @@ window.setLanguage = (requested, { persist = true } = {}) => {
   return language;
 };
 
-function updateCode() {
+unction updateCode() {
   codePanel.refresh();
   devicePanel.render();
 }
