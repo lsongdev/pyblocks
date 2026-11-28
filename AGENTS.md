@@ -60,3 +60,8 @@ When redesigning a shared library, prefer the clearest context-aware public API 
 
 - Native awaitable-returning calls are expressions; do not insert await into API or procedure calls. Generic Python await statement/value blocks own explicit waiting and validate async scope. An expression statement evaluates and discards a result. Python async function calls return a coroutine and do not implicitly schedule it. Native eager awaitables may behave differently; verify firmware semantics.
 - Preserve explicit runtime-specific scheduling (SPIKE runloop or asyncio). Ordinary return-value functions may return awaitables for callers to await; both procedure definition shapes may be async. Generated internal event scheduler code can use await as required by the event's documented semantics.
+
+## Python fundamentals and API inventory
+
+- Map native indexing, slices, data structures, built-ins, attributes and context managers directly to Python. Do not silently coerce Python values or emulate CPython APIs on constrained firmware. Keep optional arguments omitted where native defaults apply.
+- Maintain docs/api/ as a coverage inventory. Distinguish dedicated wrappers, candidates and actual physical validation. Keep runtime-specific capabilities separate from general language features.

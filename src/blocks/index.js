@@ -1,6 +1,8 @@
 import 'blockly/blocks';
 import '../python/names.js';
 import './python.js';
+import './shared/python-data.js';
+import './shared/python-files.js';
 import './boards/matrixbit.js';
 import './hardware/wifi.js';
 import './hardware/mqtt.js';

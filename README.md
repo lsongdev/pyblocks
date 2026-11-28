@@ -56,3 +56,7 @@ Block definitions and Python generators live in `src/blocks/`, editor UI in `src
 ## License
 
 [MIT](LICENSE) © Lsong. Third-party dependencies and firmware retain their respective licenses.
+
+## API coverage
+
+See [API coverage](docs/api/README.md) for Python and each supported hardware runtime. Dedicated blocks expose common native capabilities; generic Python calls cover additional APIs. Coverage is distinct from physical-device validation.

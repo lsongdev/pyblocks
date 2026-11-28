@@ -2,7 +2,7 @@ import * as Blockly from 'blockly/core';
 import { Order, pythonGenerator } from 'blockly/python';
 import { blockMessage, t } from '../i18n/index.js';
 import { PythonBlockError } from '../python/errors.js';
-import { isPythonIdentifier } from '../python/names.js';
+import { identifier, requiredValue, memberReceiver } from '../python/expressions.js';
 import { inAsyncFunction } from '../python/async-context.js';
 
 const colour = 210;
@@ -96,13 +96,6 @@ Blockly.common.defineBlocksWithJsonArray([
 ]);
 
 
-function identifier(name, label) {
-  if (!isPythonIdentifier(name)) {
-    throw new PythonBlockError(t('invalidIdentifier', label, name));
-  }
-  return name;
-}
-
 function moduleName(block) {
   return block.getFieldValue('MODULE').trim().split('.')
     .map(part => identifier(part, t('moduleName'))).join('.');
@@ -111,12 +104,6 @@ function moduleName(block) {
 function alias(block) {
   const name = block.getFieldValue('ALIAS').trim();
   return name ? ` as ${identifier(name, t('aliasName'))}` : '';
-}
-
-function requiredValue(block, generator, input, order, label) {
-  const code = generator.valueToCode(block, input, order);
-  if (!code) throw new PythonBlockError(t('requiredExpression', label));
-  return code;
 }
 
 function call(block, generator) {
@@ -155,9 +142,8 @@ Object.assign(pythonGenerator.forBlock, {
   },
   python_name: block => [identifier(block.getFieldValue('NAME').trim(), t('pythonNameLabel')), Order.ATOMIC],
   python_member: (block, generator) => {
-    const object = requiredValue(block, generator, 'OBJECT', Order.MEMBER, t('objectValue'));
+    const receiver = memberReceiver(block, generator, 'OBJECT');
     const name = identifier(block.getFieldValue('NAME').trim(), t('memberName'));
-    const receiver = /^\d+$/.test(object) ? `(${object})` : object;
     return [`${receiver}.${name}`, Order.MEMBER];
   },
   python_call: (block, generator) => [call(block, generator), Order.FUNCTION_CALL],
