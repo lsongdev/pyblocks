@@ -44,3 +44,10 @@ test('all editor panels share the same header height and padding', () => {
   assert.match(heading, /align-items:\s*center/);
   assert.doesNotMatch(css, /#(?:device|code|blocks)-panel\s+\.panel-heading\s*\{/);
 });
+
+test('collapsed code panel preserves the same gap as the expanded splitter', () => {
+  const css = readFileSync(new URL('../src/styles/editor.css', import.meta.url), 'utf8');
+  assert.match(css, /#right-panels\s*\{[^}]*--panel-spacing:\s*12px/);
+  assert.match(css, /#code-panel\.collapsed\s*\{[^}]*margin-top:\s*var\(--panel-spacing\)/);
+  assert.match(css, /\.vertical-resize\s*\{[^}]*flex:\s*0 0 var\(--panel-spacing\)/);
+});
