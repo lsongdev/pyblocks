@@ -57,6 +57,8 @@ test('SPIKE dialog confirms a selected slot, cancels without a selection and han
   assert.ok(radios.every(radio => radio.type === 'radio' && radio.name === 'spike-program-slot'));
   let result = choose(hub, { initial: 3, uploading: true });
   assert.deepEqual(radios.filter(radio => radio.checked).map(radio => radio.value), ['3']);
+  assert.equal(document.querySelector('#spike-device-version').textContent, 'HubOS 1.8.149');
+  assert.equal(document.querySelector('#spike-device-protocol').textContent, 'USB Serial · RPC 1.0.47');
   radios[7].checked = true;
   radios[7].dispatchEvent(new Event('change'));
   assert.deepEqual(radios.filter(radio => radio.checked).map(radio => radio.value), ['7']);

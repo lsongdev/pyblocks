@@ -50,3 +50,5 @@ The Device header is a compact horizontal layout: title and small stable device 
 The SPIKE slot dialog presents slots 0–19 as a five-column native radio grid, with the selected slot highlighted; occupancy is not inferred. The separator between Device and Code has a transparent background, with its drag handle still visible in both themes.
 
 Blocks, Device and Code share the same 64px minimum header height, padding and vertical alignment. Headers may grow when controls wrap in narrow layouts; they do not shrink independently.
+
+The SPIKE confirmation dialog presents a local Hub illustration, detected firmware and RPC versions, and six informational capability tiles above the program slots. External peripherals are not inferred to be connected. The native radio grid, cancel/confirm behavior and saved slot preference remain unchanged. The dialog scrolls on short viewports and follows the editor theme.

@@ -70,3 +70,15 @@ test('project feedback is a subtitle in the blocks header, not a separate row', 
   assert.match(css, /\.project-meta, \.device-meta\s*\{[^}]*justify-content:\s*center/);
   assert.match(css, /\.device-identity, #project-status\s*\{[^}]*font-size:\s*\.6875rem/);
 });
+
+test('SPIKE confirmation presents identity, six informational capabilities, slots and actions', () => {
+  const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  const dialog = html.slice(html.indexOf('id="spike-device-dialog"'), html.indexOf('id="firmware-dialog"'));
+  assert.match(dialog, /class="spike-device-summary"[\s\S]*?id="spike-device-version"[\s\S]*?id="spike-device-protocol"[\s\S]*?class="spike-device-detected"/);
+  const features = dialog.match(/<ul class="spike-capability-grid">([\s\S]*?)<\/ul>/)[1];
+  assert.equal((features.match(/<li>/g) || []).length, 6);
+  assert.doesNotMatch(features, /<button|<input/);
+  assert.match(dialog, /spikeCapabilityNote/);
+  assert.match(dialog, /id="spike-device-slot"[\s\S]*?id="spike-device-warning"[\s\S]*?id="spike-device-cancel"[\s\S]*?id="spike-device-confirm"/);
+  assert.match(readFileSync(new URL('../public/icons/spike-hub.svg', import.meta.url), 'utf8'), /<svg/);
+});

@@ -115,16 +115,34 @@
       </div>
     </main>
     <dialog id="spike-device-dialog" aria-labelledby="spike-device-title">
-      <h2 id="spike-device-title" data-i18n="spikeDeviceTitle">Detected LEGO SPIKE Prime</h2>
-      <p id="spike-device-version"></p>
-      <p data-i18n="spikeDeviceCapabilities">5×5 light matrix, buttons, orientation sensor and six ports for motors and external sensors.</p>
+      <header class="spike-device-summary">
+        <img class="spike-device-image" src="./icons/spike-hub.svg" alt="" width="108" height="108">
+        <div class="spike-device-meta">
+          <h2 id="spike-device-title">LEGO SPIKE Prime</h2>
+          <p id="spike-device-version"></p>
+          <p id="spike-device-protocol"></p>
+          <p class="spike-device-detected"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg><span data-i18n="spikeDeviceDetected">Device detected</span></p>
+        </div>
+      </header>
+      <section class="spike-capabilities" aria-labelledby="spike-capabilities-title">
+        <h3 id="spike-capabilities-title" data-i18n="spikeCapabilitiesTitle">Available capabilities</h3>
+        <ul class="spike-capability-grid">
+          <li><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18m6-18v18M3 9h18M3 15h18"/></svg><span data-i18n="spikeFeatureMatrix">LED matrix</span></li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/></svg><span data-i18n="buttons">Buttons</span></li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2 7M20 4v7h-7"/></svg><span data-i18n="spikeFeatureMotor">Motor control</span></li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5 5-2Z"/></svg><span data-i18n="spikeFeatureMotion">Motion sensing</span></li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="20" height="8" rx="2" transform="rotate(45 12 12)"/><path d="m8 6-2 2m6 2-2 2m6 2-2 2"/></svg><span data-i18n="spikeFeatureDistance">Distance sensor</span></li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 0 18h1a2 2 0 0 0 1-3.7 1.5 1.5 0 0 1 .8-2.8h2A4.2 4.2 0 0 0 21 10c0-4-4-7-9-7Z"/><circle cx="7.5" cy="10" r=".9"/><circle cx="11" cy="6.8" r=".9"/><circle cx="15.5" cy="8" r=".9"/></svg><span data-i18n="spikeFeatureColor">Color sensor</span></li>
+        </ul>
+        <p class="spike-capability-note" data-i18n="spikeCapabilityNote">Some capabilities require compatible external motors or sensors.</p>
+      </section>
       <fieldset id="spike-slot-fieldset">
         <legend data-i18n="spikeSlotLabel">Program slot</legend>
         <div id="spike-device-slot" class="spike-slot-grid"></div>
       </fieldset>
-      <p id="spike-device-warning" class="dialog-warning"></p>
-      <div class="dialog-actions">
-        <button id="spike-device-cancel" type="button" data-i18n="closeButton">Close</button>
+      <p id="spike-device-warning" class="spike-slot-note" aria-live="polite"></p>
+      <div class="dialog-actions spike-dialog-actions">
+        <button id="spike-device-cancel" type="button" data-i18n="spikeCancel">Cancel</button>
         <button id="spike-device-confirm" class="primary" type="button"></button>
       </div>
     </dialog>

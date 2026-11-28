@@ -18,6 +18,7 @@ export function createSpikeDialog(document = globalThis.document) {
   const dialog = document.querySelector('#spike-device-dialog');
   const grid = document.querySelector('#spike-device-slot');
   const version = document.querySelector('#spike-device-version');
+  const protocol = document.querySelector('#spike-device-protocol');
   const confirm = document.querySelector('#spike-device-confirm');
   const cancel = document.querySelector('#spike-device-cancel');
   const warning = document.querySelector('#spike-device-warning');
@@ -45,7 +46,8 @@ export function createSpikeDialog(document = globalThis.document) {
     if (hub.closed) return Promise.resolve(null);
     select(isSpikeSlot(initial) ? initial : 0);
     const { firmware, rpcMajor, rpcMinor, rpcBuild } = hub.info;
-    version.textContent = `HubOS ${firmware} · RPC ${rpcMajor}.${rpcMinor}.${rpcBuild}`;
+    version.textContent = `HubOS ${firmware}`;
+    protocol.textContent = `USB Serial · RPC ${rpcMajor}.${rpcMinor}.${rpcBuild}`;
     confirm.textContent = t(uploading ? 'spikeConfirmUpload' : 'spikeConfirmDevice');
     return new Promise((resolve, reject) => {
       let choice = null;

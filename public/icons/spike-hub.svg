@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 112 112">
+  <title>SPIKE Prime Hub illustration</title>
+  <rect width="112" height="112" rx="12" fill="#faf9f6"/>
+  <path d="M26 15 39 10h47q8 0 8 8v77q0 7-7 7H39l-13-6q-5-2-5-8V23q0-6 5-8Z" fill="#e4b52d" stroke="#c79c22"/>
+  <path d="M39 10h47q8 0 8 8v77q0 7-7 7H39q-7 0-7-7V18q0-8 7-8Z" fill="#f8f8f3" stroke="#c7c6be"/>
+  <g fill="#575650"><rect x="23" y="27" width="7" height="13" rx="2"/><rect x="23" y="49" width="7" height="13" rx="2"/><rect x="23" y="71" width="7" height="13" rx="2"/></g>
+  <g fill="#d2d0c4" stroke="#a5a395"><circle cx="39" cy="17" r="3"/><circle cx="87" cy="17" r="3"/><circle cx="39" cy="95" r="3"/><circle cx="87" cy="95" r="3"/></g>
+  <circle cx="78" cy="26" r="4" fill="#eeeae0" stroke="#bcb8aa"/>
+  <g fill="#e7e4d5"><rect x="44" y="38" width="5.5" height="5.5" rx=".9"/><rect x="52" y="38" width="5.5" height="5.5" rx=".9"/><rect x="60" y="38" width="5.5" height="5.5" rx=".9"/><rect x="68" y="38" width="5.5" height="5.5" rx=".9"/><rect x="76" y="38" width="5.5" height="5.5" rx=".9"/><rect x="44" y="45" width="5.5" height="5.5" rx=".9"/><rect x="52" y="45" width="5.5" height="5.5" rx=".9"/><rect x="60" y="45" width="5.5" height="5.5" rx=".9"/><rect x="68" y="45" width="5.5" height="5.5" rx=".9"/><rect x="76" y="45" width="5.5" height="5.5" rx=".9"/><rect x="44" y="52" width="5.5" height="5.5" rx=".9"/><rect x="52" y="52" width="5.5" height="5.5" rx=".9"/><rect x="60" y="52" width="5.5" height="5.5" rx=".9"/><rect x="68" y="52" width="5.5" height="5.5" rx=".9"/><rect x="76" y="52" width="5.5" height="5.5" rx=".9"/><rect x="44" y="59" width="5.5" height="5.5" rx=".9"/><rect x="52" y="59" width="5.5" height="5.5" rx=".9"/><rect x="60" y="59" width="5.5" height="5.5" rx=".9"/><rect x="68" y="59" width="5.5" height="5.5" rx=".9"/><rect x="76" y="59" width="5.5" height="5.5" rx=".9"/><rect x="44" y="66" width="5.5" height="5.5" rx=".9"/><rect x="52" y="66" width="5.5" height="5.5" rx=".9"/><rect x="60" y="66" width="5.5" height="5.5" rx=".9"/><rect x="68" y="66" width="5.5" height="5.5" rx=".9"/><rect x="76" y="66" width="5.5" height="5.5" rx=".9"/></g>
+  <g fill="#f6ca54"><rect x="52" y="38" width="5.5" height="5.5" rx=".9"/><rect x="68" y="38" width="5.5" height="5.5" rx=".9"/><rect x="44" y="45" width="5.5" height="5.5" rx=".9"/><rect x="60" y="45" width="5.5" height="5.5" rx=".9"/><rect x="76" y="45" width="5.5" height="5.5" rx=".9"/><rect x="44" y="52" width="5.5" height="5.5" rx=".9"/><rect x="76" y="52" width="5.5" height="5.5" rx=".9"/><rect x="52" y="59" width="5.5" height="5.5" rx=".9"/><rect x="68" y="59" width="5.5" height="5.5" rx=".9"/><rect x="60" y="66" width="5.5" height="5.5" rx=".9"/></g>
+  <rect x="43" y="79" width="40" height="13" rx="6.5" fill="#eeece4" stroke="#ccc8b9"/>
+  <path d="m48 83-2 2.5 2 2.5m30-5 2 2.5-2 2.5" fill="none" stroke="#aaa79b" stroke-linecap="round"/>
+  <circle cx="63" cy="85.5" r="9" fill="#faf9f3" stroke="#c0bcae"/>
+  <circle cx="63" cy="85.5" r="6" fill="#eee9d9"/>
+</svg>
