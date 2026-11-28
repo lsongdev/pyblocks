@@ -51,3 +51,12 @@ test('collapsed code panel preserves the same gap as the expanded splitter', () 
   assert.match(css, /#code-panel\.collapsed\s*\{[^}]*margin-top:\s*var\(--panel-spacing\)/);
   assert.match(css, /\.vertical-resize\s*\{[^}]*flex:\s*0 0 var\(--panel-spacing\)/);
 });
+
+test('all code actions live in the code header without an extra synchronization row', () => {
+  const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  const panel = html.slice(html.indexOf('id="code-panel"'), html.indexOf('</main>'));
+  const header = panel.match(/<div class="code-actions">([\s\S]*?)<\/div>/)[1];
+  assert.match(header, /id="use-block-code"[\s\S]*id="download"[\s\S]*id="toggle-code"/);
+  assert.equal(panel.split('id="use-block-code"').length, 2);
+  assert.doesNotMatch(panel, /code-sync/);
+});

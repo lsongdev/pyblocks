@@ -36,6 +36,8 @@ test('code collapse keeps source and manual edits available for upload and downl
   nodes.get('#use-block-code').click();
   assert.equal(panel.manualCode, null);
   assert.equal(panel.source, 'print(3)');
+  assert.equal(nodes.get('#use-block-code').hidden, true);
+  assert.equal(nodes.get('#code-body').hidden, true);
   assert.equal(changed, 2);
   panel.setExpanded(true);
   assert.equal(nodes.get('#code-body').hidden, false);

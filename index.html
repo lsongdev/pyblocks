@@ -99,15 +99,13 @@
           <div class="panel-heading">
             <h2 id="code-label" data-i18n="codeHeading">Code</h2>
             <div class="code-actions">
+              <button id="use-block-code" type="button" data-i18n="useGeneratedCode" hidden>Use generated code</button>
               <button id="download" type="button" data-i18n-title="downloadHint" data-i18n="downloadButton">Download</button>
               <button id="toggle-code" type="button" aria-expanded="true" aria-controls="code-body">Collapse</button>
             </div>
           </div>
           <div id="code-body">
             <p id="code-error" role="status"></p>
-            <div class="code-sync" id="code-sync" hidden>
-              <button id="use-block-code" type="button" data-i18n="useGeneratedCode">Use generated code</button>
-            </div>
             <textarea id="python" aria-labelledby="code-label" spellcheck="false"
               autocapitalize="off" autocomplete="off" wrap="off"></textarea>
           </div>

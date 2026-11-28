@@ -5,7 +5,6 @@ import { t } from '../i18n/index.js';
 export function createCodePanel({ generate, onChange, downloadFile, document = globalThis.document }) {
   const code = document.querySelector('#python');
   const codeError = document.querySelector('#code-error');
-  const codeSync = document.querySelector('#code-sync');
   const useBlockCode = document.querySelector('#use-block-code');
   const download = document.querySelector('#download');
   const toggle = document.querySelector('#toggle-code');
@@ -17,7 +16,7 @@ export function createCodePanel({ generate, onChange, downloadFile, document = g
 
   function render() {
     download.disabled = !code.value.trim();
-    codeSync.hidden = !manuallyEdited;
+    useBlockCode.hidden = !manuallyEdited;
     useBlockCode.disabled = generatedCode === null;
     toggle.textContent = t(body.hidden ? 'expandCode' : 'collapseCode');
     toggle.setAttribute('aria-expanded', String(!body.hidden));
@@ -62,7 +61,7 @@ export function createCodePanel({ generate, onChange, downloadFile, document = g
     manuallyEdited = false;
     render();
     onChange();
-    code.focus();
+    if (!body.hidden) code.focus();
   });
   download.addEventListener('click', () => downloadFile(code.value, 'text/x-python', 'main.py'));
   return {
