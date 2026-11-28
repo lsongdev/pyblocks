@@ -314,7 +314,7 @@ const messages = {
   pinButtonNote: ["button", "按键"],
   pinTouchKeyNote: ["touch key", "触摸键"],
   matrixNeopixel: ["Matrix:bit RGB", "Matrix:bit 板载像素灯"],
-  matrixNeopixelHint: ["Returns the three onboard WS2812 pixel lights on GPIO17 as a NeoPixel strip. Connect it to the NeoPixel set, fill and write blocks. Each color channel is 0–255.", "返回 GPIO17 上三颗板载 WS2812 像素灯组成的 NeoPixel 灯带。可接入像素灯的设置、填充和生效积木。RGB 各通道范围为 0–255。"],
+  matrixNeopixelHint: ["Creates a NeoPixel object for the three onboard lights on GPIO17. Save it in a variable and use that variable to set, fill and write pixels.", "为 GPIO17 上的三颗板载像素灯创建 NeoPixel 对象。将它保存到变量，再用该变量设置、填充和更新像素灯。"],
   matrixbitDisplayConfig: ["Matrix:bit OLED 128×64 display config", "Matrix:bit OLED 128×64 屏幕配置"],
   matrixbitDisplayConfigHint: ["Preset for the onboard OLED: I2C 0, SCL 22, SDA 23, address 0x3C, 128×64. Connect it to initialize display from config in the Display category.", "板载 OLED 预置配置：I2C 0、SCL 22、SDA 23、地址 0x3C、128×64。可接入显示分类中的“使用配置初始化显示屏”。"],
   matrixPinNumberHint: ["Converts board labels to ESP32 GPIO numbers, e.g. P0 → 33, P6 → 16. Options marked as touch key or button identify shared onboard peripherals. Use the Matrix:bit button block for A/B state, or connect these numbers to generic GPIO, PWM, I2C, UART or TouchPad inputs. GPIO34–39 are input-only; onboard peripherals may share pins.", "将板上编号转换为 ESP32 GPIO 编号，例如 P0 → 33、P6 → 16。带触摸键或按键备注的选项表示与板载外设共用。A/B 状态可使用 Matrix:bit 按键积木，也可将编号接入通用 GPIO、PWM、I2C、串口或 TouchPad 输入。GPIO34–39 只能输入，部分引脚与板载外设共用。"],

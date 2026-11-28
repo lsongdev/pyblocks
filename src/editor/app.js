@@ -505,14 +505,21 @@ async function runSpikeUpload(source) {
   serialBusy = true;
   updateButtons();
   try {
-    setUploadStatus('selectPort');
-    const port = await selectSpikeSerialPort();
+    const onProgress = value => setUploadStatus('spikeWriting', `${Math.round(value * 100)}%`);
+    if (spikeHub && !spikeHub.closed) {
+      setUploadStatus('spikeWriting', '0%');
+      await spikeHub.upload(source, SPIKE_SLOT, onProgress);
+      await spikeHub.start(SPIKE_SLOT);
+      setUploadStatus('spikeRunning', String(SPIKE_SLOT));
+      return;
+    }
+    const port = await selectSpikeSerialPort(() => setUploadStatus('selectPort'));
     await detachSerial();
     setSerialStatus('serialConnecting');
     setUploadStatus('spikeDetecting');
     const hub = await uploadSpikeProgram(port, source, {
       slot: SPIKE_SLOT,
-      onProgress: value => setUploadStatus('spikeWriting', `${Math.round(value * 100)}%`),
+      onProgress,
       onConsole: appendSerialOutput,
     });
     if (hub.closed) {
@@ -536,7 +543,7 @@ async function runSpikeUpload(source) {
     if (error.name === 'NotFoundError') {
       setUploadStatus('portCanceled');
     } else {
-      setSerialStatus('serialDisconnected');
+      if (!spikeHub || spikeHub.closed) setSerialStatus('serialDisconnected');
       setUploadStatus(error.code === 'unsupported' ? 'spikeFirmwareUnsupported' : 'flashFailed', error);
     }
   } finally {

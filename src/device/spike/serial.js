@@ -3,11 +3,19 @@
 // It is not a MicroPython REPL.
 
 const LEGO_VENDOR_ID = 0x0694;
+const SPIKE_PRIME_PRODUCT_ID = 0x0009;
 const BAUD_RATE = 115200;
 const STARTUP_DELAY = 250;
 
-export function selectSpikeSerialPort() {
+export async function selectSpikeSerialPort(onSelect) {
   if (!globalThis.navigator?.serial) throw new Error('Web Serial is not available.');
+  const ports = await navigator.serial.getPorts();
+  const candidates = ports.filter(port => {
+    const { usbVendorId, usbProductId } = port.getInfo();
+    return usbVendorId === LEGO_VENDOR_ID && usbProductId === SPIKE_PRIME_PRODUCT_ID;
+  });
+  if (candidates.length === 1) return candidates[0];
+  onSelect?.();
   return navigator.serial.requestPort({ filters: [{ usbVendorId: LEGO_VENDOR_ID }] });
 }
 

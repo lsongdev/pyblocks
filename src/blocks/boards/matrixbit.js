@@ -51,16 +51,10 @@ common.defineBlocksWithJsonArray([
 ]);
 
 pythonGenerator.addReservedWords(
-  '_matrixbit_pin,_matrixbit_button_a,_matrixbit_button_b,_matrixbit_leds,_matrixbit_neopixel',
+  '_matrixbit_pin,_matrixbit_button_a,_matrixbit_button_b,Pin,NeoPixel',
 );
 
 const pinImport = 'from machine import Pin as _matrixbit_pin';
-
-function preparePixels(generator) {
-  generator.definitions_.import_matrixbit_pin = pinImport;
-  generator.definitions_.import_matrixbit_neopixel = 'from neopixel import NeoPixel as _matrixbit_neopixel';
-  generator.definitions_.matrixbit_leds = '_matrixbit_leds = _matrixbit_neopixel(_matrixbit_pin(17), 3)';
-}
 
 function pressedExpression(block, generator) {
   const button = block.getFieldValue('BUTTON');
@@ -75,8 +69,9 @@ Object.assign(pythonGenerator.forBlock, {
   matrixbit_pin_number: block => [String(boardPins[block.getFieldValue('PIN')]), Order.ATOMIC],
   matrixbit_button_is_pressed: (block, generator) => [pressedExpression(block, generator), Order.RELATIONAL],
   matrixbit_neopixel: (_block, generator) => {
-    preparePixels(generator);
-    return ['_matrixbit_leds', Order.ATOMIC];
+    generator.definitions_.import_matrixbit_pixel_pin = 'from machine import Pin';
+    generator.definitions_.import_matrixbit_neopixel = 'from neopixel import NeoPixel';
+    return ['NeoPixel(Pin(17), 3)', Order.FUNCTION_CALL];
   },
   matrixbit_display_config: (_block, generator) => [oledConfig(generator, {
     width: '128', height: '64', i2c: '0', scl: '22', sda: '23', address: '60',

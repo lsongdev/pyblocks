@@ -99,18 +99,25 @@ test('Matrixbit opens directly to its pin and NeoPixel blocks', () => {
   assert.ok(matrixbit.contents.some(block => block.type === 'matrixbit_button_is_pressed'));
   assert.ok(matrixbit.contents.some(block => block.type === 'matrixbit_neopixel'));
 
-  const strip = () => ({block:{type:'matrixbit_neopixel'}});
-  const code = generate(
-    {type:'neopixel_set', inputs:{
-      PIXELS:strip(), INDEX:number(1), RED:number(10), GREEN:number(20), BLUE:number(30),
-    }},
-    {type:'neopixel_write', inputs:{PIXELS:strip()}},
-  );
-  assert.match(code, /from neopixel import NeoPixel as _matrixbit_neopixel/);
-  assert.match(code, /_matrixbit_leds = _matrixbit_neopixel\(_matrixbit_pin\(17\), 3\)/);
-  assert.match(code, /_matrixbit_leds\[1\] = \(10, 20, 30\)/);
-  assert.match(code, /_matrixbit_leds\.write\(\)/);
-  assert.equal(code.match(/_matrixbit_leds = /g).length, 1);
+  const variable = { name: 'leds', id: 'leds' };
+  const strip = () => ({ block: { type: 'variables_get', fields: { VAR: variable } } });
+  const code = generate({
+    type: 'variables_set',
+    fields: { VAR: variable },
+    inputs: { VALUE: { block: { type: 'matrixbit_neopixel' } } },
+    next: { block: {
+      type: 'neopixel_set',
+      inputs: { PIXELS: strip(), INDEX: number(1), RED: number(10), GREEN: number(20), BLUE: number(30) },
+      next: { block: { type: 'neopixel_write', inputs: { PIXELS: strip() } } },
+    } },
+  });
+  assert.match(code, /^from machine import Pin$/m);
+  assert.match(code, /^from neopixel import NeoPixel$/m);
+  assert.match(code, /leds = NeoPixel\(Pin\(17\), 3\)/);
+  assert.match(code, /leds\[1\] = \(10, 20, 30\)/);
+  assert.match(code, /leds\.write\(\)/);
+  assert.equal(code.match(/NeoPixel\(Pin\(17\), 3\)/g).length, 1);
+  assert.match(generate({ type: 'matrixbit_neopixel' }), /^NeoPixel\(Pin\(17\), 3\)$/m);
 });
 
 test('Matrixbit flyout has no submenu categories or removed RGB blocks', () => {

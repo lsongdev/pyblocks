@@ -63,7 +63,7 @@ test('serial transport opens at 115200, forwards reads, writes and closes', asyn
   const { port, written } = mock;
   let requested;
   const restore = installNavigator({
-    serial: { async requestPort(options) { requested = options; return port; } },
+    serial: { async getPorts() { return []; }, async requestPort(options) { requested = options; return port; } },
   });
   try {
     const received = [];
@@ -100,7 +100,9 @@ test('browser SPIKE upload uses one serial connection with firmware 1.8.149', as
     if (id === 0x1e) serial.push(pack(Uint8Array.of(0x21, 0x4f, 0x4b, 0)));
   });
   let selections = 0;
-  const restore = installNavigator({ serial: { async requestPort() { selections++; return port; } } });
+  const restore = installNavigator({
+    serial: { async getPorts() { return []; }, async requestPort() { selections++; return port; } },
+  });
   try {
     const output = [];
     const hub = await uploadSpikeProgram(await selectSpikeSerialPort(), 'print("OK")', {
@@ -115,6 +117,25 @@ test('browser SPIKE upload uses one serial connection with firmware 1.8.149', as
       await hub.close();
     }
     assert.equal(port.closed, true);
+  } finally {
+    restore();
+  }
+});
+
+test('SPIKE port selection reuses a uniquely authorized Prime and prompts when ambiguous', async () => {
+  const prime = { getInfo: () => ({ usbVendorId: 0x0694, usbProductId: 0x0009 }) };
+  const other = { getInfo: () => ({ usbVendorId: 0x1234, usbProductId: 0x0009 }) };
+  const ports = [other, prime];
+  let selections = 0;
+  const restore = installNavigator({
+    serial: { async getPorts() { return ports; }, async requestPort() { selections++; return prime; } },
+  });
+  try {
+    assert.equal(await selectSpikeSerialPort(), prime);
+    assert.equal(selections, 0);
+    ports.push({ ...prime });
+    assert.equal(await selectSpikeSerialPort(), prime);
+    assert.equal(selections, 1);
   } finally {
     restore();
   }
