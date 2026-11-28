@@ -424,12 +424,6 @@ export function createToolbox() {
             { type: 'spike_color_matrix_show' },
             { type: 'spike_color_pixel', inputs: { COLOR: numberInput(9), INTENSITY: numberInput(10) } },
           ]),
-          category(t('buzzer'), '#b08a20', faVolumeHigh, [
-            { type: 'spike_beep', inputs: { FREQ: numberInput(440), DURATION: numberInput(500), VOLUME: numberInput(100) } },
-            { type: 'spike_sound_stop' },
-            'spike_waveform', 'spike_sound_channel',
-            { type: 'spike_sound_volume', inputs: { VOLUME: numberInput(100) } },
-          ]),
           category(t('buttons'), '#b08a20', faHandPointer, ['spike_button_pressed', 'spike_button']),
           category(t('spikeMotors'), '#b08a20', faRotateRight, [
             { type: 'spike_motor_run', inputs: { SPEED: numberInput(360) } },
@@ -456,6 +450,22 @@ export function createToolbox() {
             { type: 'spike_tank_time', inputs: { DURATION: numberInput(1000), LEFT_SPEED: numberInput(360), RIGHT_SPEED: numberInput(360) } },
             { type: 'spike_unpair' },
           ]),
+          category(t('buzzer'), '#b08a20', faVolumeHigh, [
+            { type: 'spike_beep', inputs: { FREQ: numberInput(440), DURATION: numberInput(500), VOLUME: numberInput(100) } },
+            { type: 'spike_sound_stop' },
+            'spike_waveform', 'spike_sound_channel',
+            { type: 'spike_sound_volume', inputs: { VOLUME: numberInput(100) } },
+          ]),
+          category(t('sensors'), '#b08a20', faMicrochip, [
+            'spike_color', 'spike_color_constant', 'spike_reflection',
+            'spike_distance', 'spike_force', 'spike_force_pressed',
+            { type: 'spike_rgbi' },
+            { type: 'spike_force_raw' },
+            { type: 'spike_distance_clear' },
+            { type: 'spike_distance_get_pixel', inputs: { X: numberInput(0), Y: numberInput(0) } },
+            { type: 'spike_distance_set_pixel', inputs: { X: numberInput(0), Y: numberInput(0), BRIGHTNESS: numberInput(100) } },
+            { type: 'spike_distance_show' },
+          ]),
           category(t('spikeMotionCategory'), '#b08a20', faMicrochip, [
             'spike_tilt', { type: 'spike_reset_yaw', inputs: { ANGLE: numberInput(0) } },
             { type: 'spike_gesture' },
@@ -471,16 +481,6 @@ export function createToolbox() {
             { type: 'spike_gesture_constant' },
             { type: 'spike_face_constant' },
             { type: 'spike_set_yaw_face', inputs: { FACE: numberInput(0) } },
-          ]),
-          category(t('sensors'), '#b08a20', faMicrochip, [
-            'spike_color', 'spike_color_constant', 'spike_reflection',
-            'spike_distance', 'spike_force', 'spike_force_pressed',
-            { type: 'spike_rgbi' },
-            { type: 'spike_force_raw' },
-            { type: 'spike_distance_clear' },
-            { type: 'spike_distance_get_pixel', inputs: { X: numberInput(0), Y: numberInput(0) } },
-            { type: 'spike_distance_set_pixel', inputs: { X: numberInput(0), Y: numberInput(0), BRIGHTNESS: numberInput(100) } },
-            { type: 'spike_distance_show' },
           ]),
           category(t('spikeDeviceCategory'), '#b08a20', faPlug, [
             { type: 'spike_device_id' },
