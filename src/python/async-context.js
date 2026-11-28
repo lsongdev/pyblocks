@@ -18,9 +18,7 @@ export function functionContext(generator, asynchronous, generate) {
   return exceptionContext(generator, false, () => asyncContext(generator, asynchronous, generate));
 }
 
-// A synchronous procedure nested visually inside async code is still synchronous Python.
-for (const type of ['procedures_defnoreturn', 'procedures_defreturn']) {
-  const original = pythonGenerator.forBlock[type];
-  pythonGenerator.forBlock[type] = (block, generator) =>
-    functionContext(generator, false, () => original(block, generator));
-}
+// Value-returning procedures are synchronous even if visually nested in a task.
+const generateReturnProcedure = pythonGenerator.forBlock.procedures_defreturn;
+pythonGenerator.forBlock.procedures_defreturn = (block, generator) =>
+  functionContext(generator, false, () => generateReturnProcedure(block, generator));

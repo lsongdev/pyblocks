@@ -1,0 +1,213 @@
+{
+  "format": "pyblocks",
+  "version": 1,
+  "workspace": {
+    "variables": [],
+    "blocks": {
+      "languageVersion": 0,
+      "blocks": [
+        {
+          "type": "spike_pair",
+          "fields": {
+            "PAIR": "PAIR_1",
+            "LEFT": "A",
+            "RIGHT": "B"
+          },
+          "next": {
+            "block": {
+              "type": "spike_run",
+              "inputs": {
+                "DO": {
+                  "block": {
+                    "type": "controls_whileUntil",
+                    "fields": {
+                      "MODE": "WHILE"
+                    },
+                    "inputs": {
+                      "BOOL": {
+                        "block": {
+                          "type": "logic_boolean",
+                          "fields": {
+                            "BOOL": "TRUE"
+                          }
+                        }
+                      },
+                      "DO": {
+                        "block": {
+                          "type": "spike_tank",
+                          "fields": {
+                            "PAIR": "PAIR_1"
+                          },
+                          "inputs": {
+                            "LEFT_SPEED": {
+                              "block": {
+                                "type": "math_number",
+                                "fields": {
+                                  "NUM": 180
+                                }
+                              }
+                            },
+                            "RIGHT_SPEED": {
+                              "block": {
+                                "type": "math_number",
+                                "fields": {
+                                  "NUM": 180
+                                }
+                              }
+                            }
+                          },
+                          "next": {
+                            "block": {
+                              "type": "spike_until",
+                              "inputs": {
+                                "CONDITION": {
+                                  "block": {
+                                    "type": "logic_compare",
+                                    "fields": {
+                                      "OP": "EQ"
+                                    },
+                                    "inputs": {
+                                      "A": {
+                                        "block": {
+                                          "type": "spike_color",
+                                          "fields": {
+                                            "PORT": "D"
+                                          }
+                                        }
+                                      },
+                                      "B": {
+                                        "block": {
+                                          "type": "spike_color_constant",
+                                          "fields": {
+                                            "COLOR": "RED"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "TIMEOUT": {
+                                  "block": {
+                                    "type": "math_number",
+                                    "fields": {
+                                      "NUM": 0
+                                    }
+                                  }
+                                }
+                              },
+                              "next": {
+                                "block": {
+                                  "type": "procedures_callnoreturn",
+                                  "extraState": {
+                                    "name": "避障",
+                                    "params": []
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "x": 32,
+          "y": 32
+        },
+        {
+          "type": "procedures_defnoreturn",
+          "fields": {
+            "NAME": "避障",
+            "ASYNC": true
+          },
+          "inputs": {
+            "STACK": {
+              "block": {
+                "type": "spike_pair_stop",
+                "fields": {
+                  "PAIR": "PAIR_1",
+                  "STOP": "BRAKE"
+                },
+                "next": {
+                  "block": {
+                    "type": "spike_pair_degrees",
+                    "fields": {
+                      "PAIR": "PAIR_1"
+                    },
+                    "inputs": {
+                      "DEGREES": {
+                        "block": {
+                          "type": "math_number",
+                          "fields": {
+                            "NUM": -90
+                          }
+                        }
+                      },
+                      "STEERING": {
+                        "block": {
+                          "type": "math_number",
+                          "fields": {
+                            "NUM": 0
+                          }
+                        }
+                      },
+                      "SPEED": {
+                        "block": {
+                          "type": "math_number",
+                          "fields": {
+                            "NUM": 180
+                          }
+                        }
+                      }
+                    },
+                    "next": {
+                      "block": {
+                        "type": "spike_pair_degrees",
+                        "fields": {
+                          "PAIR": "PAIR_1"
+                        },
+                        "inputs": {
+                          "DEGREES": {
+                            "block": {
+                              "type": "math_number",
+                              "fields": {
+                                "NUM": 180
+                              }
+                            }
+                          },
+                          "STEERING": {
+                            "block": {
+                              "type": "math_number",
+                              "fields": {
+                                "NUM": -60
+                              }
+                            }
+                          },
+                          "SPEED": {
+                            "block": {
+                              "type": "math_number",
+                              "fields": {
+                                "NUM": 180
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "x": 550,
+          "y": 32
+        }
+      ]
+    }
+  },
+  "manualCode": null,
+  "libraries": []
+}

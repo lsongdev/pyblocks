@@ -27,3 +27,5 @@ import './boards/spike.js';
 import './boards/m5stack.js';
 
 import './shared/condition-events.js';
+
+import './shared/async-procedures.js';

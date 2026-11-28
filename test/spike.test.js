@@ -247,3 +247,28 @@ ${code}`);
     TIMES: num(2), DO: b('spike_on_condition', {}, { CONDITION: b('spike_button_pressed') }),
   }))]), /directly inside/);
 });
+
+test('named async procedures accept parameters and can be awaited from SPIKE events', () => {
+  const parameter = { name: '角度', id: 'degrees' };
+  const define = (NAME, body, params = []) => ({
+    ...b('procedures_defnoreturn', { NAME, ASYNC: true }, { STACK: body }),
+    extraState: { params },
+  });
+  const invoke = (name, args = {}) => ({
+    ...b('procedures_callnoreturn', {}, args),
+    extraState: { name, params: Object.keys(args).map(() => '角度') },
+  });
+  const back = define('後退', b('spike_pair_degrees', { PAIR: 'PAIR_1' }, {
+    DEGREES: b('variables_get', { VAR: parameter }), STEERING: num(0), SPEED: num(180),
+  }), [parameter]);
+  const avoid = define('避障', invoke('後退', { ARG0: num(-90) }));
+  const event = b('spike_on_condition', {}, {
+    CONDITION: b('logic_boolean', { BOOL: 'TRUE' }), DO: invoke('避障'),
+  });
+  const code = generate([back, avoid, run(event)]);
+  assert.match(code, /async def 後退\(角度\):/);
+  assert.match(code, /await _spike_motor_pair\.move_for_degrees\([^\n]*角度/);
+  assert.match(code, /async def 避障\(\):(?:\n  global 角度)?\s+await 後退\(-90\)/);
+  assert.match(code, /await 避障\(\)/);
+  assert.throws(() => generate([back, invoke('後退', { ARG0: num(-90) })]), /async task|异步任务/);
+});
