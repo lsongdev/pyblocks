@@ -41,9 +41,9 @@ test('SPIKE toolbox blocks in both languages compile, including all awaited acti
     applyLanguage(language);
     const group = createToolbox().contents.find(item => item.name === 'SPIKE Prime');
     const entries = group.contents.flatMap(item => item.contents).filter(item => item.kind === 'block');
-    assert.equal(entries.length, 27);
+    assert.equal(entries.length, 87);
     for (const entry of entries) {
-      if (['spike_run', 'spike_on_condition'].includes(entry.type)) continue;
+      if (['spike_run', 'spike_on_condition', 'spike_run_awaitables'].includes(entry.type)) continue;
       const workspace = new Blockly.Workspace();
       try {
         const task = workspace.newBlock('spike_run');
@@ -130,7 +130,7 @@ sys.modules['color'] = types.SimpleNamespace(RED=9)
 ('pixel', (1, 4, 60), {}), ('degrees', (5, 180, -360), {'stop': 2}),
 ('time', (1, 500, 200), {'stop': 0}), ('sleep', (10,), {}),
 ('pair', (1, 0, 4), {}), ('tank', (1, 100, -100), {}),
-('pair_degrees', (1, 360, -20), {'velocity': 280}), ('stop', (1,), {'stop': 1})
+('pair_degrees', (1, 360, -20), {'velocity': 280, 'stop': 1}), ('stop', (1,), {'stop': 1})
 ], calls`);
   assert.equal(output.trim(), '123\n-450\n-1\n25\nTrue\n70\n9\n9');
 });
@@ -333,4 +333,20 @@ sys.modules['motor'] = types.SimpleNamespace(BRAKE=1, run_for_degrees=move)
 sys.modules['runloop'] = types.SimpleNamespace(run=asyncio.run)
 ${code}`);
   assert.equal(result.trim(), 'start\nafter call\nstart\ncomplete\nafter wait');
+});
+
+test('SPIKE expanded motor wrappers preserve positional order and optional keyword arguments', () => {
+  const fields = { PAIR: 'PAIR_2', STOP: 'SMART_BRAKE' };
+  const inputs = { LEFT_SPEED: num(100), RIGHT_SPEED: num(-200), ACCELERATION: num(400), DECELERATION: num(500) };
+  const code = generate([run(chain(
+    wait(b('spike_tank_time', fields, { ...inputs, DURATION: num(1500) })),
+    wait(b('spike_tank_degrees', fields, { ...inputs, DEGREES: num(90) })),
+    wait(b('spike_motor_absolute', { PORT: 'F', DIRECTION: 'LONGEST_PATH', STOP: 'HOLD' }, { ANGLE: num(42), SPEED: num(200), ACCELERATION: num(300) })),
+  ))]);
+  assert.match(code, /await _spike_motor_pair.move_tank_for_time\(_spike_motor_pair.PAIR_2, 100, -200, 1500, stop=_spike_motor.SMART_BRAKE, acceleration=400, deceleration=500\)/);
+  assert.match(code, /await _spike_motor_pair.move_tank_for_degrees\(_spike_motor_pair.PAIR_2, 90, 100, -200, stop=_spike_motor.SMART_BRAKE, acceleration=400, deceleration=500\)/);
+  assert.match(code, /await _spike_motor.run_to_absolute_position\(_spike_port.F, 42, 200, direction=_spike_motor.LONGEST_PATH, stop=_spike_motor.HOLD, acceleration=300\)/);
+  const plain = generate([expression(b('spike_beep', {}, { FREQ: num(440), DURATION: num(500), VOLUME: num(80) }))]);
+  assert.match(plain, /_spike_sound.beep\(440, 500, 80\)/);
+  assert.doesNotMatch(plain, /await |runloop/);
 });

@@ -72,7 +72,7 @@ Each run block generates its own call at its place in the program. Multiple run 
 
 - Ports **A–F** are LEGO ports, not GPIO numbers. Connect the matching motor or sensor to the selected port.
 - Motor speed is **degrees per second**, not power percent. Supported speed depends on the motor. Timed/degree moves return an awaitable; explicitly await it to wait for completion. Continuous run returns immediately and continues until stopped or changed.
-- Motor stopping modes are native **BRAKE**, **COAST**, and **HOLD**. These are different behaviors; choose deliberately. Degree-based paired movement uses the native default braking mode.
+- Motor stopping modes include BRAKE, COAST, HOLD, CONTINUE, SMART_COAST and SMART_BRAKE. Choose deliberately. Degree-based paired movement exposes the same stopping mode. Optional acceleration/deceleration inputs are in degrees/s²; disconnected inputs omit the keyword.
 - Pair distinct left/right ports before using a motor pair. Pair IDs 1–3 correspond to native `PAIR_1`–`PAIR_3`. Steering is **-100–100**, with 0 straight. Movement degrees describe motor rotation, not distance traveled.
 - Text brightness is **0–100%**; character time is milliseconds. Matrix pixel coordinates are **0–4**, brightness **0–100%**.
 - Button readings are **held milliseconds**, with 0 when released. Compare with 0 for a condition. Reading is polling, not an event or debounced callback.
@@ -92,3 +92,9 @@ Automated checks cover both toolbox languages, Python compilation, async scope c
 ## Explicit await and motion composition
 
 [Red tape avoidance example](../examples/spike-red-tape-avoidance.blockly.json) defines ordinary forward, reverse, left and right functions. Reverse and turns return the native motor awaitable. The async avoidance function explicitly awaits reverse and left turn before calling forward. Use **evaluate expression** to discard a call result without waiting; calling a Python async function does not schedule its coroutine. Do not assume that discarding every native awaitable starts its operation; verify the specific firmware API. Regression tests cover code generation and simulated ordering; physical SPIKE verification is still required.
+
+## Expanded native API coverage
+
+Cross-checked against the [SPIKE 3.4.3 help mirror](https://tuftsceeo.github.io/SPIKEPythonDocs/SPIKE3.html) and [v3 reference](https://jvolkening.github.io/lego-spike-python-v3-docs/api.html). The toolbox now includes all nine documented motor_pair operations, the twelve documented motor operations, Hub matrix images/pixels/orientation, indicator lights, speaker beep/volume/stop, motion queries and yaw reference, device readiness/ID/data/duty, RGBI, raw force, distance sensor LEDs and external color matrix. Awaitable motion and beep expressions require the shared explicit await block only when waiting is intended. Optional motor ramps use the firmware defaults when blank. The tank time signature is pair, left_velocity, right_velocity, duration; the tank degree signature is pair, degrees, left_velocity, right_velocity. Raw tuple and list values are passed through without conversion.
+
+Not dedicated blocks: app-side display/sound (requires SPIKE app integration), undocumented methods, a few runtime-specific return/constant details. Generic Python call/member blocks remain available. New wrappers have regression tests but need physical firmware testing.
