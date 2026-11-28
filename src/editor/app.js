@@ -4,6 +4,7 @@ import { pythonGenerator } from 'blockly/python';
 import { createToolbox, EditorToolbox } from './toolbox.js';
 import { applyLanguage, getSavedLanguage, normalizeLanguage, saveLanguage, t } from '../i18n/index.js';
 import { createCodePanel } from './code-panel.js';
+import { procedureFlyout } from '../blocks/shared/async-procedures.js';
 import { createDevicePanel } from './device-panel.js';
 import { setupPanelResize } from './resize.js';
 import { setupDialogs } from './dialogs.js';
@@ -36,6 +37,8 @@ const workspace = Blockly.inject('workspace', {
   grid: { spacing: 24, length: 2, colour: '#b8bcd2' },
   theme: theme() === 'dark' ? darkTheme : lightTheme,
 });
+workspace.registerToolboxCategoryCallback('PYBLOCKS_PROCEDURE', procedureFlyout);
+
 function applyTheme() {
   const resolved = theme();
   document.documentElement.dataset.theme = resolved;

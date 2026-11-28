@@ -1,4 +1,3 @@
-import { pythonGenerator } from 'blockly/python';
 import { exceptionContext } from './exception-context.js';
 
 const contexts = new WeakMap();
@@ -17,8 +16,3 @@ export function asyncContext(generator, asynchronous, generate) {
 export function functionContext(generator, asynchronous, generate) {
   return exceptionContext(generator, false, () => asyncContext(generator, asynchronous, generate));
 }
-
-// Value-returning procedures are synchronous even if visually nested in a task.
-const generateReturnProcedure = pythonGenerator.forBlock.procedures_defreturn;
-pythonGenerator.forBlock.procedures_defreturn = (block, generator) =>
-  functionContext(generator, false, () => generateReturnProcedure(block, generator));

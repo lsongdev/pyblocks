@@ -17,7 +17,7 @@ Write programs first and choose hardware later. All supported hardware capabilit
 
 - Visual blocks with editable Python, project import/export, and local autosave.
 - GPIO, ADC, PWM, sensors, displays, and board-specific peripherals.
-- Wi-Fi, HTTP, MQTT, NTP, exception handling, and asynchronous tasks.
+- Wi-Fi, HTTP, MQTT, NTP, exception handling, explicit Python await, and asynchronous tasks.
 - USB upload, firmware installation, device files, and an interactive serial console.
 - English and Simplified Chinese, with offline support as an installable PWA.
 

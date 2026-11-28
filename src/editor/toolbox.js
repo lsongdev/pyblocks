@@ -102,10 +102,10 @@ export function createToolbox() {
         'lists_create_with', 'lists_length', 'lists_isEmpty',
       ]),
       { kind: 'iconCategory', name: t('variables'), icon: faEquals, colour: '%{BKY_VARIABLES_HUE}', custom: 'VARIABLE' },
-      { kind: 'iconCategory', name: t('functions'), icon: faCube, colour: '%{BKY_PROCEDURES_HUE}', custom: 'PROCEDURE' },
+      { kind: 'iconCategory', name: t('functions'), icon: faCube, colour: '%{BKY_PROCEDURES_HUE}', custom: 'PYBLOCKS_PROCEDURE' },
       category(t('modules'), '#3575a6', faCode, [
         'python_import', 'python_from_import', 'python_name', 'python_member',
-        'python_call', 'python_call_statement', 'python_argument', 'python_keyword_argument',
+        'python_call', 'python_call_statement', 'python_expression_statement', 'python_argument', 'python_keyword_argument',
       ]),
       category(t('timing'), '#94722a', faClock, [
         { type: 'timing_wait_ms', inputs: { MS: numberInput(100) } },
@@ -119,9 +119,9 @@ export function createToolbox() {
         'ntptime_sync', 'ntptime_time',
       ]),
       category(t('asyncCategory'), '#7755aa', faRotateRight, [
-        'asyncio_run', 'asyncio_create_task',
+        'python_await', 'python_await_value', 'asyncio_run', 'asyncio_create_task',
         { type: 'asyncio_sleep', inputs: { DURATION: numberInput(100) } },
-        'asyncio_wait_task', 'asyncio_await_task', 'asyncio_return', 'asyncio_cancel_task',
+        'asyncio_return', 'asyncio_cancel_task',
       ]),
       category(t('display'), '#3a7ca5', faDisplay, [
         { kind: 'label', text: t('displaySetup') },

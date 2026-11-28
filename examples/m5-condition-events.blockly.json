@@ -40,18 +40,25 @@
                       "inputs": {},
                       "next": {
                         "block": {
-                          "type": "asyncio_sleep",
-                          "fields": {
-                            "UNIT": "MS"
-                          },
+                          "type": "python_await",
                           "inputs": {
-                            "DURATION": {
+                            "VALUE": {
                               "block": {
-                                "type": "math_number",
+                                "type": "asyncio_sleep",
                                 "fields": {
-                                  "NUM": 10
+                                  "UNIT": "MS"
                                 },
-                                "inputs": {}
+                                "inputs": {
+                                  "DURATION": {
+                                    "block": {
+                                      "type": "math_number",
+                                      "fields": {
+                                        "NUM": 10
+                                      },
+                                      "inputs": {}
+                                    }
+                                  }
+                                }
                               }
                             }
                           }

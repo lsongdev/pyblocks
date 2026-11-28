@@ -6,7 +6,7 @@ The **SPIKE Prime** toolbox group targets the six-port hub with a 5×5 light mat
 
 1. Open [PyBlocks](https://blocks.lsong.org/) and import [the SPIKE hello project](../examples/spike-hello.blockly.json).
 2. In **SPIKE Prime → Program (runloop)**, **runloop run** automatically wraps its actions in an async function.
-3. Put **scroll text** inside it and enter a short message.
+3. Put a generic **wait for … to finish** block inside it, connect the **scroll text** expression and enter a short message.
 4. Click **Upload and run**.
 
 Choose the SPIKE Prime in the USB serial dialog. PyBlocks reads the hub's protocol and firmware versions, shows its capabilities and asks which program slot (0–19) to use before writing anything. Confirm to upload and start the program and stream `print()` output over the same port. Uploading overwrites the selected slot. Subsequent uploads reuse the connected hub and slot; **Change slot** or **Change device** is available near the upload controls. After disconnection, choose and confirm the hub again; the last slot is a local preference, not proof of device identity. See [LEGO Education support](https://education.lego.com/en-us/product-resources/spike-prime/teacher-resources/tips-tricks/) for storage positions.
@@ -64,14 +64,14 @@ Each run block generates its own call at its place in the program. Multiple run 
 
 **When condition becomes true** accepts any synchronous Boolean expression: a force sensor pressed state, a color comparison, or a compound condition. It waits for false at startup, fires once when true is observed, and waits for false before re-arming. An initially true condition must first become false; it does not immediately fire. The condition is re-evaluated, not saved as a Boolean snapshot.
 
-**Wait until** takes a Boolean expression, such as “distance is valid and less than 100 mm” or “left button held time > 0”. It generates `await runloop.until(lambda: condition, timeout=...)`, so the expression is evaluated again on each check. Other tasks can progress while waiting. A timeout of **0** waits indefinitely; a positive timeout is milliseconds. On timeout execution continues even if the condition is still false, so check the condition again if that distinction matters. The predicate must be synchronous.
+**Wait until** is an awaitable expression. Connect it to the generic await block. It takes a Boolean expression, such as “distance is valid and less than 100 mm” or “left button held time > 0”. With await, it generates `await runloop.until(lambda: condition, timeout=...)`, so the expression is evaluated again on each check. Other tasks can progress while waiting. A timeout of **0** waits indefinitely; a positive timeout is milliseconds. On timeout execution continues even if the condition is still false, so check the condition again if that distinction matters. The predicate must be synchronous.
 
 **Button events** use **when condition becomes true** with the **button pressed?** Boolean block (`button.pressed(...) > 0`). It waits for release at startup, then waits for a press, awaits its handler, waits for release, and repeats. A held button produces one invocation. Left/right listeners and multiple listeners for one button have independent tasks. There is no extra debounce or raw interrupt behavior. Quick presses during a handler can be missed, and blocking code delays every task. Awaiting inside a handler allows other tasks to progress; it does not allow that same handler to overlap with itself.
 
 ## Units and behavior
 
 - Ports **A–F** are LEGO ports, not GPIO numbers. Connect the matching motor or sensor to the selected port.
-- Motor speed is **degrees per second**, not power percent. Supported speed depends on the motor. Timed/degree moves wait for completion; continuous run returns immediately and continues until stopped or changed.
+- Motor speed is **degrees per second**, not power percent. Supported speed depends on the motor. Timed/degree moves return an awaitable; explicitly await it to wait for completion. Continuous run returns immediately and continues until stopped or changed.
 - Motor stopping modes are native **BRAKE**, **COAST**, and **HOLD**. These are different behaviors; choose deliberately. Degree-based paired movement uses the native default braking mode.
 - Pair distinct left/right ports before using a motor pair. Pair IDs 1–3 correspond to native `PAIR_1`–`PAIR_3`. Steering is **-100–100**, with 0 straight. Movement degrees describe motor rotation, not distance traveled.
 - Text brightness is **0–100%**; character time is milliseconds. Matrix pixel coordinates are **0–4**, brightness **0–100%**.
@@ -79,12 +79,16 @@ Each run block generates its own call at its place in the program. Multiple run 
 - Native orientation readings use **0.1°**: 900 means 90°. The axes are yaw, pitch and roll.
 - Distance is in **millimeters**. **-1** indicates no valid measurement; check this before applying a distance threshold.
 - Force uses **0.1 N**, ranging from 0–100: 25 means 2.5 N. Reflection is **0–100%**. Color readings remain native numeric codes; compare with the LEGO color constant block.
-- Scroll text, timed/degree motor actions, paired degree movement, and runloop waits require an async function. Place them inside a **SPIKE runloop run** or event handler, inside the explicit runloop container (events directly inside it). Ordinary procedure blocks are synchronous; the editor rejects awaited actions inside them. The SPIKE runtime uses `runloop`; existing generic `asyncio` blocks should not be assumed available on this firmware.
+- Scroll text, timed/degree motor actions, paired degree movement and runloop waits are native awaitable expressions. Use the generic await statement or value block inside a SPIKE runloop task or async function. Ordinary functions may return an awaitable without awaiting it. Calls never insert await automatically. The SPIKE runtime uses runloop; asyncio APIs should not be assumed available.
 
-Inputs are passed to the native APIs. Keep values within the documented ranges; firmware errors are not suppressed. Missing devices, canceled movement and stalled motors need application-specific handling. Awaited movement statement blocks wait for completion but do not expose the returned status code.
+Inputs are passed to the native APIs. Keep values within the documented ranges; firmware errors are not suppressed. Missing devices, canceled movement and stalled motors need application-specific handling. The generic await value block exposes the movement status code; the await statement discards it.
 
 ## API references and validation
 
 API definitions and semantics were checked against the [LEGO SPIKE App Python help](https://spike.legoeducation.com/prime/help/lls-help-python) and its [English documentation data](https://spike.legoeducation.com/content/en-us/documents.json). The official [Python lessons](https://education.lego.com/en-us/lessons/spike-python-u3-sensor-control/spike-python-u3l1-start-sensing/) demonstrate these firmware APIs.
 
 Automated checks cover both toolbox languages, Python compilation, async scope checks, and simulated call order, arguments and sensor values. The upload path also has simulated tests for COBS framing, CRC-32, message layouts and the clear/upload/start sequence, matching the [LEGO protocol documentation](https://github.com/LEGO/spike-prime-docs). Physical motor, sensor and Bluetooth upload validation is pending.
+
+## Explicit await and motion composition
+
+[Red tape avoidance example](../examples/spike-red-tape-avoidance.blockly.json) defines ordinary forward, reverse, left and right functions. Reverse and turns return the native motor awaitable. The async avoidance function explicitly awaits reverse and left turn before calling forward. Use **evaluate expression** to discard a call result without waiting; calling a Python async function does not schedule its coroutine. Do not assume that discarding every native awaitable starts its operation; verify the specific firmware API. Regression tests cover code generation and simulated ordering; physical SPIKE verification is still required.

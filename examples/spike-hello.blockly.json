@@ -11,29 +11,36 @@
           "inputs": {
             "DO": {
               "block": {
-                "type": "spike_write",
+                "type": "python_await",
                 "inputs": {
-                  "TEXT": {
-                    "shadow": {
-                      "type": "text",
-                      "fields": {
-                        "TEXT": "Hello!"
-                      }
-                    }
-                  },
-                  "BRIGHTNESS": {
-                    "shadow": {
-                      "type": "math_number",
-                      "fields": {
-                        "NUM": 100
-                      }
-                    }
-                  },
-                  "DURATION": {
-                    "shadow": {
-                      "type": "math_number",
-                      "fields": {
-                        "NUM": 500
+                  "VALUE": {
+                    "block": {
+                      "type": "spike_write",
+                      "inputs": {
+                        "TEXT": {
+                          "shadow": {
+                            "type": "text",
+                            "fields": {
+                              "TEXT": "Hello!"
+                            }
+                          }
+                        },
+                        "BRIGHTNESS": {
+                          "shadow": {
+                            "type": "math_number",
+                            "fields": {
+                              "NUM": 100
+                            }
+                          }
+                        },
+                        "DURATION": {
+                          "shadow": {
+                            "type": "math_number",
+                            "fields": {
+                              "NUM": 500
+                            }
+                          }
+                        }
                       }
                     }
                   }

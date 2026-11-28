@@ -18,11 +18,7 @@ common.defineBlocksWithJsonArray([
   { type: 'asyncio_sleep', message0: blockMessage('asyncSleep'), args0: [
     { type: 'input_value', name: 'DURATION', check: 'Number' },
     { type: 'field_dropdown', name: 'UNIT', options: [[blockMessage('milliseconds'), 'MS'], [blockMessage('asyncSeconds'), 'S']] },
-  ], ...statement, colour, tooltip: blockMessage('asyncSleepHint') },
-  { type: 'asyncio_wait_task', message0: blockMessage('asyncWaitTask'), args0: [task()], ...statement, colour,
-    tooltip: blockMessage('asyncWaitHint') },
-  { type: 'asyncio_await_task', message0: blockMessage('asyncAwaitTask'), args0: [task()], output: null, colour,
-    tooltip: blockMessage('asyncWaitHint') },
+  ], output: null, colour, tooltip: blockMessage('asyncSleepHint') },
   { type: 'asyncio_return', message0: blockMessage('asyncReturn'), args0: [{ type: 'input_value', name: 'VALUE' }],
     previousStatement: null, colour, tooltip: blockMessage('asyncReturnHint') },
   { type: 'asyncio_cancel_task', message0: blockMessage('asyncCancelTask'), args0: [task()], ...statement, colour,
@@ -56,18 +52,9 @@ Object.assign(pythonGenerator.forBlock, {
     return [`${asyncModule}.create_task(${name}())`, Order.FUNCTION_CALL];
   },
   asyncio_sleep(block, generator) {
-    requireAsync(generator);
     const duration = generator.valueToCode(block, 'DURATION', Order.NONE) || '0';
     const milliseconds = block.getFieldValue('UNIT') === 'MS';
-    return `await ${module(generator)}.${milliseconds ? 'sleep_ms' : 'sleep'}(${milliseconds ? `int(${duration})` : duration})\n`;
-  },
-  asyncio_wait_task(block, generator) {
-    requireAsync(generator);
-    return `await (${taskCode(block, generator)})\n`;
-  },
-  asyncio_await_task(block, generator) {
-    requireAsync(generator);
-    return [`(await (${taskCode(block, generator)}))`, Order.ATOMIC];
+    return [`${module(generator)}.${milliseconds ? 'sleep_ms' : 'sleep'}(${milliseconds ? `int(${duration})` : duration})`, Order.FUNCTION_CALL];
   },
   asyncio_return(block, generator) {
     requireAsync(generator);

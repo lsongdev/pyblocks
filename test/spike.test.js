@@ -7,12 +7,15 @@ import { pythonGenerator } from 'blockly/python';
 import { applyLanguage } from '../src/i18n/index.js';
 import { createToolbox } from '../src/editor/toolbox.js';
 import '../src/blocks/index.js';
+import { procedureFlyout } from '../src/blocks/shared/async-procedures.js';
 
 const b = (type, fields = {}, inputs = {}) => ({ type, fields, inputs: Object.fromEntries(Object.entries(inputs).map(([key, block]) => [key, { block }])) });
 const num = NUM => b('math_number', { NUM });
 const text = TEXT => b('text', { TEXT });
 const print = TEXT => b('text_print', {}, { TEXT });
 const run = DO => b('spike_run', {}, { DO });
+const wait = VALUE => b('python_await', {}, { VALUE });
+const expression = VALUE => b('python_expression_statement', {}, { VALUE });
 function chain(...blocks) {
   blocks.slice(0, -1).forEach((block, i) => { block.next = { block: blocks[i + 1] }; });
   return blocks[0];
@@ -60,24 +63,29 @@ test('SPIKE toolbox blocks in both languages compile, including all awaited acti
   applyLanguage('en');
 });
 
-test('SPIKE awaited operations require async scope and reject nested event loops', () => {
-  for (const type of ['spike_until', 'spike_sleep', 'spike_write', 'spike_motor_degrees', 'spike_motor_time', 'spike_pair_degrees']) {
-    assert.throws(() => generate([b(type)]), /SPIKE task/);
-    assert.throws(() => generate([b('procedures_defnoreturn', { NAME: 'sync' }, { STACK: b(type) })]), /SPIKE task/);
+test('native calls are expressions; only explicit await requires async scope', () => {
+  for (const type of ['spike_sleep', 'spike_write', 'spike_motor_degrees', 'spike_motor_time', 'spike_pair_degrees']) {
+    const call = b(type);
+    const plain = generate([expression(call)]);
+    assert.doesNotMatch(plain, /await /);
+    python(`compile(${JSON.stringify(plain)}, '<native>', 'exec')`);
+    assert.throws(() => generate([wait(b(type))]), /inside an asynchronous/);
+    assert.throws(() => generate([b('procedures_defnoreturn', { NAME: 'sync' }, { STACK: wait(b(type)) })]), /inside an asynchronous/);
+    assert.doesNotThrow(() => generate([run(wait(b(type)))]));
   }
   assert.throws(() => generate([run(b('spike_run'))]), /run/);
 });
 
 test('SPIKE native calls preserve argument order, await completion, units and sentinel readings', () => {
   const code = generate([run(chain(
-    b('spike_write', {}, { TEXT: text('Hi'), BRIGHTNESS: num(80), DURATION: num(200) }),
+    wait(b('spike_write', {}, { TEXT: text('Hi'), BRIGHTNESS: num(80), DURATION: num(200) })),
     b('spike_pixel', {}, { X: num(1), Y: num(4), BRIGHTNESS: num(60) }),
-    b('spike_motor_degrees', { PORT: 'F', STOP: 'HOLD' }, { DEGREES: num(180), SPEED: num(-360) }),
-    b('spike_motor_time', { PORT: 'B', STOP: 'COAST' }, { DURATION: num(500), SPEED: num(200) }),
-    b('spike_sleep', {}, { DURATION: num(10) }),
+    wait(b('spike_motor_degrees', { PORT: 'F', STOP: 'HOLD' }, { DEGREES: num(180), SPEED: num(-360) })),
+    wait(b('spike_motor_time', { PORT: 'B', STOP: 'COAST' }, { DURATION: num(500), SPEED: num(200) })),
+    wait(b('spike_sleep', {}, { DURATION: num(10) })),
     b('spike_pair', { LEFT: 'A', RIGHT: 'E', PAIR: 'PAIR_2' }),
     b('spike_tank', { PAIR: 'PAIR_2' }, { LEFT_SPEED: num(100), RIGHT_SPEED: num(-100) }),
-    b('spike_pair_degrees', { PAIR: 'PAIR_2' }, { DEGREES: num(360), STEERING: num(-20), SPEED: num(280) }),
+    wait(b('spike_pair_degrees', { PAIR: 'PAIR_2' }, { DEGREES: num(360), STEERING: num(-20), SPEED: num(280) })),
     b('spike_pair_stop', { PAIR: 'PAIR_2', STOP: 'BRAKE' }),
     print(b('spike_button', { BUTTON: 'RIGHT' })),
     print(b('spike_tilt', { AXIS: '1' })),
@@ -138,9 +146,9 @@ test('SPIKE hello example generates native runloop code', () => {
 test('SPIKE until re-evaluates its predicate, passes timeout, and resumes on timeout', () => {
   const condition = b('spike_button_pressed');
   const code = generate([run(chain(
-    b('spike_until', {}, { CONDITION: condition, TIMEOUT: num(0) }),
+    wait(b('spike_until', {}, { CONDITION: condition, TIMEOUT: num(0) })),
     print(text('pressed')),
-    b('spike_until', {}, { CONDITION: b('logic_boolean', { BOOL: 'FALSE' }), TIMEOUT: num(30) }),
+    wait(b('spike_until', {}, { CONDITION: b('logic_boolean', { BOOL: 'FALSE' }), TIMEOUT: num(30) })),
     print(text('timeout')),
   ))]);
   const output = python(`import sys, types, asyncio
@@ -164,16 +172,16 @@ assert reads == 3
 assert calls == [0, 30]
 `);
   assert.equal(output.trim(), 'pressed\ntimeout');
-  assert.throws(() => generate([run(b('spike_until'))]), /condition/);
-  assert.throws(() => generate([run(b('spike_until', {}, {
-    CONDITION: b('logic_compare', { OP: 'EQ' }, { A: b('asyncio_await_task', {}, { TASK: b('python_name', { NAME: 'task' }) }), B: num(0) }),
-  }))]), /async/);
+  assert.throws(() => generate([run(wait(b('spike_until')))]), /condition/);
+  assert.throws(() => generate([run(wait(b('spike_until', {}, {
+    CONDITION: b('logic_compare', { OP: 'EQ' }, { A: b('python_await_value', {}, { VALUE: b('python_name', { NAME: 'task' }) }), B: num(0) }),
+  })))]), /async/);
 });
 
 test('SPIKE events require explicit scope and generation state does not leak', () => {
   assert.throws(() => generate([run(b('spike_run'))]), /run/);
   assert.throws(() => generate([b('spike_on_condition')]), /directly inside/);
-  assert.throws(() => generate([run(b('spike_until'))]), /condition/);
+  assert.throws(() => generate([run(wait(b('spike_until')))]), /condition/);
   const code = generate([run(print(text('ok')))]);
   assert.equal((code.match(/_spike_runloop.run\(/g) || []).length, 1);
   assert.match(code, /print\('ok'\)/);
@@ -182,7 +190,7 @@ test('SPIKE events require explicit scope and generation state does not leak', (
 
 test('SPIKE polling listeners share runloop, ignore startup hold, re-arm and remain independent', () => {
   const listener = (BUTTON, message) => b('spike_on_condition', {}, { CONDITION: b('spike_button_pressed', { BUTTON }),
-    DO: chain(print(text(message)), b('spike_sleep', {}, { DURATION: num(1) })),
+    DO: chain(print(text(message)), wait(b('spike_sleep', {}, { DURATION: num(1) }))),
   });
   const code = generate([run(chain(print(text('started')),
     listener('LEFT', 'left'), listener('RIGHT', 'right'),
@@ -248,27 +256,81 @@ ${code}`);
   }))]), /directly inside/);
 });
 
-test('named async procedures accept parameters and can be awaited from SPIKE events', () => {
+test('named functions return native awaitables and explicit calls support parameters', () => {
   const parameter = { name: '角度', id: 'degrees' };
-  const define = (NAME, body, params = []) => ({
-    ...b('procedures_defnoreturn', { NAME, ASYNC: true }, { STACK: body }),
-    extraState: { params },
-  });
-  const invoke = (name, args = {}) => ({
-    ...b('procedures_callnoreturn', {}, args),
-    extraState: { name, params: Object.keys(args).map(() => '角度') },
-  });
-  const back = define('後退', b('spike_pair_degrees', { PAIR: 'PAIR_1' }, {
-    DEGREES: b('variables_get', { VAR: parameter }), STEERING: num(0), SPEED: num(180),
-  }), [parameter]);
-  const avoid = define('避障', invoke('後退', { ARG0: num(-90) }));
-  const event = b('spike_on_condition', {}, {
-    CONDITION: b('logic_boolean', { BOOL: 'TRUE' }), DO: invoke('避障'),
-  });
-  const code = generate([back, avoid, run(event)]);
-  assert.match(code, /async def 後退\(角度\):/);
-  assert.match(code, /await _spike_motor_pair\.move_for_degrees\([^\n]*角度/);
+  const back = {
+    ...b('procedures_defreturn', { NAME: '後退' }, { RETURN: b('spike_pair_degrees', { PAIR: 'PAIR_1' }, {
+      DEGREES: b('variables_get', { VAR: parameter }), STEERING: num(0), SPEED: num(180),
+    }) }),
+    extraState: { params: [parameter] },
+  };
+  const callBack = () => ({ ...b('procedures_callreturn', {}, { ARG0: num(-90) }), extraState: { name: '後退', params: ['角度'] } });
+  const avoid = b('procedures_defnoreturn', { NAME: '避障', ASYNC: true }, { STACK: wait(callBack()) });
+  const invoke = () => ({ type: 'procedures_call_expression', extraState: { name: '避障', params: [] } });
+  const code = generate([back, avoid, run(wait(invoke()))]);
+  assert.match(code, /def 後退\(角度\):/);
+  assert.match(code, /return _spike_motor_pair\.move_for_degrees\([^\n]*角度/);
   assert.match(code, /async def 避障\(\):(?:\n  global 角度)?\s+await 後退\(-90\)/);
   assert.match(code, /await 避障\(\)/);
-  assert.throws(() => generate([back, invoke('後退', { ARG0: num(-90) })]), /async task|异步任务/);
+  assert.throws(() => generate([back, avoid, wait(invoke())]), /inside an asynchronous/);
+  const unawaited = generate([back, expression(callBack())]);
+  assert.doesNotMatch(unawaited, /await /);
+  python(`compile(${JSON.stringify(unawaited)}, '<plain>', 'exec')`);
+});
+
+test('red tape avoidance uses reusable synchronous motion functions and explicit waits', () => {
+  const project = JSON.parse(readFileSync(new URL('../examples/spike-red-tape-avoidance.blockly.json', import.meta.url), 'utf8'));
+  const code = generate(project.workspace.blocks.blocks);
+  assert.match(code, /def 后退\(\):/);
+  assert.match(code, /return _spike_motor_pair\.move_for_degrees/);
+  assert.match(code, /await 后退\(\)/);
+  assert.match(code, /await 左转\(\)/);
+  assert.match(code, /await 避障\(\)/);
+  python(`compile(${JSON.stringify(code)}, '<avoidance>', 'exec')`);
+});
+
+test('async return definitions and both no-return call shapes retain explicit semantics', () => {
+  const definition = b('procedures_defreturn', { NAME: '计算', ASYNC: true }, { RETURN: num(42) });
+  const call = () => ({ type: 'procedures_callreturn', extraState: { name: '计算', params: [] } });
+  const code = generate([definition, run(print(b('python_await_value', {}, { VALUE: call() })))]);
+  assert.match(code, /async def 计算\(\):/);
+  const result = python(`import sys, types, asyncio
+sys.modules['runloop'] = types.SimpleNamespace(run=asyncio.run)
+${code}`);
+  assert.equal(result.trim(), '42');
+
+  const noReturn = b('procedures_defnoreturn', { NAME: '行动', ASYNC: true }, { STACK: print(text('action')) });
+  const raw = generate([noReturn, { type: 'procedures_callnoreturn', extraState: { name: '行动', params: [] } }]);
+  assert.match(raw, /async def 行动\(\):/);
+  assert.match(raw, /\n行动\(\)\n/);
+  assert.doesNotMatch(raw, /await 行动/);
+
+  const workspace = new Blockly.Workspace();
+  try {
+    Blockly.serialization.workspaces.load({ blocks: { languageVersion: 0, blocks: [noReturn, definition] } }, workspace);
+    const entries = procedureFlyout(workspace);
+    assert.ok(entries.some(entry => entry.type === 'procedures_call_expression' && entry.extraState.name === '行动'));
+    assert.ok(entries.some(entry => entry.type === 'procedures_callreturn' && entry.extraState.name === '计算'));
+  } finally { workspace.dispose(); }
+});
+
+test('native motor awaitables can be started synchronously and awaited later in order (simulation)', () => {
+  const call = () => b('spike_motor_degrees', { PORT: 'A', STOP: 'BRAKE' }, { DEGREES: num(90), SPEED: num(180) });
+  const def = b('procedures_defreturn', { NAME: '后退' }, { RETURN: call() });
+  const invoke = () => ({ type: 'procedures_callreturn', extraState: { name: '后退', params: [] } });
+  const code = generate([def, run(chain(expression(call()), print(text('after call')), wait(invoke()), print(text('after wait'))))]);
+  const result = python(`import sys, types, asyncio
+class Movement:
+    def __await__(self):
+        print('complete')
+        if False: yield
+        return 0
+def move(*args, **kwargs):
+    print('start')
+    return Movement()
+sys.modules['hub'] = types.SimpleNamespace(port=types.SimpleNamespace(A=0))
+sys.modules['motor'] = types.SimpleNamespace(BRAKE=1, run_for_degrees=move)
+sys.modules['runloop'] = types.SimpleNamespace(run=asyncio.run)
+${code}`);
+  assert.equal(result.trim(), 'start\nafter call\nstart\ncomplete\nafter wait');
 });

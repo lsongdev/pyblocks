@@ -125,7 +125,7 @@ assert samples == list(range(7))
 test('async listeners stay top-level while synchronous checks can be nested', () => {
   assert.doesNotThrow(()=>generate([b('controls_repeat_ext',{}, {TIMES:num(2),DO:when(b('logic_boolean'),print(text('x')))})]));
   assert.throws(()=>generate([b('controls_repeat_ext',{}, {TIMES:num(2),DO:{...when(b('logic_boolean'),print(text('x'))),type:'events_when_async'}})]),/previous/);
-  assert.throws(()=>generate([when(b('logic_boolean'),b('asyncio_sleep'))]),/async/);
+  assert.throws(()=>generate([when(b('logic_boolean'),b('python_await',{}, {VALUE:b('asyncio_sleep')}))]),/async/);
   assert.throws(()=>generate([b('events_when')]),/condition/);
   assert.doesNotMatch(generate([print(text('plain'))]),/_run_condition_events|_condition_time/);
   assert.match(generate([when(b('logic_boolean'),print(text('ok')))]),/print\('ok'\)/);
@@ -152,7 +152,7 @@ test('generic events compile for all state sources in both languages without tou
 
 test('async condition listeners cooperate, re-arm and share an optional explicit asyncio entry', () => {
   for (const foreground of [false,true]) {
-    const left = when(b('m5_button',{BUTTON:'BtnA'}),chain(print(text('left')),b('asyncio_sleep',{UNIT:'MS'},{DURATION:num(1000)})));
+    const left = when(b('m5_button',{BUTTON:'BtnA'}),chain(print(text('left')),b('python_await',{}, {VALUE:b('asyncio_sleep',{UNIT:'MS'},{DURATION:num(1000)})})));
     const right = when(b('m5_button',{BUTTON:'BtnB'}),print(text('right')));
     left.type = right.type = 'events_when_async';
     const blocks = [left,right];

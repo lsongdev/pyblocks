@@ -45,7 +45,7 @@ M5Stack initialize
 asyncio run
     repeat forever
         M5Stack update
-        async wait 10 ms
+        await (asyncio sleep 10 ms)
 
 when condition [M5Stack button A isPressed] is met, execute asynchronously
     print "A pressed"
@@ -58,7 +58,7 @@ The single explicit asyncio entry and async listeners share one asyncio loop. Pu
 This is the most common reason an async event never fires. The listeners are only started by the automatically appended `asyncio run (…)`, which runs **after** all top-level code. Two rules:
 
 1. **Your main loop must live inside `asyncio run`, not at the top level.** A top-level `repeat forever` never returns, so the appended entry is never reached and no listener is ever started. Place the loop (including `M5Stack update`) inside the `asyncio run` block so it becomes a concurrent task gathered alongside the listeners.
-2. **Inside that loop, yield with `async wait`, never a blocking `wait`.** asyncio is cooperative: a task only yields at an `await`. A `repeat forever` that uses the ordinary **wait N ms** (`time.sleep_ms`) — or any other blocking call — holds the single loop forever, so the listener task never gets to poll, even though it was started. Use **async wait** so control returns to the scheduler between updates.
+2. **Inside that loop, yield with `await (asyncio sleep)`, never a blocking `wait`.** asyncio is cooperative: a task only yields at an `await`. A `repeat forever` that uses the ordinary **wait N ms** (`time.sleep_ms`) — or any other blocking call — holds the single loop forever, so the listener task never gets to poll, even though it was started. Use **await (asyncio sleep)** so control returns to the scheduler between updates.
 
 Wrong — the loop blocks and the button is never seen:
 
@@ -79,13 +79,13 @@ M5Stack initialize
 asyncio run
     repeat forever
         M5Stack update
-        async wait 10 ms
+        await (asyncio sleep 10 ms)
 
 when condition [M5Stack button A isPressed] is met, execute asynchronously
     print "A pressed"
 ```
 
-Rule of thumb: **async events → main loop inside `asyncio run` with `async wait`; synchronous events → check inside your ordinary top-level loop with a normal `wait`.** The synchronous block exists precisely for the latter case and needs no asyncio at all.
+Rule of thumb: **async events → main loop inside `asyncio run` with `await (asyncio sleep)`; synchronous events → check inside your ordinary top-level loop with a normal `wait`.** The synchronous block exists precisely for the latter case and needs no asyncio at all.
 
 - [Matrix:bit async button with 25 ms debounce](../examples/matrixbit-condition-events.blockly.json)
 - [M5Stack async button with explicit updates](../examples/m5-condition-events.blockly.json)

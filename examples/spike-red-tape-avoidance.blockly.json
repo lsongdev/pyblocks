@@ -34,73 +34,70 @@
                       },
                       "DO": {
                         "block": {
-                          "type": "spike_tank",
-                          "fields": {
-                            "PAIR": "PAIR_1"
-                          },
-                          "inputs": {
-                            "LEFT_SPEED": {
-                              "block": {
-                                "type": "math_number",
-                                "fields": {
-                                  "NUM": 180
-                                }
-                              }
-                            },
-                            "RIGHT_SPEED": {
-                              "block": {
-                                "type": "math_number",
-                                "fields": {
-                                  "NUM": 180
-                                }
-                              }
-                            }
+                          "type": "procedures_callnoreturn",
+                          "extraState": {
+                            "name": "前进",
+                            "params": []
                           },
                           "next": {
                             "block": {
-                              "type": "spike_until",
+                              "type": "python_await",
                               "inputs": {
-                                "CONDITION": {
+                                "VALUE": {
                                   "block": {
-                                    "type": "logic_compare",
-                                    "fields": {
-                                      "OP": "EQ"
-                                    },
+                                    "type": "spike_until",
                                     "inputs": {
-                                      "A": {
+                                      "CONDITION": {
                                         "block": {
-                                          "type": "spike_color",
+                                          "type": "logic_compare",
                                           "fields": {
-                                            "PORT": "D"
+                                            "OP": "EQ"
+                                          },
+                                          "inputs": {
+                                            "A": {
+                                              "block": {
+                                                "type": "spike_color",
+                                                "fields": {
+                                                  "PORT": "D"
+                                                }
+                                              }
+                                            },
+                                            "B": {
+                                              "block": {
+                                                "type": "spike_color_constant",
+                                                "fields": {
+                                                  "COLOR": "RED"
+                                                }
+                                              }
+                                            }
                                           }
                                         }
                                       },
-                                      "B": {
+                                      "TIMEOUT": {
                                         "block": {
-                                          "type": "spike_color_constant",
+                                          "type": "math_number",
                                           "fields": {
-                                            "COLOR": "RED"
+                                            "NUM": 0
                                           }
                                         }
                                       }
-                                    }
-                                  }
-                                },
-                                "TIMEOUT": {
-                                  "block": {
-                                    "type": "math_number",
-                                    "fields": {
-                                      "NUM": 0
                                     }
                                   }
                                 }
                               },
                               "next": {
                                 "block": {
-                                  "type": "procedures_callnoreturn",
-                                  "extraState": {
-                                    "name": "避障",
-                                    "params": []
+                                  "type": "python_await",
+                                  "inputs": {
+                                    "VALUE": {
+                                      "block": {
+                                        "type": "procedures_call_expression",
+                                        "extraState": {
+                                          "name": "避障",
+                                          "params": []
+                                        }
+                                      }
+                                    }
                                   }
                                 }
                               }
@@ -120,6 +117,174 @@
         {
           "type": "procedures_defnoreturn",
           "fields": {
+            "NAME": "前进"
+          },
+          "inputs": {
+            "STACK": {
+              "block": {
+                "type": "spike_tank",
+                "fields": {
+                  "PAIR": "PAIR_1"
+                },
+                "inputs": {
+                  "LEFT_SPEED": {
+                    "block": {
+                      "type": "math_number",
+                      "fields": {
+                        "NUM": 180
+                      }
+                    }
+                  },
+                  "RIGHT_SPEED": {
+                    "block": {
+                      "type": "math_number",
+                      "fields": {
+                        "NUM": 180
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "x": 550,
+          "y": 30
+        },
+        {
+          "type": "procedures_defreturn",
+          "fields": {
+            "NAME": "后退"
+          },
+          "inputs": {
+            "RETURN": {
+              "block": {
+                "type": "spike_pair_degrees",
+                "fields": {
+                  "PAIR": "PAIR_1"
+                },
+                "inputs": {
+                  "DEGREES": {
+                    "block": {
+                      "type": "math_number",
+                      "fields": {
+                        "NUM": -90
+                      }
+                    }
+                  },
+                  "STEERING": {
+                    "block": {
+                      "type": "math_number",
+                      "fields": {
+                        "NUM": 0
+                      }
+                    }
+                  },
+                  "SPEED": {
+                    "block": {
+                      "type": "math_number",
+                      "fields": {
+                        "NUM": 180
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "x": 550,
+          "y": 220
+        },
+        {
+          "type": "procedures_defreturn",
+          "fields": {
+            "NAME": "左转"
+          },
+          "inputs": {
+            "RETURN": {
+              "block": {
+                "type": "spike_pair_degrees",
+                "fields": {
+                  "PAIR": "PAIR_1"
+                },
+                "inputs": {
+                  "DEGREES": {
+                    "block": {
+                      "type": "math_number",
+                      "fields": {
+                        "NUM": 180
+                      }
+                    }
+                  },
+                  "STEERING": {
+                    "block": {
+                      "type": "math_number",
+                      "fields": {
+                        "NUM": -60
+                      }
+                    }
+                  },
+                  "SPEED": {
+                    "block": {
+                      "type": "math_number",
+                      "fields": {
+                        "NUM": 180
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "x": 550,
+          "y": 390
+        },
+        {
+          "type": "procedures_defreturn",
+          "fields": {
+            "NAME": "右转"
+          },
+          "inputs": {
+            "RETURN": {
+              "block": {
+                "type": "spike_pair_degrees",
+                "fields": {
+                  "PAIR": "PAIR_1"
+                },
+                "inputs": {
+                  "DEGREES": {
+                    "block": {
+                      "type": "math_number",
+                      "fields": {
+                        "NUM": 180
+                      }
+                    }
+                  },
+                  "STEERING": {
+                    "block": {
+                      "type": "math_number",
+                      "fields": {
+                        "NUM": 60
+                      }
+                    }
+                  },
+                  "SPEED": {
+                    "block": {
+                      "type": "math_number",
+                      "fields": {
+                        "NUM": 180
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "x": 550,
+          "y": 560
+        },
+        {
+          "type": "procedures_defnoreturn",
+          "fields": {
             "NAME": "避障",
             "ASYNC": true
           },
@@ -133,65 +298,38 @@
                 },
                 "next": {
                   "block": {
-                    "type": "spike_pair_degrees",
-                    "fields": {
-                      "PAIR": "PAIR_1"
-                    },
+                    "type": "python_await",
                     "inputs": {
-                      "DEGREES": {
+                      "VALUE": {
                         "block": {
-                          "type": "math_number",
-                          "fields": {
-                            "NUM": -90
-                          }
-                        }
-                      },
-                      "STEERING": {
-                        "block": {
-                          "type": "math_number",
-                          "fields": {
-                            "NUM": 0
-                          }
-                        }
-                      },
-                      "SPEED": {
-                        "block": {
-                          "type": "math_number",
-                          "fields": {
-                            "NUM": 180
+                          "type": "procedures_callreturn",
+                          "extraState": {
+                            "name": "后退",
+                            "params": []
                           }
                         }
                       }
                     },
                     "next": {
                       "block": {
-                        "type": "spike_pair_degrees",
-                        "fields": {
-                          "PAIR": "PAIR_1"
-                        },
+                        "type": "python_await",
                         "inputs": {
-                          "DEGREES": {
+                          "VALUE": {
                             "block": {
-                              "type": "math_number",
-                              "fields": {
-                                "NUM": 180
+                              "type": "procedures_callreturn",
+                              "extraState": {
+                                "name": "左转",
+                                "params": []
                               }
                             }
-                          },
-                          "STEERING": {
-                            "block": {
-                              "type": "math_number",
-                              "fields": {
-                                "NUM": -60
-                              }
-                            }
-                          },
-                          "SPEED": {
-                            "block": {
-                              "type": "math_number",
-                              "fields": {
-                                "NUM": 180
-                              }
+                          }
+                        },
+                        "next": {
+                          "block": {
+                            "type": "procedures_callnoreturn",
+                            "extraState": {
+                              "name": "前进",
+                              "params": []
                             }
                           }
                         }
@@ -202,8 +340,8 @@
               }
             }
           },
-          "x": 550,
-          "y": 32
+          "x": 950,
+          "y": 30
         }
       ]
     }

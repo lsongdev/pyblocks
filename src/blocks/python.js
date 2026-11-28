@@ -3,6 +3,7 @@ import { Order, pythonGenerator } from 'blockly/python';
 import { blockMessage, t } from '../i18n/index.js';
 import { PythonBlockError } from '../python/errors.js';
 import { isPythonIdentifier } from '../python/names.js';
+import { inAsyncFunction } from '../python/async-context.js';
 
 const colour = 210;
 const argument = 'PythonArgument';
@@ -56,6 +57,24 @@ Blockly.common.defineBlocksWithJsonArray([
     message1: blockMessage('arguments'),
     args1: [args],
     ...statement, colour,
+  },
+  {
+    type: 'python_expression_statement',
+    message0: blockMessage('expressionStatement'),
+    args0: [value('VALUE')], ...statement, colour,
+    tooltip: blockMessage('expressionStatementHint'),
+  },
+  {
+    type: 'python_await',
+    message0: blockMessage('awaitExpression'),
+    args0: [value('VALUE')], ...statement, colour: 260,
+    tooltip: blockMessage('awaitExpressionHint'),
+  },
+  {
+    type: 'python_await_value',
+    message0: blockMessage('awaitExpressionValue'),
+    args0: [value('VALUE')], ...expression, colour: 260,
+    tooltip: blockMessage('awaitExpressionHint'),
   },
   {
     type: 'python_argument',
@@ -119,7 +138,16 @@ function call(block, generator) {
   return `${target}(${parameters.join(', ')})`;
 }
 
+function awaitExpression(block, generator) {
+  if (!inAsyncFunction(generator)) throw new PythonBlockError(t('asyncContextRequired'));
+  return 'await ' + requiredValue(block, generator, 'VALUE', Order.MEMBER, t('awaitableExpression'));
+}
+
 Object.assign(pythonGenerator.forBlock, {
+  python_expression_statement: (block, generator) =>
+    requiredValue(block, generator, 'VALUE', Order.NONE, t('expressionLabel')) + '\n',
+  python_await: (block, generator) => awaitExpression(block, generator) + '\n',
+  python_await_value: (block, generator) => ['(' + awaitExpression(block, generator) + ')', Order.ATOMIC],
   python_import: block => `import ${moduleName(block)}${alias(block)}\n`,
   python_from_import: block => {
     const name = identifier(block.getFieldValue('NAME').trim(), t('importedName'));

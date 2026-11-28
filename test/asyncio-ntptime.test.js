@@ -14,7 +14,8 @@ const num = NUM => b('math_number', { NUM });
 const get = id => b('variables_get', { VAR: { id } });
 const set = (id, VALUE) => b('variables_set', { VAR: { id } }, { VALUE });
 const print = TEXT => b('text_print', {}, { TEXT: typeof TEXT === 'string' ? text(TEXT) : TEXT });
-const sleep = (duration, UNIT = 'MS') => b('asyncio_sleep', { UNIT }, { DURATION: num(duration) });
+const wait = VALUE => b('python_await', {}, { VALUE });
+const sleep = (duration, UNIT = 'MS') => wait(b('asyncio_sleep', { UNIT }, { DURATION: num(duration) }));
 function chain(...blocks) {
   for (let i = 0; i < blocks.length - 1; i++) blocks[i].next = { block: blocks[i + 1] };
   return blocks[0];
@@ -66,7 +67,7 @@ test('async tasks run concurrently with independent functions, shared variables 
   const code = generate([b('asyncio_run', {}, { DO: chain(
     set('a', b('asyncio_create_task', {}, { DO: chain(print('A start'), sleep(20), set('count', num(7)), print('A end'), b('asyncio_return', {}, { VALUE: num(42) })) })),
     set('b', b('asyncio_create_task', {}, { DO: chain(print('B start'), sleep(0, 'S'), print('B end')) })),
-    print('main'), print(b('asyncio_await_task', {}, { TASK: get('a') })), b('asyncio_wait_task', {}, { TASK: get('b') }),
+    print('main'), print(b('python_await_value', {}, { VALUE: get('a') })), b('python_await', {}, { VALUE: get('b') }),
   ) })]);
   assert.match(code, /async def _async_task\(\)/);
   assert.match(code, /async def _async_task_2\(\)/);
@@ -79,7 +80,7 @@ test('async tasks run concurrently with independent functions, shared variables 
 test('cancellation is a native request, with CancelledError propagated when awaited', () => {
   const code = generate([b('asyncio_run', {}, { DO: chain(
     set('a', b('asyncio_create_task', {}, { DO: sleep(1000) })), sleep(0),
-    b('asyncio_cancel_task', {}, { TASK: get('a') }), b('asyncio_wait_task', {}, { TASK: get('a') }),
+    b('asyncio_cancel_task', {}, { TASK: get('a') }), b('python_await', {}, { VALUE: get('a') }),
   ) })]);
   assert.match(code, /任务甲.cancel\(\)/);
   python(asyncSetup + 'try:\n' + code.split('\n').map(line => '    ' + line).join('\n') + `
@@ -89,12 +90,12 @@ else: raise AssertionError('cancellation was swallowed')
 });
 
 test('async operations reject synchronous contexts, nested runs and missing tasks', () => {
-  for (const type of ['asyncio_sleep', 'asyncio_create_task', 'asyncio_wait_task', 'asyncio_await_task', 'asyncio_return']) {
-    assert.throws(() => generate([b(type)]), /inside an asynchronous/);
+  for (const type of ['asyncio_create_task', 'python_await', 'python_await_value', 'asyncio_return']) {
+    assert.throws(() => generate([type === 'python_await_value' ? print(b(type)) : b(type)]), /inside an asynchronous/);
   }
   assert.throws(() => generate([b('asyncio_run', {}, { DO: b('asyncio_run') })]), /Do not nest/);
-  for (const type of ['asyncio_wait_task', 'asyncio_await_task', 'asyncio_cancel_task']) {
-    assert.throws(() => generate([b('asyncio_run', {}, { DO: type === 'asyncio_await_task' ? print(b(type)) : b(type) })]), /Connect an expression/);
+  for (const type of ['python_await', 'python_await_value', 'asyncio_cancel_task']) {
+    assert.throws(() => generate([b('asyncio_run', {}, { DO: type === 'python_await_value' ? print(b(type)) : b(type) })]), /Connect an expression/);
   }
   // A native synchronous MQTT callback must not inherit its enclosing async context.
   const callback = b('mqtt_on_message', { TOPIC_VAR: { id: 'a' }, MESSAGE_VAR: { id: 'b' } }, { CLIENT: get('count'), DO: sleep(1) });

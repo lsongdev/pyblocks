@@ -128,13 +128,20 @@
                                                   },
                                                   "next": {
                                                     "block": {
-                                                      "type": "asyncio_sleep",
+                                                      "type": "python_await",
                                                       "inputs": {
-                                                        "DURATION": {
+                                                        "VALUE": {
                                                           "block": {
-                                                            "type": "math_number",
-                                                            "fields": {
-                                                              "NUM": 1000
+                                                            "type": "asyncio_sleep",
+                                                            "inputs": {
+                                                              "DURATION": {
+                                                                "block": {
+                                                                  "type": "math_number",
+                                                                  "fields": {
+                                                                    "NUM": 1000
+                                                                  }
+                                                                }
+                                                              }
                                                             }
                                                           }
                                                         }
@@ -190,13 +197,20 @@
                                                       },
                                                       "next": {
                                                         "block": {
-                                                          "type": "asyncio_sleep",
+                                                          "type": "python_await",
                                                           "inputs": {
-                                                            "DURATION": {
+                                                            "VALUE": {
                                                               "block": {
-                                                                "type": "math_number",
-                                                                "fields": {
-                                                                  "NUM": 500
+                                                                "type": "asyncio_sleep",
+                                                                "inputs": {
+                                                                  "DURATION": {
+                                                                    "block": {
+                                                                      "type": "math_number",
+                                                                      "fields": {
+                                                                        "NUM": 500
+                                                                      }
+                                                                    }
+                                                                  }
                                                                 }
                                                               }
                                                             }
@@ -214,9 +228,9 @@
                                     },
                                     "next": {
                                       "block": {
-                                        "type": "asyncio_wait_task",
+                                        "type": "python_await",
                                         "inputs": {
-                                          "TASK": {
+                                          "VALUE": {
                                             "block": {
                                               "type": "variables_get",
                                               "fields": {
@@ -229,9 +243,9 @@
                                         },
                                         "next": {
                                           "block": {
-                                            "type": "asyncio_wait_task",
+                                            "type": "python_await",
                                             "inputs": {
-                                              "TASK": {
+                                              "VALUE": {
                                                 "block": {
                                                   "type": "variables_get",
                                                   "fields": {

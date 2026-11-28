@@ -55,3 +55,8 @@ When redesigning a shared library, prefer the clearest context-aware public API 
 - Preserve legal Unicode variable/function names across scripts and their original spelling. Repair invalid characters and invalid starts only as needed; use a readable fallback last. Protect keywords, generated/internal names, imports, and normalized-name collisions, keeping declarations and references consistent without changing saved names or IDs.
 
 - When renaming or reorganizing APIs and blocks, update current call sites directly. Do not add compatibility wrappers or migrations for older projects unless explicitly requested.
+
+## Explicit Python asynchronous composition
+
+- Native awaitable-returning calls are expressions; do not insert await into API or procedure calls. Generic Python await statement/value blocks own explicit waiting and validate async scope. An expression statement evaluates and discards a result. Python async function calls return a coroutine and do not implicitly schedule it. Native eager awaitables may behave differently; verify firmware semantics.
+- Preserve explicit runtime-specific scheduling (SPIKE runloop or asyncio). Ordinary return-value functions may return awaitables for callers to await; both procedure definition shapes may be async. Generated internal event scheduler code can use await as required by the event's documented semantics.
